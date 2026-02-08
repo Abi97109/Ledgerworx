@@ -1,0 +1,412 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us - LedgerWorx</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .about-hero {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      color: white;
+      padding: 100px 40px;
+      text-align: center;
+    }
+
+    .about-hero h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    .about-hero p {
+      font-size: 18px;
+      opacity: 0.95;
+    }
+
+    .about-content {
+      padding: 80px 40px;
+      background: white;
+    }
+
+    .mission-vision {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 50px;
+      margin-bottom: 80px;
+    }
+
+    .mission-vision-card {
+      padding: 40px;
+      background: linear-gradient(135deg, #f0f9f8 0%, #f5faf9 100%);
+      border-radius: 12px;
+      border-left: 4px solid var(--accent-color);
+    }
+
+    .mission-vision-card h2 {
+      color: var(--primary-color);
+      margin-bottom: 20px;
+      font-size: 28px;
+    }
+
+    .mission-vision-card p {
+      color: #404e5c;
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .why-choose-us {
+      margin-bottom: 80px;
+    }
+
+    .why-choose-us h2 {
+      color: var(--primary-color);
+      text-align: center;
+      font-size: 36px;
+      margin-bottom: 50px;
+    }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+    }
+
+    .why-card {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .why-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 30px rgba(23, 166, 151, 0.15);
+    }
+
+    .why-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    .why-card h3 {
+      color: var(--primary-color);
+      margin-bottom: 15px;
+      font-size: 20px;
+    }
+
+    .why-card p {
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .stats {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      color: white;
+      padding: 60px 40px;
+      margin: 80px 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 40px;
+      text-align: center;
+    }
+
+    .stat-item {
+      padding: 30px;
+    }
+
+    .stat-number {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .stat-label {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    .team {
+      margin-bottom: 80px;
+    }
+
+    .team h2 {
+      color: var(--primary-color);
+      text-align: center;
+      font-size: 36px;
+      margin-bottom: 50px;
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+    }
+
+    .team-member {
+      text-align: center;
+    }
+
+    .team-member-avatar {
+      width: 150px;
+      height: 150px;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 60px;
+      font-weight: 700;
+    }
+
+    .team-member h3 {
+      color: var(--primary-color);
+      margin-bottom: 5px;
+      font-size: 18px;
+    }
+
+    .team-member p {
+      color: var(--accent-color);
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .team-member small {
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    @media (max-width: 768px) {
+      .mission-vision {
+        grid-template-columns: 1fr;
+      }
+
+      .about-hero h1 {
+        font-size: 32px;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="navbar-container">
+    <div class="logo">
+      <a href="index.html">
+        <img src="logo_backgroundless_preview.png" alt="LedgerWorx" class="logo-img">
+      </a>
+    </div>
+    <nav class="nav-menu">
+      <a href="index.html#features" class="nav-link">Features</a>
+      <a href="index.html#services" class="nav-link">Services</a>
+      <a href="about.html" class="nav-link">About</a>
+      <a href="index.html#packages" class="nav-link">Packages</a>
+      <a href="contact.html" class="nav-link">Contact</a>
+    </nav>
+    <div class="nav-buttons">
+      <button class="btn-consultation" onclick="window.location.href='contact.html'">Get Consultation</button>
+      <button class="btn-login" onclick="window.location.href='login.html'">Login</button>
+      <button class="btn-register" onclick="window.location.href='register.html'">Register</button>
+    </div>
+    <div class="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+</header>
+
+<!-- ABOUT HERO -->
+<section class="about-hero">
+  <h1>About LedgerWorx</h1>
+  <p>Your Trusted Partner for Business Setup and Accounting Services in Dubai</p>
+</section>
+
+<!-- ABOUT CONTENT -->
+<section class="about-content">
+  <div class="container">
+    <!-- Mission & Vision -->
+    <div class="mission-vision">
+      <div class="mission-vision-card">
+        <h2>🎯 Our Mission</h2>
+        <p>To simplify business setup and accounting processes for entrepreneurs in the UAE by providing comprehensive, professional, and affordable services. We aim to be the most trusted partner for businesses at every stage of their journey.</p>
+      </div>
+
+      <div class="mission-vision-card">
+        <h2>🚀 Our Vision</h2>
+        <p>To become the leading business setup and accounting service provider in the Middle East, known for excellence, innovation, and customer satisfaction. We envision a future where entrepreneurship is accessible to everyone.</p>
+      </div>
+    </div>
+
+    <!-- Why Choose Us -->
+    <div class="why-choose-us">
+      <h2>Why Choose LedgerWorx?</h2>
+      
+      <div class="why-grid">
+        <div class="why-card">
+          <div class="why-icon">👥</div>
+          <h3>Expert Team</h3>
+          <p>Our team consists of experienced professionals with extensive knowledge of UAE business regulations and accounting standards.</p>
+        </div>
+
+        <div class="why-card">
+          <div class="why-icon">⚡</div>
+          <h3>Fast Processing</h3>
+          <p>We ensure quick turnaround times without compromising on quality. Most services are completed within 5-7 business days.</p>
+        </div>
+
+        <div class="why-card">
+          <div class="why-icon">💰</div>
+          <h3>Affordable Pricing</h3>
+          <p>Competitive pricing packages that provide value for money. Transparent pricing with no hidden charges.</p>
+        </div>
+
+        <div class="why-card">
+          <div class="why-icon">🎓</div>
+          <h3>Full Support</h3>
+          <p>From initial consultation to final paperwork, we provide end-to-end support and guidance throughout your journey.</p>
+        </div>
+
+        <div class="why-card">
+          <div class="why-icon">✅</div>
+          <h3>100% Compliance</h3>
+          <p>All our services are fully compliant with UAE and emirate-specific regulations and requirements.</p>
+        </div>
+
+        <div class="why-card">
+          <div class="why-icon">📞</div>
+          <h3>24/7 Support</h3>
+          <p>Our customer support team is available to answer your questions and provide assistance whenever you need it.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number">5000+</div>
+          <div class="stat-label">Businesses Served</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">15+</div>
+          <div class="stat-label">Years Experience</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">98%</div>
+          <div class="stat-label">Client Satisfaction</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">24/7</div>
+          <div class="stat-label">Customer Support</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Section -->
+    <div class="team">
+      <h2>Meet Our Team</h2>
+      
+      <div class="team-grid">
+        <div class="team-member">
+          <div class="team-member-avatar">AR</div>
+          <h3>Ahmed Al Maktoum</h3>
+          <p>Founder & CEO</p>
+          <small>Business Setup Specialist</small>
+        </div>
+
+        <div class="team-member">
+          <div class="team-member-avatar">FA</div>
+          <h3>Fatima Al Mansouri</h3>
+          <p>Chief Accountant</p>
+          <small>Accounting & Bookkeeping Expert</small>
+        </div>
+
+        <div class="team-member">
+          <div class="team-member-avatar">MH</div>
+          <h3>Mohammad Hassan</h3>
+          <p>Legal Advisor</p>
+          <small>Compliance & Regulations Specialist</small>
+        </div>
+
+        <div class="team-member">
+          <div class="team-member-avatar">SA</div>
+          <h3>Sarah Al Nuaimi</h3>
+          <p>Customer Relations Manager</p>
+          <small>Client Success Specialist</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-banner">
+  <h2>Ready to work with us?</h2>
+  <p>Let's help you establish and grow your business in Dubai</p>
+  <button class="btn-cta" onclick="window.location.href='contact.html'">Get in Touch Today</button>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h4>About LedgerWorx</h4>
+        <p>We provide comprehensive business setup and accounting services for entrepreneurs and businesses in the UAE.</p>
+      </div>
+
+      <div class="footer-section">
+        <h4>Our Services</h4>
+        <ul>
+          <li><a href="#">Business Setup</a></li>
+          <li><a href="#">PRO Services</a></li>
+          <li><a href="#">Accounting & Bookkeeping</a></li>
+          <li><a href="#">License Services</a></li>
+          <li><a href="#">VAT Registration</a></li>
+          <li><a href="#">Corporate Sponsorship</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="privacy-policy.html">Privacy Policy</a></li>
+          <li><a href="login.html">Login</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Follow Us</h4>
+        <div class="social-links">
+          <a href="https://www.facebook.com/ledgerwx" target="_blank">Facebook</a>
+          <a href="https://www.instagram.com/ledgerworx/" target="_blank">Instagram</a>
+          <a href="https://www.linkedin.com/company/ledgerworx-fze" target="_blank">LinkedIn</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 LedgerWorx. All rights reserved. | <a href="privacy-policy.html">Privacy Policy</a></p>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

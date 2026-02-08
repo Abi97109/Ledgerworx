@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - LedgerWorx</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .auth-page {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      padding: 20px;
+    }
+
+    .auth-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      max-width: 450px;
+      width: 100%;
+      padding: 50px 40px;
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .auth-header h1 {
+      color: var(--primary-color);
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .auth-header p {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--primary-color);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(23, 166, 151, 0.1);
+    }
+
+    .form-remember {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .form-remember input[type="checkbox"] {
+      cursor: pointer;
+    }
+
+    .form-remember label {
+      margin-bottom: 0;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .forgot-password {
+      color: var(--accent-color);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .forgot-password:hover {
+      text-decoration: underline;
+    }
+
+    .btn-login-form {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .btn-login-form:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(11, 62, 102, 0.3);
+    }
+
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      margin: 30px 0;
+      color: #ccc;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+
+    .auth-divider span {
+      margin: 0 15px;
+      font-size: 14px;
+      color: #a0aec0;
+    }
+
+    .social-login {
+      display: flex;
+      gap: 10px;
+    }
+
+    .social-btn {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .social-btn:hover {
+      border-color: var(--accent-color);
+      background: #f9fafb;
+    }
+
+    .auth-footer {
+      text-align: center;
+      margin-top: 20px;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .auth-footer a {
+      color: var(--accent-color);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .demo-credentials {
+      background: #f0f9f8;
+      border-left: 4px solid var(--accent-color);
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 13px;
+    }
+
+    .demo-credentials strong {
+      color: var(--primary-color);
+    }
+
+    @media (max-width: 768px) {
+      .auth-page {
+        min-height: auto;
+        padding-top: 40px;
+        padding-bottom: 40px;
+      }
+
+      .auth-container {
+        padding: 30px 20px;
+      }
+
+      .auth-header h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="navbar-container">
+    <div class="logo">
+      <a href="index.html">
+        <img src="logo_backgroundless_preview.png" alt="LedgerWorx" class="logo-img">
+      </a>
+    </div>
+    <nav class="nav-menu">
+      <a href="index.html#features" class="nav-link">Features</a>
+      <a href="index.html#services" class="nav-link">Services</a>
+      <a href="about.html" class="nav-link">About</a>
+      <a href="index.html#packages" class="nav-link">Packages</a>
+      <a href="contact.html" class="nav-link">Contact</a>
+    </nav>
+    <div class="nav-buttons">
+      <button class="btn-consultation" onclick="window.location.href='contact.html'">Get Consultation</button>
+      <button class="btn-login" onclick="window.location.href='login.html'">Login</button>
+      <button class="btn-register" onclick="window.location.href='register.html'">Register</button>
+    </div>
+    <div class="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+</header>
+
+<!-- LOGIN PAGE -->
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="auth-header">
+      <h1>Welcome Back</h1>
+      <p>Login to your LedgerWorx account</p>
+    </div>
+
+    <div class="demo-credentials">
+      <strong>Demo Access:</strong> Use any registered email and password to login. First register an account to get started.
+    </div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label for="email">Email Address *</label>
+        <input type="email" id="email" name="email" placeholder="your@email.com" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password *</label>
+        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+      </div>
+
+      <div class="form-remember">
+        <label for="remember">
+          <input type="checkbox" id="remember" name="remember">
+          Remember me
+        </label>
+        <a href="#" class="forgot-password">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn-login-form">Login</button>
+    </form>
+
+    <div class="auth-divider">
+      <span>Or continue with</span>
+    </div>
+
+    <div class="social-login">
+      <button type="button" class="social-btn" onclick="alert('Social login coming soon')">Google</button>
+      <button type="button" class="social-btn" onclick="alert('Social login coming soon')">LinkedIn</button>
+    </div>
+
+    <div class="auth-footer">
+      Don't have an account? <a href="register.html">Register here</a>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

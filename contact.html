@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - LedgerWorx</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .contact-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 50px;
+      margin-top: 50px;
+    }
+
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .info-item {
+      display: flex;
+      gap: 20px;
+    }
+
+    .info-icon {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .info-content h3 {
+      color: var(--primary-color);
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .info-content p {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .contact-form-wrapper {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--primary-color);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(23, 166, 151, 0.1);
+    }
+
+    .form-group textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+
+    .form-group select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%230b3e66' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+      appearance: none;
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      border: none;
+      padding: 14px 40px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(11, 62, 102, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .contact-container {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .contact-form-wrapper {
+        padding: 30px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="navbar-container">
+    <div class="logo">
+      <a href="index.html">
+        <img src="logo_backgroundless_preview.png" alt="LedgerWorx" class="logo-img">
+      </a>
+    </div>
+    <nav class="nav-menu">
+      <a href="index.html#features" class="nav-link">Features</a>
+      <a href="index.html#services" class="nav-link">Services</a>
+      <a href="about.html" class="nav-link">About</a>
+      <a href="index.html#packages" class="nav-link">Packages</a>
+      <a href="contact.html" class="nav-link">Contact</a>
+    </nav>
+    <div class="nav-buttons">
+      <button class="btn-consultation" onclick="window.location.href='contact.html'">Get Consultation</button>
+      <button class="btn-login" onclick="window.location.href='login.html'">Login</button>
+      <button class="btn-register" onclick="window.location.href='register.html'">Register</button>
+    </div>
+    <div class="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+</header>
+
+<!-- PAGE TITLE -->
+<section class="hero" style="min-height: 300px;">
+  <div class="hero-content">
+    <h1>Get in Touch</h1>
+    <p>Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+  </div>
+</section>
+
+<!-- CONTACT SECTION -->
+<section class="contact" style="padding: 80px 40px; background: #f9fafb;">
+  <div class="container">
+    <div class="contact-container">
+      <!-- Contact Info -->
+      <div class="contact-info">
+        <h2 style="color: var(--primary-color); margin-bottom: 10px;">Contact Information</h2>
+        <p style="color: #64748b; margin-bottom: 30px;">Reach out to us through any of these channels</p>
+
+        <div class="info-item">
+          <div class="info-icon">📍</div>
+          <div class="info-content">
+            <h3>Address</h3>
+            <p>Business Setup in Dubai UAE<br>Freezone & Mainland</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon">📞</div>
+          <div class="info-content">
+            <h3>Phone</h3>
+            <p>+971 4 XXX XXXX</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon">✉️</div>
+          <div class="info-content">
+            <h3>Email</h3>
+            <p>info@ledgerworx.ae</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon">🕐</div>
+          <div class="info-content">
+            <h3>Business Hours</h3>
+            <p>Monday - Friday: 9:00 AM - 6:00 PM<br>Saturday: 10:00 AM - 4:00 PM<br>Sunday: Closed</p>
+          </div>
+        </div>
+
+        <div style="margin-top: 30px; padding-top: 30px; border-top: 1px solid var(--border-color);">
+          <h3 style="color: var(--primary-color); margin-bottom: 15px;">Follow Us</h3>
+          <div style="display: flex; gap: 15px;">
+            <a href="https://www.facebook.com/ledgerwx" target="_blank" style="display: inline-block; width: 40px; height: 40px; background: var(--accent-color); color: white; text-decoration: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">f</a>
+            <a href="https://www.instagram.com/ledgerworx/" target="_blank" style="display: inline-block; width: 40px; height: 40px; background: var(--accent-color); color: white; text-decoration: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">📷</a>
+            <a href="https://www.linkedin.com/company/ledgerworx-fze" target="_blank" style="display: inline-block; width: 40px; height: 40px; background: var(--accent-color); color: white; text-decoration: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">in</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Form -->
+      <div class="contact-form-wrapper">
+        <h2 style="color: var(--primary-color); margin-bottom: 10px;">Send us a Message</h2>
+        <p style="color: #64748b; margin-bottom: 30px; font-size: 14px;">Fill out the form below and we'll get back to you shortly</p>
+
+        <form id="contact-form">
+          <div class="form-group">
+            <label for="name">Full Name *</label>
+            <input type="text" id="name" name="name" placeholder="Your name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address *</label>
+            <input type="email" id="email" name="email" placeholder="your@email.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number *</label>
+            <input type="tel" id="phone" name="phone" placeholder="+971 50 XXX XXXX" required>
+          </div>
+
+          <div class="form-group">
+            <label for="service">Service Interested *</label>
+            <select id="service" name="service" required>
+              <option value="">Select a service</option>
+              <option value="business-setup">Business Setup</option>
+              <option value="pro-services">PRO Services</option>
+              <option value="accounting">Accounting & Bookkeeping</option>
+              <option value="license">License Services</option>
+              <option value="vat">VAT Registration</option>
+              <option value="sponsorship">Corporate Sponsorship</option>
+              <option value="other">Other Services</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="message">Message *</label>
+            <textarea id="message" name="message" placeholder="Tell us more about your requirements..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit">Send Message</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-banner">
+  <h2>Ready to get started?</h2>
+  <p>Let our experts help you set up your business in Dubai</p>
+  <button class="btn-cta" onclick="window.location.href='register.html'">Get Started Today</button>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h4>About LedgerWorx</h4>
+        <p>We provide comprehensive business setup and accounting services for entrepreneurs and businesses in the UAE.</p>
+      </div>
+
+      <div class="footer-section">
+        <h4>Our Services</h4>
+        <ul>
+          <li><a href="#">Business Setup</a></li>
+          <li><a href="#">PRO Services</a></li>
+          <li><a href="#">Accounting & Bookkeeping</a></li>
+          <li><a href="#">License Services</a></li>
+          <li><a href="#">VAT Registration</a></li>
+          <li><a href="#">Corporate Sponsorship</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="privacy-policy.html">Privacy Policy</a></li>
+          <li><a href="login.html">Login</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Follow Us</h4>
+        <div class="social-links">
+          <a href="https://www.facebook.com/ledgerwx" target="_blank">Facebook</a>
+          <a href="https://www.instagram.com/ledgerworx/" target="_blank">Instagram</a>
+          <a href="https://www.linkedin.com/company/ledgerworx-fze" target="_blank">LinkedIn</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 LedgerWorx. All rights reserved. | <a href="privacy-policy.html">Privacy Policy</a></p>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

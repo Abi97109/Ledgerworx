@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LedgerWorx – Lead Details</title>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
 /* ===== GLOBAL ===== */
 * {
@@ -22,13 +24,13 @@ body {
 
 /* ===== NAVBAR ===== */
 .navbar {
-  background: linear-gradient(90deg, #0b3e66 0%, #1a5a8f 100%);
+  background: #002c2c;
   color: white;
   padding: 12px 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 4px 20px rgba(11, 62, 102, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 44, 44, 0.3);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -37,6 +39,14 @@ body {
 .nav-left {
   font-weight: 700;
   font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-left img {
+  height: 70px;
+  transition: transform 0.3s ease;
 }
 
 .nav-center {
@@ -78,14 +88,34 @@ body {
   display: flex;
   align-items: center;
   gap: 20px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
+}
+
+.nav-right a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-right .profile-icon {
+  font-size: 20px;
 }
 
 .notification-icon {
   position: relative;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s ease;
+}
+
+.notification-icon:hover {
+  transform: scale(1.1);
 }
 
 .notification-badge {
@@ -102,6 +132,30 @@ body {
   justify-content: center;
   font-size: 11px;
   font-weight: bold;
+}
+
+/* ===== PROFILE BUTTON ===== */
+.profile-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #4da3ff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(77, 163, 255, 0.3);
+  text-decoration: none;
+}
+
+.profile-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(77, 163, 255, 0.5);
 }
 
 /* ===== LAYOUT ===== */
@@ -252,14 +306,14 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(90deg, #1a5a8f 0%, #0b3e66 100%);
+  background: #002c2c;
   color: white;
-  box-shadow: 0 2px 8px rgba(26, 90, 143, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 44, 44, 0.15);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(26, 90, 143, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 44, 44, 0.25);
 }
 
 .btn-secondary {
@@ -357,7 +411,7 @@ body {
 
 .add-btn {
   padding: 10px 14px;
-  background: linear-gradient(90deg, #1a5a8f 0%, #0b3e66 100%);
+  background: #002c2c;
   color: white;
   border: none;
   border-radius: 8px;
@@ -504,7 +558,7 @@ body {
 <!-- Navbar -->
 <div class="navbar">
   <div class="nav-left" style="display: flex; align-items: center; gap: 12px; cursor: pointer;" onclick="window.location.href='sales-dashboard.php'">
-    <img src="logo-removebg-preview.png" alt="LedgerWorx" style="height: 45px; width: auto;">
+    <img src="logo_backgroundless_preview.png" alt="LedgerWorx" style="height: 60px; width: auto;">
   </div>
   <div class="nav-center">
     <a href="sales-dashboard.php">Dashboard</a>
@@ -514,11 +568,10 @@ body {
     <a href="sales-notifications.php">Notifications</a>
   </div>
   <div class="nav-right">
-    <div class="notification-icon">
-      🔔
-      <span class="notification-badge">3</span>
-    </div>
-    <div>John Carter</div>
+    <a href="profile.php" style="color: rgba(255, 255, 255, 0.85); text-decoration: none; transition: all 0.3s ease;" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255, 255, 255, 0.85)'">
+      <span>John Carter</span>
+      <i class="fas fa-user-circle profile-icon"></i>
+    </a>
   </div>
 </div>
 
@@ -545,21 +598,21 @@ body {
 
       <div class="lead-details-list">
         <div class="detail-item">
-          <div class="detail-item-icon">📞</div>
+          <div class="detail-item-icon"><i class="fas fa-phone"></i></div>
           <div class="detail-item-content">
             <div class="detail-item-label">Phone</div>
             <div class="detail-item-value" id="leadPhone"></div>
           </div>
         </div>
         <div class="detail-item">
-          <div class="detail-item-icon">🏷️</div>
+          <div class="detail-item-icon"><i class="fas fa-tag"></i></div>
           <div class="detail-item-content">
             <div class="detail-item-label">Status</div>
             <div class="detail-item-value" id="leadStatus"></div>
           </div>
         </div>
         <div class="detail-item">
-          <div class="detail-item-icon">👤</div>
+          <div class="detail-item-icon"><i class="fas fa-user"></i></div>
           <div class="detail-item-content">
             <div class="detail-item-label">Owner</div>
             <div class="detail-item-value" id="leadOwner"></div>
@@ -574,6 +627,7 @@ body {
       <div class="header-buttons">
         <button class="btn btn-primary" onclick="openNoteModal()">📝 Add Note / Follow-Up</button>
         <button class="btn btn-primary" onclick="assignService()">🔄 Assign Service</button>
+        <button class="btn btn-primary" onclick="openTransferModal()"><i class="fas fa-exchange-alt"></i> Transfer Lead</button>
         <button class="btn btn-secondary" onclick="convertToClient()">✓ Convert to Client</button>
       </div>
     </div>
@@ -641,6 +695,102 @@ body {
     <div style="display: flex; gap: 12px;">
       <button class="btn btn-primary" onclick="saveNote()" style="flex: 1;">Save Note</button>
       <button class="btn btn-secondary" onclick="closeModal()" style="flex: 1;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Transfer Lead Modal -->
+<div class="modal" id="transferModal">
+  <div class="modal-content" style="max-width: 400px;">
+    <span class="modal-close" onclick="closeTransferModal()">×</span>
+    <h3 style="margin-bottom: 20px;">Transfer Lead</h3>
+    <p style="color: #64748b; margin-bottom: 15px;">Transfer <strong id="transferLeadName"></strong> to another sales employee:</p>
+    
+    <div class="form-group">
+      <label for="transferEmployee" style="display: block; margin-bottom: 8px; font-weight: 600; color: #1f2937;">Select Employee</label>
+      <select id="transferEmployee" style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px;">
+        <option value="">Choose an employee...</option>
+        <option value="Sarah Malik">Sarah Malik</option>
+        <option value="John Carter">John Carter</option>
+        <option value="Emma Johnson">Emma Johnson</option>
+        <option value="Mark D'Souza">Mark D'Souza</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label for="transferNotes" style="display: block; margin-bottom: 8px; font-weight: 600; color: #1f2937;">Transfer Notes (Optional)</label>
+      <textarea id="transferNotes" placeholder="Add any notes for the new owner..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; resize: vertical; min-height: 80px;"></textarea>
+    </div>
+    
+    <div style="display: flex; gap: 10px;">
+      <button class="btn" style="flex: 1; background: #64748b;" onclick="closeTransferModal()">Cancel</button>
+      <button class="btn" style="flex: 1;" onclick="proceedTransferLead()">Transfer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div class="modal" id="profileModal">
+  <div class="modal-content" style="max-width: 400px;">
+    <span class="modal-close" onclick="closeProfileModal()">×</span>
+    <h3 style="margin-bottom: 20px;">User Profile</h3>
+    <div style="background: #f0f4f8; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+      <div style="text-align: center;">
+        <div style="width: 80px; height: 80px; background: #002c2c; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 15px;">JC</div>
+        <h4 style="margin: 0 0 5px 0;">John Carter</h4>
+        <p style="margin: 0; color: #64748b; font-size: 13px;">john.carter@ledgerworx.com</p>
+      </div>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn" style="flex: 1; background: #002c2c;" onclick="closeProfileModal()">Close</button>
+      <button class="btn" style="flex: 1;">Edit Profile</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal" id="settingsModal">
+  <div class="modal-content" style="max-width: 400px;">
+    <span class="modal-close" onclick="closeSettingsModal()">×</span>
+    <h3 style="margin-bottom: 20px;">Settings</h3>
+    
+    <div style="margin-bottom: 20px;">
+      <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+        <input type="checkbox" checked>
+        <span>Email Notifications</span>
+      </label>
+    </div>
+    
+    <div style="margin-bottom: 20px;">
+      <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+        <input type="checkbox" checked>
+        <span>Desktop Notifications</span>
+      </label>
+    </div>
+    
+    <div style="margin-bottom: 20px;">
+      <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+        <input type="checkbox">
+        <span>Dark Theme</span>
+      </label>
+    </div>
+    
+    <div style="display: flex; gap: 10px;">
+      <button class="btn" style="flex: 1; background: #002c2c;" onclick="closeSettingsModal()">Cancel</button>
+      <button class="btn" style="flex: 1;">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Logout Confirmation Modal -->
+<div class="modal" id="logoutModal">
+  <div class="modal-content" style="max-width: 350px;">
+    <span class="modal-close" onclick="closeLogoutModal()">×</span>
+    <h3 style="text-align: center; margin-bottom: 15px;">Confirm Logout</h3>
+    <p style="text-align: center; color: #64748b; margin-bottom: 20px;">Are you sure you want to logout? You'll need to login again to access your account.</p>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn" style="flex: 1; background: #64748b;" onclick="closeLogoutModal()">Cancel</button>
+      <button class="btn" style="flex: 1;" onclick="performLogout()">Logout</button>
     </div>
   </div>
 </div>
@@ -753,6 +903,123 @@ document.getElementById('noteModal').addEventListener('click', function(event) {
   if (event.target === this) {
     closeModal();
   }
+});
+
+// Profile Modal Functions
+function openProfileModal() {
+  document.getElementById('profileModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeProfileModal() {
+  document.getElementById('profileModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+// Settings Modal Functions
+function openSettingsModal() {
+  document.getElementById('settingsModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSettingsModal() {
+  document.getElementById('settingsModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+// Logout Modal Functions
+function confirmLogout() {
+  document.getElementById('logoutModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLogoutModal() {
+  document.getElementById('logoutModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+function performLogout() {
+  window.location.href = 'logout-confirmation.php';
+}
+
+// Transfer Lead Modal Functions
+function openTransferModal() {
+  if (!selectedLead) return;
+  document.getElementById('transferLeadName').innerText = selectedLead.name;
+  document.getElementById('transferEmployee').value = '';
+  document.getElementById('transferNotes').value = '';
+  window.currentTransferingLeadId = selectedLead.id;
+  document.getElementById('transferModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeTransferModal() {
+  document.getElementById('transferModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+  window.currentTransferingLeadId = null;
+}
+
+function proceedTransferLead() {
+  const employee = document.getElementById('transferEmployee').value;
+  const transferNotes = document.getElementById('transferNotes').value;
+  
+  if (!employee) {
+    alert('Please select an employee to transfer the lead to');
+    return;
+  }
+  
+  // Update the lead owner
+  if (selectedLead) {
+    const oldOwner = selectedLead.owner || 'Unassigned';
+    selectedLead.owner = employee;
+    
+    // Save transfer note
+    const transferNote = `Lead transferred from ${oldOwner} to ${employee}. ${transferNotes ? 'Notes: ' + transferNotes : ''}`;
+    notes.push({
+      text: transferNote,
+      date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+      isSystemNote: true
+    });
+    
+    localStorage.setItem('lead_' + selectedLead.id + '_notes', JSON.stringify(notes));
+    
+    // Update display
+    document.getElementById('leadOwner').innerText = employee;
+    closeTransferModal();
+    alert(`Lead "${selectedLead.name}" has been successfully transferred to ${employee}`);
+    loadNotes();
+  }
+}
+
+// Click outside modals to close
+document.addEventListener('DOMContentLoaded', function() {
+  // Transfer Modal
+  document.getElementById('transferModal').addEventListener('click', function(event) {
+    if (event.target === this) {
+      closeTransferModal();
+    }
+  });
+
+  // Profile Modal
+  document.getElementById('profileModal').addEventListener('click', function(event) {
+    if (event.target === this) {
+      closeProfileModal();
+    }
+  });
+
+  // Settings Modal
+  document.getElementById('settingsModal').addEventListener('click', function(event) {
+    if (event.target === this) {
+      closeSettingsModal();
+    }
+  });
+
+  // Logout Modal
+  document.getElementById('logoutModal').addEventListener('click', function(event) {
+    if (event.target === this) {
+      closeLogoutModal();
+    }
+  });
 });
 </script>
 

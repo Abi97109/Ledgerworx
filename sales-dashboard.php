@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LedgerWorx | Dashboard</title>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -24,20 +25,29 @@ body {
 
 /* ===== NAVBAR ===== */
 .navbar {
-  background: linear-gradient(90deg, #0b3e66 0%, #1a5a8f 100%);
+  background: #002c2c;
   color: white;
   padding: 12px 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 4px 20px rgba(11, 62, 102, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 44, 44, 0.3);
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
+.nav-left {
+  font-weight: 700;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
 .nav-left img {
-  height: 50px;
+  height: 70px;
   transition: transform 0.3s ease;
 }
 
@@ -84,14 +94,29 @@ body {
   display: flex;
   align-items: center;
   gap: 20px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
+}
+
+.nav-right a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-right .profile-icon {
+  font-size: 20px;
 }
 
 .notification-icon {
   position: relative;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
   transition: transform 0.3s ease;
 }
 
@@ -113,6 +138,30 @@ body {
   justify-content: center;
   font-size: 11px;
   font-weight: bold;
+}
+
+/* ===== PROFILE BUTTON ===== */
+.profile-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #4da3ff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(77, 163, 255, 0.3);
+  text-decoration: none;
+}
+
+.profile-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(77, 163, 255, 0.5);
 }
 
 /* ===== LAYOUT ===== */
@@ -269,7 +318,7 @@ body {
   margin-top: 16px;
   width: 100%;
   padding: 12px;
-  background: linear-gradient(90deg, #1a5a8f 0%, #0b3e66 100%);
+  background: #002c2c;
   color: white;
   border: none;
   border-radius: 10px;
@@ -395,7 +444,7 @@ canvas {
 <!-- ===== NAVBAR ===== -->
 <div class="navbar">
   <div class="nav-left" style="display: flex; align-items: center; gap: 12px; cursor: pointer;" onclick="window.location.href='sales-dashboard.php'">
-    <img src="logo-removebg-preview.png" alt="LedgerWorx" style="height: 45px; width: auto;">
+    <img src="logo_backgroundless_preview.png" alt="LedgerWorx" style="height: 60px; width: auto;">
   </div>
 
   <div class="nav-center">
@@ -407,11 +456,10 @@ canvas {
   </div>
 
   <div class="nav-right">
-    <div class="notification-icon">
-      🔔
-      <span class="notification-badge">3</span>
-    </div>
-    <div>John Carter</div>
+    <a href="profile.php" style="color: rgba(255, 255, 255, 0.85); text-decoration: none; transition: all 0.3s ease;" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255, 255, 255, 0.85)'">
+      <span>John Carter</span>
+      <i class="fas fa-user-circle profile-icon"></i>
+    </a>
   </div>
 </div>
 
@@ -484,7 +532,7 @@ canvas {
     <div class="card tile-blue">
       <h3 style="margin-bottom: 18px; color: #0b3e66; font-size: 18px; font-weight: 700;">Sales Performance</h3>
       <div style="margin-bottom: 16px; display: flex; gap: 10px; justify-content: flex-end;">
-        <button style="padding: 6px 12px; border: 1px solid #cbd5e0; background: white; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: #64748b; transition: all 0.3s ease;" onclick="toggleChartView(this)">Weekly</button>
+        <button style="padding: 6px 12px; border: 1px solid #cbd5e0; background: #002c2c; color: white; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease;" onclick="toggleChartView(this)">Weekly</button>
         <button style="padding: 6px 12px; border: 1px solid #cbd5e0; background: white; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; color: #64748b; transition: all 0.3s ease;" onclick="toggleChartView(this)">Monthly</button>
       </div>
       <canvas id="salesChart"></canvas>
@@ -523,7 +571,7 @@ canvas {
     <div class="card tile-blue">
       <h3 style="margin-bottom: 18px; color: #0b3e66; font-size: 18px; font-weight: 700;">Reminders</h3>
       <div style="margin-bottom: 14px; padding: 12px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 6px;">
-        <div style="color: #92400e; font-weight: 600; font-size: 13px;">🔔 Follow up with Ahmed</div>
+        <div style="color: #92400e; font-weight: 600; font-size: 13px;"><i class="fas fa-bell"></i> Follow up with Ahmed</div>
         <div style="color: #b45309; font-size: 12px; margin-top: 4px;">Today at 2:00 PM</div>
       </div>
       <div style="padding: 12px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 6px;">

@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LedgerWorx – Leads</title>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
 /* ===== GLOBAL ===== */
 * {
@@ -22,13 +24,13 @@ body {
 
 /* ===== NAVBAR ===== */
 .navbar {
-  background: linear-gradient(90deg, #0b3e66 0%, #1a5a8f 100%);
+  background: #002c2c;
   color: white;
   padding: 12px 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 4px 20px rgba(11, 62, 102, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 44, 44, 0.3);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -37,6 +39,14 @@ body {
 .nav-left {
   font-weight: 700;
   font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-left img {
+  height: 70px;
+  transition: transform 0.3s ease;
 }
 
 .nav-center {
@@ -78,14 +88,34 @@ body {
   display: flex;
   align-items: center;
   gap: 20px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
+}
+
+.nav-right a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-right .profile-icon {
+  font-size: 20px;
 }
 
 .notification-icon {
   position: relative;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s ease;
+}
+
+.notification-icon:hover {
+  transform: scale(1.1);
 }
 
 .notification-badge {
@@ -104,6 +134,30 @@ body {
   font-weight: bold;
 }
 
+/* ===== PROFILE BUTTON ===== */
+.profile-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #4da3ff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(77, 163, 255, 0.3);
+  text-decoration: none;
+}
+
+.profile-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(77, 163, 255, 0.5);
+}
+
 /* ===== LAYOUT ===== */
 .container {
   padding: 40px;
@@ -117,7 +171,7 @@ body {
 
 .page-header h1 {
   font-size: 32px;
-  color: #0b3e66;
+  color: #002c2c;
   margin-bottom: 12px;
   font-weight: 700;
 }
@@ -147,12 +201,12 @@ body {
 }
 
 .filter-tabs span:hover {
-  color: #0b3e66;
+  color: #002c2c;
 }
 
 .filter-tabs span.active {
-  color: #0b3e66;
-  border-bottom-color: #0b3e66;
+  color: #002c2c;
+  border-bottom-color: #002c2c;
 }
 
 .filter-controls {
@@ -181,7 +235,7 @@ body {
 
 /* ===== BUTTON ===== */
 .btn {
-  background: linear-gradient(90deg, #1a5a8f 0%, #0b3e66 100%);
+  background: #002c2c;
   color: white;
   border: none;
   padding: 10px 16px;
@@ -190,7 +244,7 @@ body {
   font-weight: 600;
   font-size: 13px;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(26, 90, 143, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 44, 44, 0.15);
 }
 
 .btn:hover {
@@ -306,6 +360,9 @@ tbody tr:hover {
   color: #404e5c;
   transition: all 0.3s ease;
   border-bottom: 1px solid #f0f4f8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .menu div:last-child {
@@ -314,7 +371,7 @@ tbody tr:hover {
 
 .menu div:hover {
   background: linear-gradient(90deg, #f0f4f8 0%, #e8f1f8 100%);
-  color: #0b3e66;
+  color: #002c2c;
   padding-left: 18px;
 }
 
@@ -341,7 +398,7 @@ tbody tr:hover {
 }
 
 .modal-content h3 {
-  color: #0b3e66;
+  color: #002c2c;
   font-size: 20px;
   margin-bottom: 20px;
 }
@@ -360,8 +417,8 @@ tbody tr:hover {
 .modal-content input:focus,
 .modal-content select:focus {
   outline: none;
-  border-color: #0b3e66;
-  box-shadow: 0 0 0 3px rgba(11, 62, 102, 0.1);
+  border-color: #002c2c;
+  box-shadow: 0 0 0 3px rgba(0, 44, 44, 0.1);
 }
 
 .modal-close {
@@ -445,7 +502,7 @@ tbody tr:hover {
 <!-- Navbar -->
 <div class="navbar">
   <div class="nav-left" style="display: flex; align-items: center; gap: 12px; cursor: pointer;" onclick="window.location.href='sales-dashboard.php'">
-    <img src="logo-removebg-preview.png" alt="LedgerWorx" style="height: 45px; width: auto;">
+    <img src="logo_backgroundless_preview.png" alt="LedgerWorx" style="height: 60px; width: auto;">
   </div>
   <div class="nav-center">
     <a href="sales-dashboard.php">Dashboard</a>
@@ -455,11 +512,10 @@ tbody tr:hover {
     <a href="sales-notifications.php">Notifications</a>
   </div>
   <div class="nav-right">
-    <div class="notification-icon">
-      🔔
-      <span class="notification-badge">3</span>
-    </div>
-    <div>John Carter</div>
+    <a href="profile.php" style="color: rgba(255, 255, 255, 0.85); text-decoration: none; transition: all 0.3s ease;" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255, 255, 255, 0.85)'">
+      <span>John Carter</span>
+      <i class="fas fa-user-circle profile-icon"></i>
+    </a>
   </div>
 </div>
 
@@ -482,11 +538,11 @@ tbody tr:hover {
     </div>
 
     <div class="filter-controls">
-      <input type="text" id="searchInput" placeholder="🔍 Search leads..." onkeyup="searchLeads()">
-      <select id="dateFilter">
-        <option value="">This Week</option>
-        <option value="">This Month</option>
-        <option value="">All Time</option>
+      <input type="text" id="searchInput" placeholder="Search leads..." onkeyup="searchLeads()">
+      <select id="dateFilter" onchange="filterByDate()">
+        <option value="week">This Week</option>
+        <option value="month">This Month</option>
+        <option value="all">All Time</option>
       </select>
       <button class="btn" onclick="openModal()">+ Add New Lead</button>
     </div>
@@ -528,6 +584,19 @@ tbody tr:hover {
   </div>
 </div>
 
+<!-- Convert to Client Confirmation Modal -->
+<div class="modal" id="convertModal">
+  <div class="modal-content" style="max-width: 350px;">
+    <span class="modal-close" onclick="closeConvertModal()">×</span>
+    <h3 style="text-align: center; margin-bottom: 10px;">Convert to Client</h3>
+    <p style="text-align: center; color: #64748b; margin-bottom: 20px;">Are you sure you want to convert <strong id="convertLeadName"></strong> to a client?</p>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn" style="flex: 1; background: #64748b;" onclick="closeConvertModal()">Cancel</button>
+      <button class="btn" style="flex: 1;" onclick="proceedConvertToClient()">Convert</button>
+    </div>
+  </div>
+</div>
+
 <script>
 let leads = [
   { id: 1, name: "XYZ Technologies", contact: "+971 50 123 4564", email: "xyz@tech.com", status: "hot", followUp: "Apr 26, 2024", owner: "Sarah Malik", avatar: "XY" },
@@ -557,14 +626,15 @@ function render(data) {
         <td><span class="badge ${l.status}">${l.status.charAt(0).toUpperCase() + l.status.slice(1)}</span></td>
         <td style="color: #64748b; font-size: 13px;">${l.followUp}</td>
         <td style="color: #404e5c; font-weight: 500;">${l.owner}</td>
-        <td><button class="btn" style="padding: 6px 12px; font-size: 12px;">Convert to Client</button></td>
-        <td><button class="btn" style="padding: 6px 12px; font-size: 12px; background: linear-gradient(90deg, #71979c 0%, #4f8389 100%);">Send Invoice</button></td>
-        <td class="actions" onclick="event.stopPropagation(); toggleMenu(${i})">⋮
+        <td><button class="btn" style="padding: 6px 12px; font-size: 12px;" onclick="convertToClient(${l.id}, event)">Convert to Client</button></td>
+        <td><button class="btn" style="padding: 6px 12px; font-size: 12px;" onclick="sendInvoice(${l.id}, event)">Send Invoice</button></td>
+        <td class="actions" onclick="event.stopPropagation(); toggleMenu(${i})">
+          <i class="fas fa-ellipsis-v"></i>
           <div class="menu" id="menu-${i}">
-            <div onclick="viewLeadDetails(${l.id})">👁 View Details</div>
-            <div>✏️ Edit Lead</div>
-            <div>📝 Add Note</div>
-            <div>🔄 Assign Service</div>
+            <div style="display: flex; align-items: center; gap: 8px;" onclick="viewLeadDetails(${l.id})"><i class="fas fa-eye" style="width: 16px; text-align: center; color: #002c2c;"></i>View Details</div>
+            <div style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-edit" style="width: 16px; text-align: center; color: #002c2c;"></i>Edit Lead</div>
+            <div style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-sticky-note" style="width: 16px; text-align: center; color: #002c2c;"></i>Add Note</div>
+            <div style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-handshake" style="width: 16px; text-align: center; color: #002c2c;"></i>Assign Service</div>
           </div>
         </td>
       </tr>
@@ -640,6 +710,58 @@ function viewLeadDetails(leadId) {
   }
 }
 
+function convertToClient(leadId, event) {
+  event.stopPropagation();
+  const lead = leads.find(l => l.id === leadId);
+  if (lead) {
+    document.getElementById("convertLeadName").innerText = lead.name;
+    window.currentConvertingLeadId = leadId;
+    document.getElementById("convertModal").style.display = "flex";
+  }
+}
+
+function closeConvertModal() {
+  document.getElementById("convertModal").style.display = "none";
+  window.currentConvertingLeadId = null;
+}
+
+function proceedConvertToClient() {
+  const leadId = window.currentConvertingLeadId;
+  const lead = leads.find(l => l.id === leadId);
+  if (lead) {
+    lead.status = 'converted';
+    render(leads);
+    closeConvertModal();
+    alert(`${lead.name} has been successfully converted to a client!`);
+  }
+}
+
+function sendInvoice(leadId, event) {
+  event.stopPropagation();
+  const lead = leads.find(l => l.id === leadId);
+  if (lead) {
+    alert(`Invoice sent to ${lead.name} at ${lead.email}`);
+  }
+}
+
+function filterByDate() {
+  const dateFilter = document.getElementById("dateFilter").value;
+  // For demo purposes, we'll just show all leads with different filters
+  // In a real app, you'd filter based on actual dates
+  if (dateFilter === "week") {
+    // Filter leads from this week
+    render(leads); // For demo, showing all
+    alert("Filtering leads from this week");
+  } else if (dateFilter === "month") {
+    // Filter leads from this month
+    render(leads); // For demo, showing all
+    alert("Filtering leads from this month");
+  } else if (dateFilter === "all") {
+    // Show all leads
+    render(leads);
+  }
+}
+
 // Close menu when clicking elsewhere
 document.addEventListener('click', function(event) {
   if (!event.target.closest('.actions')) {
@@ -651,6 +773,13 @@ document.addEventListener('click', function(event) {
 document.getElementById("leadModal").addEventListener('click', function(event) {
   if (event.target === this) {
     closeModal();
+  }
+});
+
+// Close convert modal when clicking outside
+document.getElementById("convertModal").addEventListener('click', function(event) {
+  if (event.target === this) {
+    closeConvertModal();
   }
 });
 </script>

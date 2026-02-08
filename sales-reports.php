@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LedgerWorx – Reports</title>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -24,13 +25,13 @@ body {
 
 /* ===== NAVBAR ===== */
 .navbar {
-  background: linear-gradient(90deg, #0b3e66 0%, #1a5a8f 100%);
+  background: #002c2c;
   color: white;
   padding: 12px 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 4px 20px rgba(11, 62, 102, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 44, 44, 0.3);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -39,6 +40,14 @@ body {
 .nav-left {
   font-weight: 700;
   font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-left img {
+  height: 70px;
+  transition: transform 0.3s ease;
 }
 
 .nav-center {
@@ -80,14 +89,34 @@ body {
   display: flex;
   align-items: center;
   gap: 20px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
+}
+
+.nav-right a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-right .profile-icon {
+  font-size: 20px;
 }
 
 .notification-icon {
   position: relative;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s ease;
+}
+
+.notification-icon:hover {
+  transform: scale(1.1);
 }
 
 .notification-badge {
@@ -104,6 +133,30 @@ body {
   justify-content: center;
   font-size: 11px;
   font-weight: bold;
+}
+
+/* ===== PROFILE BUTTON ===== */
+.profile-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #4da3ff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(77, 163, 255, 0.3);
+  text-decoration: none;
+}
+
+.profile-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(77, 163, 255, 0.5);
 }
 
 /* ===== LAYOUT ===== */
@@ -155,7 +208,7 @@ body {
 }
 
 .toggle-btn.active {
-  background: linear-gradient(90deg, #1a5a8f 0%, #0b3e66 100%);
+  background: #002c2c;
   color: white;
   border-color: transparent;
   box-shadow: 0 2px 8px rgba(26, 90, 143, 0.2);
@@ -456,7 +509,7 @@ canvas {
 <!-- Navbar -->
 <div class="navbar">
   <div class="nav-left" style="display: flex; align-items: center; gap: 12px; cursor: pointer;" onclick="window.location.href='sales-dashboard.php'">
-    <img src="logo-removebg-preview.png" alt="LedgerWorx" style="height: 45px; width: auto;">
+    <img src="logo_backgroundless_preview.png" alt="LedgerWorx" style="height: 60px; width: auto;">
   </div>
   <div class="nav-center">
     <a href="sales-dashboard.php">Dashboard</a>
@@ -466,11 +519,10 @@ canvas {
     <a href="sales-notifications.php">Notifications</a>
   </div>
   <div class="nav-right">
-    <div class="notification-icon">
-      🔔
-      <span class="notification-badge">3</span>
-    </div>
-    <div>John Carter</div>
+    <a href="profile.php" style="color: rgba(255, 255, 255, 0.85); text-decoration: none; transition: all 0.3s ease;" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255, 255, 255, 0.85)'">
+      <span>John Carter</span>
+      <i class="fas fa-user-circle profile-icon"></i>
+    </a>
   </div>
 </div>
 
@@ -581,7 +633,6 @@ canvas {
   </div>
 
 </div>
-
 <script>
 let chartInstance = null;
 let currentPeriod = 'week';

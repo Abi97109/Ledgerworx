@@ -1,0 +1,80 @@
+/* ========================================
+   SETTINGS & PROFILE PAGES STYLES
+   ======================================== */
+
+.settings-page {
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.settings-page .settings-content {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 30px;
+}
+
+.settings-page .settings-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-page .settings-menu-item {
+  padding: 14px 16px;
+  background: var(--color-background-secondary);
+  border-left: 4px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-size: 14px;
+  transition: var(--transition-short);
+}
+
+.settings-page .settings-menu-item:hover {
+  background: var(--color-background-tertiary);
+  border-left-color: var(--color-accent-grey-blue);
+  color: var(--color-text-primary);
+}
+
+.settings-page .settings-menu-item.active {
+  background: var(--color-background-tertiary);
+  border-left-color: var(--color-accent-grey-blue);
+  color: var(--color-accent-grey-blue);
+}
+
+.settings-page .settings-main {
+  display: grid;
+  gap: 24px;
+}
+
+.settings-page .settings-card {
+  background: var(--color-background-secondary);
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: var(--shadow-small);
+  animation: slideUp 0.5s ease-out;
+}
+
+.settings-page .settings-card h3 {
+  font-size: 18px;
+  color: var(--color-text-primary);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+}
+
+.profile-page .navbar {
+  background: var(--color-navbar-primary);
+  color: white;
+  padding: 16px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px var(--color-navbar-shadow);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: var(--transition-short);
+}

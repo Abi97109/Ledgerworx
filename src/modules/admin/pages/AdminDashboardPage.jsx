@@ -1,4 +1,5 @@
 import AdminHeader from "../components/AdminHeader";
+import { Link, useNavigate } from "react-router-dom";
 import {
   accountsOverview,
   companyFeed,
@@ -8,12 +9,13 @@ import {
   liveActivityFeed,
   recentPayments
 } from "../data/adminDashboardData";
-import { buildLegacyUrl } from "../../../utils/legacyLinks";
 import "../styles/header.css";
 import "../styles/admin_dashboard.css";
 import "../styles/admin_theme.css";
 
 export default function AdminDashboardPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="wrap">
       <aside className="sidebar">
@@ -27,20 +29,23 @@ export default function AdminDashboardPage() {
         </div>
 
         <nav className="side-nav">
-          <a className="active">Dashboard</a>
-          <a>Sales Department</a>
-          <a>Accounts Department</a>
-          <a>Services & Packages</a>
-          <a>Users & Roles</a>
-          <a>Payments & Reports</a>
-          <a>Settings</a>
-          <a
+          <Link to="/admin/dashboard" className="active">
+            Dashboard
+          </Link>
+          <Link to="/admin/sales">Sales Department</Link>
+          <Link to="/admin/accounts">Accounts Department</Link>
+          <Link to="/admin/services">Services & Packages</Link>
+          <Link to="/admin/users">Users & Roles</Link>
+          <Link to="/admin/payments">Payments & Reports</Link>
+          <Link to="/admin/settings">Settings</Link>
+          <button
+            type="button"
             onClick={() => {
-              window.location.href = buildLegacyUrl("logout.php");
+              navigate("/admin/logout");
             }}
           >
             Logout
-          </a>
+          </button>
         </nav>
       </aside>
 

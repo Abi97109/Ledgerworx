@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { buildLegacyUrl } from "../../../utils/legacyLinks";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { adminNavigationItems } from "../utils/adminNavigation";
 
 export default function AdminHeader({ adminName = "Admin" }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const dropdownRef = useRef(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -53,11 +53,13 @@ export default function AdminHeader({ adminName = "Admin" }) {
   }, []);
 
   function goToEditProfile() {
-    window.location.href = buildLegacyUrl("admin_profile.php");
+    navigate("/admin/profile");
+    setIsDropdownOpen(false);
   }
 
   function goToLogout() {
-    window.location.href = buildLegacyUrl("logout.php");
+    navigate("/admin/logout");
+    setIsDropdownOpen(false);
   }
 
   return (
@@ -69,24 +71,15 @@ export default function AdminHeader({ adminName = "Admin" }) {
         <nav className="nav-items">
           <div className="nav-items-inner">
             {adminNavigationItems.map((item) => {
-              const isActive = item.type === "react" && activePath === item.path;
+              const isActive = activePath === item.path;
               const className = isActive ? "active" : "";
               const icon = <i className={item.iconClass} />;
 
-              if (item.type === "react") {
-                return (
-                  <Link key={item.key} to={item.path} className={className}>
-                    {icon}
-                    {item.label}
-                  </Link>
-                );
-              }
-
               return (
-                <a key={item.key} href={buildLegacyUrl(item.legacyPath)} className={className}>
+                <Link key={item.key} to={item.path} className={className}>
                   {icon}
                   {item.label}
-                </a>
+                </Link>
               );
             })}
           </div>

@@ -1,0 +1,47 @@
+
+> client-update@1.0.0 dev
+> vite
+
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m1047[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.4.101:[1m5173[22m/[39m
+[2m11:44:23 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/routes/AppRouter.jsx[22m
+[2m11:48:15 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/routes/AppRouter.jsx[22m
+[2m11:48:15 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/components/AppViewportScale.jsx[22m
+[2m1:15:56 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/routes/AppRouter.jsx[22m
+[2m1:33:22 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/pages/ClientSupportPage.jsx[22m
+[2m1:33:22 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/pages/ClientSupportPage.jsx[22m
+[2m1:36:48 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/pages/ClientSupportPage.jsx[22m
+[2m1:36:48 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/pages/ClientSupportPage.jsx[22m
+[2m1:38:49 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/pages/ClientSupportPage.jsx[22m
+[2m1:38:49 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/pages/ClientSupportPage.jsx[22m
+[2m1:39:35 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/pages/ClientSupportPage.jsx[22m
+[2m1:44:31 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/components/AppViewportFit.jsx[22m
+[2m1:57:30 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/styles/client-dashboard.css[22m
+[2m1:57:30 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/styles/client-activeservices.css[22m
+[2m1:57:30 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/styles/client-documents.css[22m
+[2m1:57:30 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/styles/clinet-notification.css[22m
+[2m1:57:30 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/styles/client-payments.css[22m
+[2m1:57:30 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/styles/client-notificationex.css[22m
+[2m1:57:30 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/styles/client-package.css[22m
+[2m1:57:30 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/styles/client-profile-settings.css[22m
+[2m1:57:30 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/styles/client-receiptpdf.css[22m
+[2m1:57:30 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/styles/client-support.css[22m
+[2m1:57:30 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/styles/client-subServices.css[22m
+[2m1:57:30 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/styles/client-signoutaf.css[22m
+[2m1:57:30 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/styles/client-request.css[22m
+[2m1:58:09 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/routes/AppRouter.jsx[22m
+[2m2:01:30 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/styles/dark-mode.css[22m
+[2m2:07:18 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/routes/AppRouter.jsx[22m
+[2m2:07:28 pm[22m [36m[1m[vite][22m[39m [32mvite.config.js changed, restarting server...[39m
+[2m2:07:28 pm[22m [36m[1m[vite][22m[39m server restarted.
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.1.54:[1m5173[22m/[39m
+[2m2:08:25 pm[22m [36m[1m[vite][22m[39m [32mvite.config.js changed, restarting server...[39m
+Re-optimizing dependencies because vite config has changed
+[2m2:08:25 pm[22m [36m[1m[vite][22m[39m server restarted.
+[2m2:11:07 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/pages/ClientSupportPage.jsx[22m
+[2m2:15:44 pm[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/@fs/E:/wamp/www/client-update/src/modules/client/pages/ClientSupportPage.jsx[22m

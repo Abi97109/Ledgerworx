@@ -1,0 +1,635 @@
+        body.client-documents-page {
+            --primary: #0b3b6f;
+            --primary-dark: #08273f;
+            --accent: #f4b400;
+            --bg: #f9fbfd;
+            --text: #0f1724;
+            --card: #ffffff;
+            --muted: #64748b;
+            --ok: #16a34a;
+            --pending: #ea580c;
+            --border: #e2e8f0;
+        }
+
+        body.client-documents-page, body.client-documents-page * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body.client-documents-page {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        body.client-documents-page .navbar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 28px;
+            background: var(--primary-dark);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+            justify-content: space-between;
+            color: #fff;
+            overflow: visible !important;
+            position: relative;
+            z-index: 100;
+        }
+
+        body.client-documents-page .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        body.client-documents-page .logo-img {
+            width: 280px;
+            height: 100px;
+        }
+
+        body.client-documents-page .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        body.client-documents-page .nav-links a {
+            text-decoration: none;
+            color: #fff;
+            font-weight: 500;
+            position: relative;
+            padding: 6px 4px;
+        }
+
+        body.client-documents-page .nav-links a::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 3px;
+            bottom: -8px;
+            background: transparent;
+            border-radius: 4px;
+            transition: background .18s ease, height .18s ease;
+        }
+
+        body.client-documents-page .nav-links a.active::after {
+            background: var(--accent);
+        }
+
+        body.client-documents-page .nav-links a:hover::after {
+            background: #fff;
+            height: 4px;
+        }
+
+        body.client-documents-page .navbar.nav-alt {
+            background: var(--primary);
+        }
+
+        body.client-documents-page .navbar.nav-alt .nav-links a {
+            color: #fff;
+        }
+
+        body.client-documents-page .navbar.nav-alt .nav-links a.active::after {
+            background: #fff;
+        }
+
+        body.client-documents-page .nav-toggle {
+            display: none;
+            background: none;
+            border: 0;
+            font-size: 20px;
+            color: #fff;
+        }
+
+        body.client-documents-page .profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            cursor: pointer;
+            overflow: visible;
+            z-index: 1000;
+        }
+
+        body.client-documents-page .profile-arrow {
+            color: #fff;
+            font-size: 12px;
+            transition: transform .2s ease;
+        }
+
+        body.client-documents-page .profile-arrow.rotate {
+            transform: rotate(180deg);
+        }
+
+        body.client-documents-page .profile-name {
+            cursor: pointer;
+            transition: color .12s ease;
+            color: #fff;
+        }
+
+        body.client-documents-page .profile-name:hover {
+            color: var(--accent);
+        }
+
+        body.client-documents-page .profile-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform .12s ease;
+        }
+
+        body.client-documents-page .profile-img:hover {
+            transform: scale(1.08);
+        }
+
+        body.client-documents-page .profile-dropdown {
+            position: absolute;
+            top: 48px;
+            right: -40px;
+            background: var(--card);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(8, 39, 63, 0.25);
+            min-width: 220px;
+            z-index: 99999;
+            overflow: visible;
+            border: 1px solid #e5e7eb;
+            pointer-events: auto;
+            visibility: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+        }
+
+        body.client-documents-page .profile-dropdown.active {
+            display: flex !important;
+            flex-direction: column;
+            visibility: visible !important;
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+
+        body.client-documents-page .profile-dropdown a,
+body.client-documents-page .profile-dropdown button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 12px 14px;
+            border: none;
+            background: none;
+            color: var(--text);
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: inherit;
+            text-align: left;
+            transition: background .12s ease, color .12s ease;
+            white-space: nowrap;
+        }
+
+        body.client-documents-page .profile-dropdown a:hover,
+body.client-documents-page .profile-dropdown button:hover {
+            background: #f3f4f6;
+        }
+
+        body.client-documents-page .profile-dropdown button.signout:hover {
+            background: rgba(244, 180, 0, 0.1);
+            color: var(--accent);
+        }
+
+        body.client-documents-page .profile-dropdown i {
+            width: 18px;
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        body.client-documents-page .profile-dropdown button.signout i {
+            color: var(--accent);
+        }
+
+        body.client-documents-page .container {
+            width: min(1200px, 94%);
+            margin: 24px auto 40px;
+        }
+
+        body.client-documents-page .page-header {
+            margin-bottom: 20px;
+        }
+
+        body.client-documents-page .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 6px;
+        }
+
+        body.client-documents-page .page-subtitle {
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        body.client-documents-page .document-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        body.client-documents-page .doc-section {
+            background: linear-gradient(180deg, #ffffff 0%, #f5f9ff 100%);
+            border: 1px solid #dbe6f8;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 10px 26px rgba(8, 39, 63, 0.10);
+        }
+
+        body.client-documents-page .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            margin-bottom: 0;
+        }
+
+        body.client-documents-page .section-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        body.client-documents-page .section-head-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        body.client-documents-page .more-docs-link {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1d4ed8;
+            text-decoration: none;
+            border: 1px solid #bfdbfe;
+            background: #eff6ff;
+            border-radius: 999px;
+            padding: 5px 10px;
+            white-space: nowrap;
+        }
+
+        body.client-documents-page .more-docs-link:hover {
+            background: #dbeafe;
+        }
+
+        body.client-documents-page .upload-other-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        body.client-documents-page .section-title .fa-circle-check {
+            color: var(--ok);
+        }
+
+        body.client-documents-page .section-title .fa-hourglass-half {
+            color: var(--pending);
+        }
+
+        body.client-documents-page .section-title .fa-building {
+            color: #2563eb;
+        }
+
+        body.client-documents-page .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 14px;
+        }
+
+        body.client-documents-page .doc-tile {
+            border: 1px solid #d6e1f6;
+            border-radius: 14px;
+            padding: 14px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            box-shadow: 0 12px 28px rgba(11, 59, 111, 0.16), 0 3px 8px rgba(11, 59, 111, 0.08);
+            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+        }
+
+        body.client-documents-page .doc-tile:hover {
+            transform: translateY(-3px);
+            border-color: #b7cdf3;
+            box-shadow: 0 18px 36px rgba(11, 59, 111, 0.22), 0 6px 12px rgba(11, 59, 111, 0.10);
+        }
+
+        body.client-documents-page .doc-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        body.client-documents-page .doc-status {
+            font-size: 20px;
+        }
+
+        body.client-documents-page .doc-status.uploaded {
+            color: var(--ok);
+        }
+
+        body.client-documents-page .doc-status.pending {
+            color: var(--pending);
+        }
+
+        body.client-documents-page .doc-status.company {
+            color: #2563eb;
+        }
+
+        body.client-documents-page .doc-status.invoice {
+            color: #9333ea;
+        }
+
+        body.client-documents-page .doc-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        body.client-documents-page .doc-meta {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        body.client-documents-page .doc-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        body.client-documents-page .btn {
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-size: 13px;
+            padding: 7px 11px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all .2s ease;
+        }
+
+        body.client-documents-page .btn-view,
+body.client-documents-page .btn-upload {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        body.client-documents-page .btn-view:hover,
+body.client-documents-page .btn-upload:hover {
+            background: var(--primary-dark);
+        }
+
+        body.client-documents-page .btn-delete {
+            background: #fff;
+            color: #b91c1c;
+            border-color: #fecaca;
+        }
+
+        body.client-documents-page .btn-delete:hover {
+            background: #fee2e2;
+        }
+
+        body.client-documents-page .btn-reupload {
+            background: #fff8e1;
+            color: #8a5a00;
+            border-color: #f9d66b;
+        }
+
+        body.client-documents-page .btn-reupload:hover {
+            background: #fff2bf;
+        }
+
+        body.client-documents-page .btn-download {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+        }
+
+        body.client-documents-page .btn-download:hover {
+            background: #dbeafe;
+        }
+
+        body.client-documents-page .company-docs-wrap {
+            margin-top: 0;
+        }
+
+        body.client-documents-page .confirm-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(11, 23, 42, 0.52);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1200;
+            padding: 16px;
+        }
+
+        body.client-documents-page .confirm-modal.active {
+            display: flex;
+        }
+
+        body.client-documents-page .confirm-box {
+            width: min(420px, 100%);
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid #dbe6f8;
+            box-shadow: 0 18px 44px rgba(8, 39, 63, 0.26);
+            padding: 20px;
+        }
+
+        body.client-documents-page .confirm-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f1724;
+            margin-bottom: 8px;
+        }
+
+        body.client-documents-page .confirm-text {
+            font-size: 14px;
+            color: #334155;
+            margin-bottom: 16px;
+            line-height: 1.45;
+        }
+
+        body.client-documents-page .confirm-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        body.client-documents-page .btn-cancel {
+            background: #fff;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+        }
+
+        body.client-documents-page .btn-cancel:hover {
+            background: #f8fafc;
+        }
+
+        body.client-documents-page .btn-confirm-delete {
+            background: #b91c1c;
+            color: #fff;
+        }
+
+        body.client-documents-page .btn-confirm-delete:hover {
+            background: #991b1b;
+        }
+
+        @media (max-width: 1024px) {
+            body.client-documents-page .document-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+        body.client-documents-page .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 20px;
+            z-index: 1300;
+        }
+
+        body.client-documents-page .modal[aria-hidden="false"] {
+            display: flex;
+        }
+
+        body.client-documents-page .modal-content {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        body.client-documents-page .modal-close {
+            float: right;
+            border: 0;
+            background: none;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        body.client-documents-page .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+        @media (max-width: 860px) {
+            body.client-documents-page .navbar {
+                flex-wrap: wrap;
+                padding: 12px 16px;
+            }
+
+            body.client-documents-page .logo-img {
+                width: 200px;
+                height: 72px;
+            }
+
+            body.client-documents-page .nav-toggle {
+                display: block;
+                margin-left: auto;
+            }
+
+            body.client-documents-page .nav-links {
+                width: 100%;
+                display: none;
+                flex-direction: column;
+                gap: 8px;
+                padding-top: 8px;
+            }
+
+            body.client-documents-page .profile {
+                margin-left: auto;
+            }
+
+            body.client-documents-page .profile-dropdown {
+                right: 0;
+            }
+        }
+    
+        body.client-documents-page #modal.modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 20px;
+        }
+
+        body.client-documents-page #modal[aria-hidden="false"] {
+            display: flex;
+        }
+
+        body.client-documents-page #modal .modal-content {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        body.client-documents-page #modal .modal-close {
+            float: right;
+            border: 0;
+            background: none;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        body.client-documents-page #modal .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+
+        body.client-documents-page #modal .primary {
+            background: var(--accent);
+            color: var(--primary);
+            border: 0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: transform .12s ease, box-shadow .12s ease;
+        }
+
+        body.client-documents-page #modal .primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(244, 180, 0, 0.25);
+        }
+
+        body.client-documents-page #modal .secondary {
+            background: #f3f4f6;
+            border: 0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform .12s ease, box-shadow .12s ease;
+        }
+
+        body.client-documents-page #modal .secondary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+    

@@ -1,0 +1,498 @@
+        body.client-active-services-page {
+            --primary: #0b3b6f;
+            --primary-dark: #08273f;
+            --accent: #f4b400;
+            --bg: #f9fbfd;
+            --text: #0f1724;
+            --card: #ffffff;
+            --muted: #64748b;
+            --border: #dbe7fb;
+        }
+
+        body.client-active-services-page, body.client-active-services-page * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body.client-active-services-page {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        body.client-active-services-page .navbar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 28px;
+            background: var(--primary-dark);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+            justify-content: space-between;
+            color: #fff;
+            overflow: visible !important;
+            position: relative;
+            z-index: 100;
+        }
+
+        body.client-active-services-page .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        body.client-active-services-page .logo-img {
+            width: 280px;
+            height: 100px;
+        }
+
+        body.client-active-services-page .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        body.client-active-services-page .nav-links a {
+            text-decoration: none;
+            color: #fff;
+            font-weight: 500;
+            position: relative;
+            padding: 6px 4px;
+        }
+
+        body.client-active-services-page .nav-links a::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 3px;
+            bottom: -8px;
+            background: transparent;
+            border-radius: 4px;
+            transition: background .18s ease, height .18s ease;
+        }
+
+        body.client-active-services-page .nav-links a.active::after {
+            background: var(--accent);
+        }
+
+        body.client-active-services-page .nav-links a:hover::after {
+            background: #fff;
+            height: 4px;
+        }
+
+        body.client-active-services-page .nav-toggle {
+            display: none;
+            background: none;
+            border: 0;
+            font-size: 20px;
+            color: #fff;
+        }
+
+        body.client-active-services-page .profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            cursor: pointer;
+            overflow: visible;
+            z-index: 1000;
+        }
+
+        body.client-active-services-page .profile-arrow {
+            color: #fff;
+            font-size: 12px;
+            transition: transform .2s ease;
+        }
+
+        body.client-active-services-page .profile-arrow.rotate {
+            transform: rotate(180deg);
+        }
+
+        body.client-active-services-page .profile-name {
+            cursor: pointer;
+            transition: color .12s ease;
+            color: #fff;
+        }
+
+        body.client-active-services-page .profile-name:hover {
+            color: var(--accent);
+        }
+
+        body.client-active-services-page .profile-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform .12s ease;
+        }
+
+        body.client-active-services-page .profile-img:hover {
+            transform: scale(1.08);
+        }
+
+        body.client-active-services-page .profile-dropdown {
+            position: absolute;
+            top: 48px;
+            right: -40px;
+            background: var(--card);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(8, 39, 63, 0.25);
+            min-width: 220px;
+            z-index: 99999;
+            overflow: visible;
+            border: 1px solid #e5e7eb;
+            pointer-events: auto;
+            visibility: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+        }
+
+        body.client-active-services-page .profile-dropdown.active {
+            display: flex !important;
+            flex-direction: column;
+            visibility: visible !important;
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+
+        body.client-active-services-page .profile-dropdown a,
+body.client-active-services-page .profile-dropdown button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 12px 14px;
+            border: none;
+            background: none;
+            color: var(--text);
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: inherit;
+            text-align: left;
+            transition: background .12s ease, color .12s ease;
+            white-space: nowrap;
+        }
+
+        body.client-active-services-page .profile-dropdown a:hover,
+body.client-active-services-page .profile-dropdown button:hover {
+            background: #f3f4f6;
+        }
+
+        body.client-active-services-page .profile-dropdown button.signout:hover {
+            background: rgba(244, 180, 0, 0.1);
+            color: var(--accent);
+        }
+
+        body.client-active-services-page .profile-dropdown i {
+            width: 18px;
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        body.client-active-services-page .profile-dropdown button.signout i {
+            color: var(--accent);
+        }
+
+        body.client-active-services-page .container {
+            width: min(1200px, 94%);
+            margin: 24px auto 40px;
+        }
+
+        body.client-active-services-page .page-header {
+            margin-bottom: 18px;
+        }
+
+        body.client-active-services-page .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+        }
+
+        body.client-active-services-page .page-subtitle {
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        body.client-active-services-page .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        body.client-active-services-page .service-link {
+            color: inherit;
+            text-decoration: none;
+            display: block;
+            cursor: pointer;
+        }
+
+        body.client-active-services-page .service-tile {
+            background: linear-gradient(180deg, #ffffff 0%, #f5f9ff 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 10px 22px rgba(11, 59, 111, 0.10);
+            transition: transform .16s ease, box-shadow .16s ease;
+        }
+
+        body.client-active-services-page .service-tile:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 30px rgba(11, 59, 111, 0.16);
+        }
+
+        body.client-active-services-page .tile-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        body.client-active-services-page .tile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: #eaf2ff;
+            color: #1d4ed8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        body.client-active-services-page .status-chip {
+            font-size: 12px;
+            font-weight: 600;
+            color: #166534;
+            background: #dcfce7;
+            border-radius: 999px;
+            padding: 4px 9px;
+        }
+
+        body.client-active-services-page .tile-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #0f1f3a;
+        }
+
+        body.client-active-services-page .tile-meta {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        body.client-active-services-page .service-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1200;
+            padding: 16px;
+        }
+
+        body.client-active-services-page .service-modal.active {
+            display: flex;
+        }
+
+        body.client-active-services-page .service-modal-box {
+            width: min(560px, 100%);
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 14px 34px rgba(2, 6, 23, 0.25);
+            padding: 18px;
+        }
+
+        body.client-active-services-page .service-modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        body.client-active-services-page .service-modal-title {
+            font-size: 22px;
+            color: #0f1f3a;
+            font-weight: 700;
+        }
+
+        body.client-active-services-page .service-modal-close {
+            border: 0;
+            background: transparent;
+            font-size: 20px;
+            cursor: pointer;
+            color: #475569;
+        }
+
+        body.client-active-services-page .service-modal-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        body.client-active-services-page .service-chip {
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 999px;
+            padding: 4px 9px;
+        }
+
+        body.client-active-services-page .service-chip.status {
+            color: #166534;
+            background: #dcfce7;
+        }
+
+        body.client-active-services-page .service-chip.date {
+            color: #1d4ed8;
+            background: #eaf2ff;
+        }
+
+        body.client-active-services-page .service-modal-text {
+            font-size: 14px;
+            color: #334155;
+            line-height: 1.55;
+        }
+        body.client-active-services-page .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 20px;
+            z-index: 1300;
+        }
+
+        body.client-active-services-page .modal[aria-hidden="false"] {
+            display: flex;
+        }
+
+        body.client-active-services-page .modal-content {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        body.client-active-services-page .modal-close {
+            float: right;
+            border: 0;
+            background: none;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        body.client-active-services-page .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+        @media (max-width: 860px) {
+            body.client-active-services-page .navbar {
+                flex-wrap: wrap;
+                padding: 12px 16px;
+            }
+
+            body.client-active-services-page .logo-img {
+                width: 200px;
+                height: 72px;
+            }
+
+            body.client-active-services-page .nav-toggle {
+                display: block;
+                margin-left: auto;
+            }
+
+            body.client-active-services-page .nav-links {
+                width: 100%;
+                display: none;
+                flex-direction: column;
+                gap: 8px;
+                padding-top: 8px;
+            }
+
+            body.client-active-services-page .profile {
+                margin-left: auto;
+            }
+
+            body.client-active-services-page .profile-dropdown {
+                right: 0;
+            }
+        }
+    
+        body.client-active-services-page #modal.modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 20px;
+        }
+
+        body.client-active-services-page #modal[aria-hidden="false"] {
+            display: flex;
+        }
+
+        body.client-active-services-page #modal .modal-content {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        body.client-active-services-page #modal .modal-close {
+            float: right;
+            border: 0;
+            background: none;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        body.client-active-services-page #modal .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+
+        body.client-active-services-page #modal .primary {
+            background: var(--accent);
+            color: var(--primary);
+            border: 0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: transform .12s ease, box-shadow .12s ease;
+        }
+
+        body.client-active-services-page #modal .primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(244, 180, 0, 0.25);
+        }
+
+        body.client-active-services-page #modal .secondary {
+            background: #f3f4f6;
+            border: 0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform .12s ease, box-shadow .12s ease;
+        }
+
+        body.client-active-services-page #modal .secondary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+    

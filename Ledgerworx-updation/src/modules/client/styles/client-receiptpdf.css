@@ -1,0 +1,153 @@
+        body.client-receipt-pdf-page {
+            --primary: #0b3b6f;
+            --text: #0f1724;
+            --muted: #64748b;
+            --border: #dbe7fb;
+            --sheet: #ffffff;
+            --bg: #eef3fa;
+            --success: #27ae60;
+        }
+
+        body.client-receipt-pdf-page, body.client-receipt-pdf-page * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body.client-receipt-pdf-page {
+            background: var(--bg);
+            color: var(--text);
+            padding: 24px;
+        }
+
+        body.client-receipt-pdf-page .toolbar {
+            max-width: 860px;
+            margin: 0 auto 14px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        body.client-receipt-pdf-page .toolbar a,
+body.client-receipt-pdf-page .toolbar button {
+            border: 0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        body.client-receipt-pdf-page .toolbar a {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        body.client-receipt-pdf-page .toolbar button {
+            background: #f4b400;
+            color: #08273f;
+        }
+
+        body.client-receipt-pdf-page .sheet {
+            max-width: 860px;
+            margin: 0 auto;
+            background: var(--sheet);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: 0 14px 28px rgba(11, 59, 111, 0.12);
+            padding: 26px;
+        }
+
+        body.client-receipt-pdf-page .top {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: flex-start;
+            border-bottom: 1px solid #e8edf7;
+            padding-bottom: 14px;
+            margin-bottom: 16px;
+        }
+
+        body.client-receipt-pdf-page .title {
+            color: var(--primary);
+            font-size: 30px;
+            font-weight: 700;
+        }
+
+        body.client-receipt-pdf-page .paid-badge {
+            margin-top: 6px;
+            color: var(--success);
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        body.client-receipt-pdf-page .meta {
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.7;
+            text-align: right;
+        }
+
+        body.client-receipt-pdf-page .meta strong {
+            color: #1e293b;
+        }
+
+        body.client-receipt-pdf-page .section {
+            margin-bottom: 14px;
+        }
+
+        body.client-receipt-pdf-page .label {
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            font-size: 12px;
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        body.client-receipt-pdf-page .value {
+            font-size: 16px;
+            color: #0f1724;
+            font-weight: 600;
+        }
+
+        body.client-receipt-pdf-page .total {
+            margin-top: 16px;
+            background: #f8fbff;
+            border: 1px solid #dfebff;
+            border-radius: 8px;
+            padding: 14px;
+        }
+
+        body.client-receipt-pdf-page .total .value {
+            color: var(--primary);
+            font-size: 28px;
+        }
+
+        body.client-receipt-pdf-page .foot {
+            margin-top: 20px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        @media print {
+            body.client-receipt-pdf-page {
+                background: #fff;
+                padding: 0;
+            }
+
+            body.client-receipt-pdf-page .toolbar {
+                display: none;
+            }
+
+            body.client-receipt-pdf-page .sheet {
+                border: 0;
+                box-shadow: none;
+                border-radius: 0;
+                max-width: none;
+                margin: 0;
+                padding: 0;
+            }
+        }
+    

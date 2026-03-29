@@ -1,0 +1,16 @@
+export const CLIENT_DASHBOARD_ROUTE = '/client/dashboard';
+export const CLIENT_ACTIVE_SERVICES_ROUTE = '/client/active-services';
+export const CLIENT_DOCUMENTS_ROUTE = '/client/documents';
+export const CLIENT_MORE_SERVICES_ROUTE = '/client/more-services';
+export const CLIENT_INVOICES_ROUTE = '/client/invoices';
+export const CLIENT_INVOICE_PDF_ROUTE = '/client/invoice-pdf';
+export const CLIENT_REQUESTS_ROUTE = '/client/requests';
+export const CLIENT_PAYMENTS_ROUTE = '/client/payments';
+export const CLIENT_NOTIFICATIONS_ROUTE = '/client/notifications';
+export const CLIENT_NOTIFICATION_DETAIL_ROUTE = '/client/notification-detail';
+export const CLIENT_PACKAGE_ROUTE = '/client/package';
+export const CLIENT_PROFILE_SETTINGS_ROUTE = '/client/profile-settings';
+export const CLIENT_RECEIPT_PDF_ROUTE = '/client/receipt-pdf';
+export const CLIENT_SIGNOUT_ROUTE = '/client/signout';
+export const CLIENT_SUB_SERVICES_ROUTE = '/client/sub-services';
+export const CLIENT_SUPPORT_ROUTE = '/client/support';

@@ -1,0 +1,698 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.payments-page-v2 {
+  max-width: 1460px;
+  margin: 0 auto;
+  padding: 24px;
+  color: #2f3c4e;
+  --payp-btn-primary: var(--primary, #1f8f8b);
+  --payp-btn-secondary: var(--secondary, #2fb7b0);
+  --payp-btn-shadow: 0 8px 18px rgba(31, 143, 139, 0.24);
+  --payp-btn-shadow-hover: 0 12px 24px rgba(31, 143, 139, 0.32);
+}
+
+body,
+.payments-page-v2,
+.payments-page-v2 * {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.payments-page-v2 .fa-solid {
+  font-family: "Font Awesome 6 Free" !important;
+  font-weight: 900;
+}
+
+.payments-page-v2 .fa-regular {
+  font-family: "Font Awesome 6 Free" !important;
+  font-weight: 400;
+}
+
+.payments-page-v2 button,
+.payments-page-v2 select,
+.payments-page-v2 input {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.payments-page-v2 button:focus-visible,
+.payments-page-v2 select:focus-visible,
+.payments-page-v2 input:focus-visible {
+  outline: 2px solid rgba(31, 143, 139, 0.35);
+  outline-offset: 1px;
+}
+
+.payments-page-v2 .payp-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.payments-page-v2 .payp-topbar h2 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+  color: #303c4f;
+}
+
+.payments-page-v2 .payp-top-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.payments-page-v2 .payp-top-btn {
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: linear-gradient(135deg, var(--payp-btn-primary), var(--payp-btn-secondary));
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 16px;
+  min-height: 36px;
+  box-shadow: var(--payp-btn-shadow);
+  cursor: pointer;
+}
+
+.payments-page-v2 .payp-top-btn:hover {
+  box-shadow: var(--payp-btn-shadow-hover);
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.payments-page-v2 .payp-top-btn:active {
+  transform: translateY(0);
+}
+
+.payments-page-v2 .payp-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 14px;
+  background: transparent;
+}
+
+.payments-page-v2 .payp-kpi {
+  padding: 16px 18px;
+  border: 1px solid #dde4ef;
+  border-top: 4px solid #2f80d7;
+  border-radius: 16px;
+  background: #eef1f5;
+  box-shadow: 0 8px 20px rgba(19, 39, 67, 0.08);
+}
+
+.payments-page-v2 .payp-kpi-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #48627f;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 7px;
+}
+
+.payments-page-v2 .payp-kpi-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 10px;
+}
+
+.payments-page-v2 .payp-kpi-revenue .payp-kpi-icon {
+  background: #4f8eed;
+}
+
+.payments-page-v2 .payp-kpi-pending .payp-kpi-icon {
+  background: #f2b93f;
+}
+
+.payments-page-v2 .payp-kpi-paid .payp-kpi-icon {
+  background: #29b5a9;
+}
+
+.payments-page-v2 .payp-kpi-overdue .payp-kpi-icon {
+  background: #ef6a57;
+}
+
+.payments-page-v2 .payp-kpi-value {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #1f4b78;
+  margin-bottom: 5px;
+}
+
+.payments-page-v2 .payp-kpi-meta {
+  font-size: 13px;
+  color: #6a7f97;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.payments-page-v2 .payp-kpi-meta i {
+  font-size: 8px;
+  color: #6a7f97;
+}
+
+.payments-page-v2 .payp-kpi:nth-child(2) {
+  background: #edf4f3;
+  border-top-color: #2fbe9a;
+}
+
+.payments-page-v2 .payp-kpi:nth-child(3) {
+  background: #f2f0ec;
+  border-top-color: #f39c12;
+}
+
+.payments-page-v2 .payp-kpi:nth-child(4) {
+  background: #f0edf5;
+  border-top-color: #6f42c1;
+}
+
+.payments-page-v2 .payp-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.payments-page-v2 .payp-left-panel,
+.payments-page-v2 .payp-right-panel {
+  border: 1px solid #d9e2ef;
+  background: #f8fafd;
+  border-radius: 8px;
+  min-height: 560px;
+}
+
+.payments-page-v2 .payp-left-panel {
+  padding: 8px;
+}
+
+.payments-page-v2 .payp-filter-wrap {
+  border: 1px solid #dde5f1;
+  background: #f2f5fb;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.payments-page-v2 .payp-filter-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) 58px;
+  gap: 8px;
+  margin-bottom: 7px;
+  align-items: center;
+}
+
+.payments-page-v2 .payp-filter-row:last-child {
+  margin-bottom: 0;
+}
+
+.payments-page-v2 .payp-control {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.payments-page-v2 .payp-control label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #5b6f8b;
+  min-width: 0;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.payments-page-v2 .payp-control select,
+.payments-page-v2 .payp-control input {
+  width: 100%;
+  height: 32px;
+  border: 1px solid #ccd6e8;
+  border-radius: 5px;
+  background: #f8faff;
+  color: #4c607c;
+  font-size: 12px;
+  padding: 0 10px;
+}
+
+.payments-page-v2 .payp-control input::placeholder {
+  color: #9aaac0;
+}
+
+.payments-page-v2 .payp-mini-btn {
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: linear-gradient(135deg, var(--payp-btn-primary), var(--payp-btn-secondary));
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0 10px;
+  width: 58px;
+  height: 32px;
+  box-shadow: 0 6px 14px rgba(31, 143, 139, 0.22);
+  cursor: pointer;
+}
+
+.payments-page-v2 .payp-mini-btn:hover {
+  box-shadow: 0 10px 18px rgba(31, 143, 139, 0.3);
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.payments-page-v2 .payp-table-wrap {
+  border: 1px solid #dde5f1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.payments-page-v2 .payp-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.payments-page-v2 .payp-col-customer {
+  width: 30%;
+}
+
+.payments-page-v2 .payp-col-type {
+  width: 11%;
+}
+
+.payments-page-v2 .payp-col-date {
+  width: 14%;
+}
+
+.payments-page-v2 .payp-col-status {
+  width: 12%;
+}
+
+.payments-page-v2 .payp-col-amount {
+  width: 15%;
+}
+
+.payments-page-v2 .payp-col-assigned {
+  width: 14%;
+}
+
+.payments-page-v2 .payp-col-action {
+  width: 4%;
+}
+
+.payments-page-v2 .payp-table th,
+.payments-page-v2 .payp-table td {
+  border-bottom: 1px solid #e8edf6;
+  padding: 12px 12px;
+  font-size: 13px;
+  color: #344a66;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.payments-page-v2 .payp-table th {
+  background: #f3f6fb;
+  font-size: 12px;
+  font-weight: 800;
+  color: #4d6380;
+}
+
+.payments-page-v2 .payp-row {
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.payments-page-v2 .payp-row:hover {
+  background: #f7fafe;
+}
+
+.payments-page-v2 .payp-row.active {
+  background: #eef4ff;
+}
+
+.payments-page-v2 .payp-status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+.payments-page-v2 .payp-status-tag.created {
+  color: #546a86;
+}
+
+.payments-page-v2 .payp-status-tag.paid {
+  color: #17a680;
+}
+
+.payments-page-v2 .payp-assigned {
+  font-weight: 500;
+}
+
+.payments-page-v2 .payp-action-cell {
+  text-align: center !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+}
+
+.payments-page-v2 .payp-dot-btn {
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(31, 143, 139, 0.28);
+  border-radius: 50%;
+  background: rgba(31, 143, 139, 0.1);
+  color: var(--payp-btn-primary);
+  cursor: pointer;
+  padding: 0;
+  font-size: 12px;
+}
+
+.payments-page-v2 .payp-dot-btn:hover {
+  border-color: var(--payp-btn-primary);
+  background: linear-gradient(135deg, var(--payp-btn-primary), var(--payp-btn-secondary));
+  color: #ffffff;
+}
+
+.payments-page-v2 .payp-table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: #f8fafd;
+}
+
+.payments-page-v2 .payp-record-count {
+  font-size: 12px;
+  color: #5d7190;
+  font-weight: 700;
+}
+
+.payments-page-v2 .payp-footer-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.payments-page-v2 .payp-nav-btn {
+  width: 24px;
+  height: 20px;
+  border: 1px solid rgba(31, 143, 139, 0.3);
+  background: rgba(31, 143, 139, 0.08);
+  border-radius: 5px;
+  color: var(--payp-btn-primary);
+  font-size: 9px;
+  box-shadow: 0 1px 4px rgba(31, 143, 139, 0.14);
+  cursor: pointer;
+}
+
+.payments-page-v2 .payp-nav-btn:hover {
+  border-color: var(--payp-btn-primary);
+  background: linear-gradient(135deg, var(--payp-btn-primary), var(--payp-btn-secondary));
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.payments-page-v2 .payp-page-pill {
+  min-width: 26px;
+  height: 20px;
+  border: 1px solid #cfd8e7;
+  border-radius: 3px;
+  background: #fff;
+  color: #516985;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.payments-page-v2 .payp-page-size {
+  height: 22px;
+  border: 1px solid rgba(31, 143, 139, 0.3);
+  border-radius: 5px;
+  background: #ffffff;
+  color: var(--payp-btn-primary);
+  font-size: 11px;
+  padding: 0 8px;
+}
+
+.payments-page-v2 .payp-right-panel {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.payments-page-v2 .payp-info-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #dbe4f0;
+  margin-bottom: 10px;
+}
+
+.payments-page-v2 .payp-info-head h3 {
+  margin: 0;
+  font-size: 17px;
+  color: #2e4058;
+}
+
+.payments-page-v2 .payp-primary-btn {
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--payp-btn-primary), var(--payp-btn-secondary));
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 7px 14px;
+  box-shadow: var(--payp-btn-shadow);
+  cursor: pointer;
+}
+
+.payments-page-v2 .payp-primary-btn:hover {
+  box-shadow: var(--payp-btn-shadow-hover);
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.payments-page-v2 .payp-customer-block {
+  margin-bottom: 10px;
+}
+
+.payments-page-v2 .payp-label {
+  font-size: 12px;
+  color: #8394ab;
+  margin-bottom: 4px;
+}
+
+.payments-page-v2 .payp-customer-name {
+  font-size: 20px;
+  color: #2f4058;
+  font-weight: 700;
+}
+
+.payments-page-v2 .payp-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border-top: 1px solid #dfe7f2;
+  border-bottom: 1px solid #dfe7f2;
+  margin-bottom: 12px;
+}
+
+.payments-page-v2 .payp-info-grid > div {
+  padding: 8px 6px;
+  border-right: 1px solid #e3eaf5;
+}
+
+.payments-page-v2 .payp-info-grid > div:nth-child(3n) {
+  border-right: none;
+}
+
+.payments-page-v2 .payp-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #3a4f69;
+}
+
+.payments-page-v2 .payp-items-panel {
+  border: 1px solid #dce5f1;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.payments-page-v2 .payp-items-title {
+  background: #f0f4fa;
+  color: #405773;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 8px 10px;
+}
+
+.payments-page-v2 .payp-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-top: 1px solid #e4ebf6;
+  font-size: 13px;
+  color: #4b607a;
+}
+
+.payments-page-v2 .payp-item-row.total {
+  background: #f8fbff;
+  font-size: 18px;
+  font-weight: 800;
+  color: #324760;
+}
+
+.payments-page-v2 .payp-item-row.total strong {
+  font-size: 18px;
+}
+
+.payments-page-v2 .payp-record-btn {
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--payp-btn-primary), var(--payp-btn-secondary));
+  color: #fff;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: var(--payp-btn-shadow);
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.payments-page-v2 .payp-record-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--payp-btn-shadow-hover);
+  filter: brightness(1.03);
+}
+
+.payments-page-v2 .payp-side-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.payments-page-v2 .payp-side-btn {
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: linear-gradient(135deg, var(--payp-btn-primary), var(--payp-btn-secondary));
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 10px;
+  min-height: 38px;
+  box-shadow: var(--payp-btn-shadow);
+  cursor: pointer;
+}
+
+.payments-page-v2 .payp-side-btn i {
+  margin-right: 6px;
+}
+
+.payments-page-v2 .payp-side-btn:hover {
+  box-shadow: var(--payp-btn-shadow-hover);
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.payments-page-v2 .payp-csv-select {
+  border: 1px solid rgba(31, 143, 139, 0.3);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--payp-btn-primary);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 0 8px;
+  height: 37px;
+}
+
+@media (max-width: 1300px) {
+  .payments-page-v2 .payp-kpi-value {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .payments-page-v2 .payp-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .payments-page-v2 .payp-right-panel {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .payments-page-v2 .payp-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .payments-page-v2 .payp-filter-row {
+    grid-template-columns: 1fr;
+  }
+
+  .payments-page-v2 .payp-control {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+
+  .payments-page-v2 .payp-table {
+    table-layout: auto;
+  }
+
+  .payments-page-v2 .payp-table th,
+  .payments-page-v2 .payp-table td {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 700px) {
+  .payments-page-v2 {
+    padding: 14px 4px 20px;
+  }
+
+  .payments-page-v2 .payp-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .payments-page-v2 .payp-info-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .payments-page-v2 .payp-info-grid > div:nth-child(3n) {
+    border-right: 1px solid #e3eaf5;
+  }
+
+  .payments-page-v2 .payp-info-grid > div:nth-child(2n) {
+    border-right: none;
+  }
+
+  .payments-page-v2 .payp-side-actions {
+    grid-template-columns: 1fr;
+  }
+}

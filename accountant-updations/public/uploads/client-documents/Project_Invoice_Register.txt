@@ -1,0 +1,8 @@
+LedgerWorx Accountant Preview
+
+Document: Project Invoice Register
+
+Summary:
+- Project billing milestones tracked
+- Contractor retention lines noted
+- VAT treatment reviewed for stage invoices

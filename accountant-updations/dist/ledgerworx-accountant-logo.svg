@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="160" viewBox="0 0 400 160" role="img" aria-labelledby="title desc">
+  <title id="title">LedgerWorx Accountant Logo</title>
+  <desc id="desc">LedgerWorx accountant portal brand mark</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f3d5e"/>
+      <stop offset="55%" stop-color="#1a5a8f"/>
+      <stop offset="100%" stop-color="#16a34a"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9be7ff"/>
+      <stop offset="100%" stop-color="#dcfce7"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="160" rx="28" fill="url(#bg)"/>
+  <rect x="28" y="28" width="72" height="72" rx="20" fill="rgba(255,255,255,0.12)"/>
+  <path d="M50 83h30l-11 12H50z" fill="#ffffff"/>
+  <path d="M60 42h16l14 18-24 28H50l24-28z" fill="url(#accent)"/>
+  <text x="122" y="70" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">LedgerWorx</text>
+  <text x="122" y="102" fill="#dbeafe" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="600">Accountant Portal</text>
+  <text x="30" y="136" fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="14">Preview-ready static deployment</text>
+</svg>

@@ -1,0 +1,10 @@
+LedgerWorx Accountant Preview
+
+Document: Purchase Ledger Q1
+Client: XYZ Technologies
+Period: Q1 2026
+
+Summary:
+- Supplier invoices matched with ledger entries
+- Recoverable VAT items highlighted
+- Expense coding reviewed for month-end close

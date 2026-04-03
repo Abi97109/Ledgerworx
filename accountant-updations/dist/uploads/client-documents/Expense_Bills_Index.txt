@@ -1,0 +1,9 @@
+LedgerWorx Accountant Preview
+
+Document: Expense Bills Index
+
+Included:
+- Utilities
+- Rent
+- Software subscriptions
+- Travel and reimbursement items

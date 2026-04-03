@@ -1,0 +1,12 @@
+LedgerWorx Accountant Preview
+
+Document: Sales Ledger Q1
+Client: XYZ Technologies
+Period: Q1 2026
+
+Summary:
+- Total sales transactions reviewed: 148
+- Taxable revenue verified against VAT ledger
+- Export transactions marked separately
+
+This is a preview file bundled with the React accountant portal.

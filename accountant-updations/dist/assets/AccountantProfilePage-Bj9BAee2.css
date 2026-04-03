@@ -1,0 +1,1 @@
+.profile-actions-wrap{margin-top:20px;min-height:auto}.profile-actions-wrap .section{display:block}.profile-actions-wrap .section-header{margin-bottom:20px}.profile-score{color:var(--success)}body.dark-mode .profile-score{color:#86efac}@media (max-width: 768px){.profile-actions-wrap .section-header{flex-direction:column;align-items:flex-start;gap:12px}}

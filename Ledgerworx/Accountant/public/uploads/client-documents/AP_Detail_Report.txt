@@ -1,0 +1,8 @@
+LedgerWorx Accountant Preview
+
+Document: AP Detail Report
+
+Key points:
+- Outstanding supplier balances listed
+- Due-date prioritization complete
+- Cash flow timing reviewed

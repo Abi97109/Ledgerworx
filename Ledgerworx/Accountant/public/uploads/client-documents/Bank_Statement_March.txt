@@ -1,0 +1,8 @@
+LedgerWorx Accountant Preview
+
+Document: Bank Statement March
+
+Highlights:
+- Opening balance reconciled
+- Large transfers flagged for follow-up
+- Month-end closing balance confirmed

@@ -1,0 +1,8 @@
+LedgerWorx Accountant Preview
+
+Document: Inventory Count Sheets
+
+Summary:
+- Warehouse count completed
+- Variance log attached in working papers
+- Stock valuation pending final approval

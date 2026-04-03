@@ -1,0 +1,14 @@
+LedgerWorx Accountant Preview
+
+Generated Report Preview
+
+This bundled report file replaces the old accountant-n generated report dependency.
+
+Included sections:
+- Executive summary
+- Client reconciliation notes
+- Filing readiness checklist
+- Recommended next actions
+
+Deploy note:
+This file is stored in the React app public folder, so it is copied into dist automatically.

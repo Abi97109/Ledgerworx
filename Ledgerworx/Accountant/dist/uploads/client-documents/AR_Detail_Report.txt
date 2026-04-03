@@ -1,0 +1,8 @@
+LedgerWorx Accountant Preview
+
+Document: AR Detail Report
+
+Key points:
+- Receivable balances aged by customer
+- Follow-up required on overdue balances
+- Expected collections mapped to invoice IDs

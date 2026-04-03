@@ -1,0 +1,8 @@
+LedgerWorx Accountant Preview
+
+Document: Contractor Invoices Index
+
+Summary:
+- Invoice packet indexed by vendor
+- Payment certificate references included
+- Supporting approvals logged

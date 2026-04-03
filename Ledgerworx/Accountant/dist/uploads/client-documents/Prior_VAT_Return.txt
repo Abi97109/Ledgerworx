@@ -1,0 +1,9 @@
+LedgerWorx Accountant Preview
+
+Document: Prior VAT Return
+Client: Sarah and Partners
+
+Notes:
+- Previous filing reference archived for comparison
+- Input and output VAT balances included for review
+- This preview copy is static and safe for hosting

@@ -1,19 +1,40 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     createClientRequest,
+    deleteClientDocument,
     deleteClientRequest,
+    fetchClientDocuments,
     fetchClientRequests,
     updateClientRequest,
 } from '../api/clientRequestsApi';
 
 export const CLIENT_REQUESTS_QUERY_KEY = ['client-requests'];
+export const CLIENT_DOCUMENTS_QUERY_KEY = ['client-documents'];
 
 export function useClientRequestsQuery() {
     return useQuery({
         queryKey: CLIENT_REQUESTS_QUERY_KEY,
         queryFn: fetchClientRequests,
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0,
         gcTime: 15 * 60 * 1000,
+        refetchOnMount: 'always',
+        refetchOnWindowFocus: true,
+        refetchInterval: 10000,
+        refetchIntervalInBackground: false,
+        retry: 1,
+    });
+}
+
+export function useClientDocumentsQuery() {
+    return useQuery({
+        queryKey: CLIENT_DOCUMENTS_QUERY_KEY,
+        queryFn: fetchClientDocuments,
+        staleTime: 0,
+        gcTime: 15 * 60 * 1000,
+        refetchOnMount: 'always',
+        refetchOnWindowFocus: true,
+        refetchInterval: 10000,
+        refetchIntervalInBackground: false,
         retry: 1,
     });
 }
@@ -26,6 +47,7 @@ export function useCreateClientRequestMutation() {
         onSuccess: async () => {
             await Promise.all([
                 queryClient.invalidateQueries({ queryKey: CLIENT_REQUESTS_QUERY_KEY }),
+                queryClient.invalidateQueries({ queryKey: CLIENT_DOCUMENTS_QUERY_KEY }),
                 queryClient.invalidateQueries({ queryKey: ['portal-dashboard'] }),
             ]);
         },
@@ -40,6 +62,7 @@ export function useUpdateClientRequestMutation() {
         onSuccess: async () => {
             await Promise.all([
                 queryClient.invalidateQueries({ queryKey: CLIENT_REQUESTS_QUERY_KEY }),
+                queryClient.invalidateQueries({ queryKey: CLIENT_DOCUMENTS_QUERY_KEY }),
                 queryClient.invalidateQueries({ queryKey: ['portal-dashboard'] }),
             ]);
         },
@@ -53,6 +76,22 @@ export function useDeleteClientRequestMutation() {
         mutationFn: deleteClientRequest,
         onSuccess: async () => {
             await Promise.all([
+                queryClient.invalidateQueries({ queryKey: CLIENT_REQUESTS_QUERY_KEY }),
+                queryClient.invalidateQueries({ queryKey: CLIENT_DOCUMENTS_QUERY_KEY }),
+                queryClient.invalidateQueries({ queryKey: ['portal-dashboard'] }),
+            ]);
+        },
+    });
+}
+
+export function useDeleteClientDocumentMutation() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: deleteClientDocument,
+        onSuccess: async () => {
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: CLIENT_DOCUMENTS_QUERY_KEY }),
                 queryClient.invalidateQueries({ queryKey: CLIENT_REQUESTS_QUERY_KEY }),
                 queryClient.invalidateQueries({ queryKey: ['portal-dashboard'] }),
             ]);

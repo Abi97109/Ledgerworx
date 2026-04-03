@@ -6,21 +6,65 @@ import { PortalPageError, PortalPageLoader } from '../components/PortalPageState
 import { usePortalSession } from '../context/PortalSessionProvider';
 import { clientPrimaryNavLinks } from '../data/clientNavData';
 import { clientSubServicesPageMeta } from '../data/subServicesData';
-import { useCreateClientRequestMutation } from '../hooks/useClientRequestsQuery';
+import {
+    useClientDocumentsQuery,
+    useCreateClientRequestMutation
+} from '../hooks/useClientRequestsQuery';
 import { usePortalCatalogQuery } from '../hooks/usePortalQueries';
 import {
     CLIENT_DASHBOARD_ROUTE,
+    CLIENT_DOCUMENTS_ROUTE,
     CLIENT_MORE_SERVICES_ROUTE,
+    CLIENT_PAYMENTS_ROUTE,
     CLIENT_REQUESTS_ROUTE
 } from '../utils/routePaths';
 import {
-    createSubmittedClientRequest,
+    buildClientProgressFromStatus,
 } from '../utils/requestStorage';
 import { normalizeServiceCategory } from '../utils/portalData';
 import { useClientPortalPage } from '../utils/useClientPortalPage';
 import '../styles/client-subServices.css';
 import '../styles/dark-mode.css';
 import '../styles/client-breadcrumb.css';
+
+function normalizeDocumentKey(value) {
+    return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function uniqDocumentNames(values) {
+    const seen = new Set();
+    const output = [];
+
+    (values || []).forEach((value) => {
+        const name = String(value || '').trim();
+        const key = normalizeDocumentKey(name);
+        if (!key || seen.has(key)) {
+            return;
+        }
+        seen.add(key);
+        output.push(name);
+    });
+
+    return output;
+}
+
+function inferServiceRequiredDocuments(categoryTitle, serviceName) {
+    const combined = `${categoryTitle || ''} ${serviceName || ''}`.toLowerCase();
+
+    if (combined.includes('business') || combined.includes('license') || combined.includes('government') || combined.includes('visa')) {
+        return ['Passport Copy', 'Company Setup Information Form'];
+    }
+
+    if (combined.includes('tax') || combined.includes('vat')) {
+        return ['Passport Copy', 'Tax Registration Details Form'];
+    }
+
+    if (combined.includes('legal') || combined.includes('contract')) {
+        return ['Passport Copy', 'Signed Engagement Form'];
+    }
+
+    return ['Passport Copy'];
+}
 
 function getSelectedCategory(categories, locationSearch) {
     const query = new URLSearchParams(locationSearch || '');
@@ -40,6 +84,7 @@ export default function ClientSubServicesPage() {
     const navigate = useNavigate();
     const bootstrapQuery = usePortalSession();
     const catalogQuery = usePortalCatalogQuery();
+    const documentsQuery = useClientDocumentsQuery();
     const createRequestMutation = useCreateClientRequestMutation();
     const { theme, toggleTheme } = useClientPortalPage(clientSubServicesPageMeta.pageTitle);
     const [selectedService, setSelectedService] = useState(null);
@@ -57,6 +102,14 @@ export default function ClientSubServicesPage() {
         phone: '',
         notes: ''
     });
+    const uploadedDocumentKeySet = useMemo(() => {
+        const docs = Array.isArray(documentsQuery.data?.documents) ? documentsQuery.data.documents : [];
+        return new Set(
+            docs
+                .map((item) => normalizeDocumentKey(item?.documentName))
+                .filter(Boolean)
+        );
+    }, [documentsQuery.data]);
 
     const categories = useMemo(() => {
         return Array.isArray(catalogQuery.data && catalogQuery.data.services)
@@ -141,23 +194,56 @@ export default function ClientSubServicesPage() {
             return;
         }
 
-        const newRequest = createSubmittedClientRequest({
-            title: `${selectedCategory.title} - ${selectedService.name}`,
-            category: selectedCategory.title,
-            overview: selectedService.description || 'Service request submitted from the services page.',
-            requester: {
-                name: requestForm.fullName.trim(),
-                email: requestForm.email.trim(),
-                phone: requestForm.phone.trim()
-            },
-            notes: requestForm.notes.trim(),
-            amount: selectedService.amount,
-            duration: selectedService.years,
-            submittedAt: new Date()
-        });
+        const requiredDocuments = inferServiceRequiredDocuments(selectedCategory.title, selectedService.name);
+        const uploadedDocuments = uniqDocumentNames(
+            requiredDocuments.filter((item) => uploadedDocumentKeySet.has(normalizeDocumentKey(item)))
+        );
+        const readyForPayment =
+            requiredDocuments.length > 0 &&
+            requiredDocuments.every((item) => uploadedDocumentKeySet.has(normalizeDocumentKey(item)));
+        const nextStatus = readyForPayment ? 'Payment Pending' : 'Documents Required';
 
         try {
-            await createRequestMutation.mutateAsync(newRequest);
+            const response = await createRequestMutation.mutateAsync({
+                title: `${selectedCategory.title} - ${selectedService.name}`,
+                category: 'Service Request',
+                overview: selectedService.description || 'Service request submitted from the services page.',
+                requester: {
+                    name: requestForm.fullName.trim(),
+                    email: requestForm.email.trim(),
+                    phone: requestForm.phone.trim()
+                },
+                notes: requestForm.notes.trim(),
+                amount: selectedService.amount,
+                duration: selectedService.years,
+                requiredDocuments,
+                uploadedDocuments,
+                instructions: readyForPayment
+                    ? [
+                          'Your required service documents are already available in the portal.',
+                          'You can continue to the payment handoff for this service request.',
+                          'After payment handoff, this request will move to completion.'
+                      ]
+                    : [
+                          'Your service request has been submitted successfully.',
+                          'Upload the required documents from the Documents page to continue processing.',
+                          'Once the required documents are complete, payment handoff will unlock automatically.'
+                      ],
+                status: nextStatus,
+                workflowStage: nextStatus,
+                actionBtn: readyForPayment ? 'Contact on WhatsApp' : 'Upload Documents',
+                dueDate: readyForPayment ? 'Proceed to payment handoff' : 'Upload remaining required documents',
+                progress: buildClientProgressFromStatus(readyForPayment ? 'payment pending' : 'documents required'),
+                source: 'service-page',
+                paymentContactName: 'LedgerWorx Accounts Team',
+                paymentContactPhone: '+971506708639',
+                paymentWhatsappLink: 'https://wa.me/971506708639',
+                staffName: 'LedgerWorx Team',
+                staffRole: 'Service Coordinator',
+                icon: 'fas fa-concierge-bell',
+                iconColor: '#3498db',
+                iconTone: 'blue'
+            });
             setRequestForm({
                 fullName: '',
                 email: '',
@@ -165,13 +251,20 @@ export default function ClientSubServicesPage() {
                 notes: ''
             });
             closeFormModal();
-            openModal(
-                'Request Submitted',
-                'Your service request has been submitted and is now visible in My Requests.',
-                () => {
-                    navigate(CLIENT_REQUESTS_ROUTE);
+            const createdRequestId = String(response?.request?.requestId || '').trim();
+            openModal('Request Submitted', 'Your service request has been submitted and is now visible in My Requests.', () => {
+                if (readyForPayment && createdRequestId) {
+                    navigate(`${CLIENT_PAYMENTS_ROUTE}?request=${encodeURIComponent(createdRequestId)}`);
+                    return;
                 }
-            );
+
+                if (createdRequestId) {
+                    navigate(`${CLIENT_REQUESTS_ROUTE}?request=${encodeURIComponent(createdRequestId)}`);
+                    return;
+                }
+
+                navigate(CLIENT_DOCUMENTS_ROUTE);
+            });
         } catch (error) {
             openModal(
                 'Unable to submit request',
@@ -180,16 +273,19 @@ export default function ClientSubServicesPage() {
         }
     }
 
-    if (catalogQuery.isLoading) {
+    if (catalogQuery.isLoading || documentsQuery.isLoading) {
         return <PortalPageLoader label="Loading sub services..." />;
     }
 
-    if (catalogQuery.isError) {
+    if (catalogQuery.isError || documentsQuery.isError) {
         return (
             <PortalPageError
                 title="Unable to load sub services"
-                message={catalogQuery.error && catalogQuery.error.message}
-                onRetry={() => catalogQuery.refetch()}
+                message={(catalogQuery.error && catalogQuery.error.message) || (documentsQuery.error && documentsQuery.error.message)}
+                onRetry={() => {
+                    catalogQuery.refetch();
+                    documentsQuery.refetch();
+                }}
             />
         );
     }

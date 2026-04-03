@@ -2,11 +2,15 @@ import React, { useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import ClientConfirmModal from '../components/ClientConfirmModal';
 import ClientPortalNavbar from '../components/ClientPortalNavbar';
+import { PortalPageError, PortalPageLoader } from '../components/PortalPageState';
+import { usePortalSession } from '../context/PortalSessionProvider';
 import { clientPrimaryNavLinks } from '../data/clientNavData';
 import {
+    buildClientNotificationItems,
     clientNotificationsPageMeta,
     getClientNotificationById
 } from '../data/notificationsData';
+import { usePortalDashboardQuery } from '../hooks/usePortalQueries';
 import {
     CLIENT_DASHBOARD_ROUTE,
     CLIENT_NOTIFICATIONS_ROUTE
@@ -18,17 +22,27 @@ import '../styles/client-breadcrumb.css';
 
 export default function ClientNotificationDetailPage() {
     const location = useLocation();
+    const bootstrapQuery = usePortalSession();
+    const dashboardQuery = usePortalDashboardQuery({
+        staleTime: 0,
+        refetchOnMount: 'always'
+    });
     const { theme, toggleTheme } = useClientPortalPage('LedgerWorx - Notification Detail');
     const [modalState, setModalState] = useState({
         isOpen: false,
         title: 'Confirm',
         body: 'Are you sure?'
     });
+    const sessionProfile = bootstrapQuery.data && bootstrapQuery.data.profile ? bootstrapQuery.data.profile : null;
+    const notificationItems = useMemo(
+        () => buildClientNotificationItems(dashboardQuery.data && dashboardQuery.data.notifications),
+        [dashboardQuery.data]
+    );
 
     const notification = useMemo(() => {
         const query = new URLSearchParams(location.search || '');
         return (
-            getClientNotificationById(query.get('id')) || {
+            getClientNotificationById(query.get('id'), notificationItems) || {
                 title: 'Notification Not Found',
                 detailTime: 'N/A',
                 category: 'General',
@@ -36,13 +50,27 @@ export default function ClientNotificationDetailPage() {
                     'The selected notification could not be found. Please return to the notifications page and choose an available item.'
             }
         );
-    }, [location.search]);
+    }, [location.search, notificationItems]);
+
+    if (dashboardQuery.isLoading) {
+        return <PortalPageLoader label="Loading notification..." />;
+    }
+
+    if (dashboardQuery.isError) {
+        return (
+            <PortalPageError
+                title="Unable to load notification"
+                message={dashboardQuery.error && dashboardQuery.error.message}
+                onRetry={() => dashboardQuery.refetch()}
+            />
+        );
+    }
 
     return (
         <>
             <ClientPortalNavbar
-                profileName={clientNotificationsPageMeta.profileName}
-                profileImage={clientNotificationsPageMeta.profileImage}
+                profileName={(sessionProfile && sessionProfile.name) || clientNotificationsPageMeta.profileName}
+                profileImage={(sessionProfile && sessionProfile.avatarUrl) || clientNotificationsPageMeta.profileImage}
                 navLinks={clientPrimaryNavLinks}
                 activeNavKey="notifications"
                 homeRoute={CLIENT_DASHBOARD_ROUTE}

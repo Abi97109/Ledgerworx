@@ -1,6 +1,7 @@
 export const CLIENT_DASHBOARD_ROUTE = '/client/dashboard';
 export const CLIENT_ACTIVE_SERVICES_ROUTE = '/client/active-services';
 export const CLIENT_DOCUMENTS_ROUTE = '/client/documents';
+export const CLIENT_MORE_PACKAGES_ROUTE = '/client/more-packages';
 export const CLIENT_MORE_SERVICES_ROUTE = '/client/more-services';
 export const CLIENT_INVOICES_ROUTE = '/client/invoices';
 export const CLIENT_INVOICE_PDF_ROUTE = '/client/invoice-pdf';

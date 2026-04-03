@@ -1,4 +1,7 @@
-const DEFAULT_WORDPRESS_BASE_URL = 'https://ledgerworx.me';
+const DEFAULT_WORDPRESS_BASE_URL =
+    typeof window !== 'undefined' && window.location && window.location.origin
+        ? window.location.origin
+        : 'https://ledgerworx.me';
 const DEFAULT_LOGIN_URL = DEFAULT_WORDPRESS_BASE_URL + '/login/';
 const DEFAULT_PORTAL_BASE_URL = DEFAULT_WORDPRESS_BASE_URL + '/portal/client/';
 let portalRestNonce = '';
@@ -77,6 +80,25 @@ async function requestPortalJsonWithBody(path, method, body) {
     });
 }
 
+async function requestPortalFormData(path, formData, method = 'POST') {
+    const requestHeaders = {
+        Accept: 'application/json'
+    };
+
+    if (portalRestNonce) {
+        requestHeaders['X-WP-Nonce'] = portalRestNonce;
+    }
+
+    const response = await fetch(buildAbsoluteUrl(path), {
+        method,
+        credentials: 'include',
+        headers: requestHeaders,
+        body: formData
+    });
+
+    return parsePortalResponse(response);
+}
+
 function readConfigUrl(configValue, fallbackUrl) {
     const normalizedValue = String(configValue || '').trim();
     return normalizedValue ? normalizedValue : fallbackUrl;
@@ -129,23 +151,74 @@ export async function fetchPortalSession() {
 }
 
 export async function fetchPortalDashboard() {
-    return requestPortalJson('/wp-json/lw/v1/dashboard');
+    const cacheBuster = Date.now();
+    return requestPortalJson(`/wp-json/lw/v1/dashboard?_=${cacheBuster}`, {
+        cache: 'no-store'
+    });
 }
 
 export async function fetchPortalCatalog() {
-    const [packagesPayload, servicesPayload] = await Promise.all([
-        requestPortalJson('/wp-json/lw/v1/catalog/packages'),
-        requestPortalJson('/wp-json/lw/v1/catalog/services')
+    const cacheBuster = Date.now();
+    const [packagesResult, servicesResult] = await Promise.allSettled([
+        requestPortalJson(`/wp-json/lw/v1/catalog/packages?_=${cacheBuster}`, {
+            cache: 'no-store'
+        }),
+        requestPortalJson(`/wp-json/lw/v1/catalog/services?_=${cacheBuster}`, {
+            cache: 'no-store'
+        })
     ]);
+
+    if (packagesResult.status === 'rejected' && servicesResult.status === 'rejected') {
+        throw packagesResult.reason || servicesResult.reason || new Error('Unable to load catalog data.');
+    }
+
+    const packagesPayload = packagesResult.status === 'fulfilled' ? packagesResult.value : {};
+    const servicesPayload = servicesResult.status === 'fulfilled' ? servicesResult.value : {};
 
     return {
         packages: Array.isArray(packagesPayload && packagesPayload.packages) ? packagesPayload.packages : [],
         services: Array.isArray(servicesPayload && servicesPayload.categories) ? servicesPayload.categories : [],
         meta: {
             packages: packagesPayload && packagesPayload.meta ? packagesPayload.meta : {},
-            services: servicesPayload && servicesPayload.meta ? servicesPayload.meta : {}
+            services: servicesPayload && servicesPayload.meta ? servicesPayload.meta : {},
+            errors: {
+                packages: packagesResult.status === 'rejected' ? (packagesResult.reason?.message || 'Unable to load packages.') : '',
+                services: servicesResult.status === 'rejected' ? (servicesResult.reason?.message || 'Unable to load services.') : ''
+            }
         }
     };
+}
+
+export async function fetchPortalInvoices() {
+    try {
+        const cacheBuster = Date.now();
+        const payload = await requestPortalJson(`/wp-json/lw/v1/client/invoices?_=${cacheBuster}`, {
+            cache: 'no-store'
+        });
+        return {
+            invoices: Array.isArray(payload?.invoices) ? payload.invoices : [],
+            meta: payload?.meta || {}
+        };
+    } catch (error) {
+        const isRetryableRestFailure =
+            error instanceof PortalApiError &&
+            [401, 403, 404, 405].includes(error.status);
+
+        if (!isRetryableRestFailure) {
+            throw error;
+        }
+
+        const cacheBuster = Date.now();
+        const payload = await requestPortalJson(`/wp-admin/admin-ajax.php?action=lw_client_invoices&_=${cacheBuster}`, {
+            method: 'GET',
+            cache: 'no-store'
+        });
+
+        return {
+            invoices: Array.isArray(payload?.invoices) ? payload.invoices : [],
+            meta: payload?.meta || {}
+        };
+    }
 }
 
 export async function savePortalCompanyName(companyName) {
@@ -174,4 +247,4 @@ export function getWordPressLoginUrl() {
     return DEFAULT_LOGIN_URL;
 }
 
-export { PortalApiError, requestPortalJson, requestPortalJsonWithBody };
+export { PortalApiError, requestPortalJson, requestPortalJsonWithBody, requestPortalFormData };

@@ -412,14 +412,104 @@ body.client-documents-page .btn-upload:hover {
             background: #fff2bf;
         }
 
-        body.client-documents-page .btn-download {
-            background: #eff6ff;
-            color: #1d4ed8;
-            border-color: #bfdbfe;
-        }
+body.client-documents-page .btn-download {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+}
+
+body.client-documents-page .invoice-doc-tile {
+    text-decoration: none;
+    color: inherit;
+    min-height: 210px;
+    justify-content: space-between;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+}
+
+body.client-documents-page .invoice-doc-title {
+    max-width: 85%;
+    word-break: break-word;
+    color: #0f3c74;
+}
+
+body.client-documents-page .invoice-doc-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+body.client-documents-page .invoice-doc-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+body.client-documents-page .invoice-doc-value {
+    font-size: 15px;
+    color: #0f1724;
+    font-weight: 600;
+}
+
+body.client-documents-page .invoice-doc-amount {
+    color: #0b3b6f;
+    font-size: 20px;
+}
 
         body.client-documents-page .btn-download:hover {
             background: #dbeafe;
+        }
+
+        body.client-documents-page .documents-upload-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(8, 39, 63, 0.42);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2200;
+            backdrop-filter: blur(2px);
+        }
+
+        body.client-documents-page .documents-upload-card {
+            width: min(320px, calc(100vw - 32px));
+            border-radius: 18px;
+            padding: 28px 24px;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid #d7e4f8;
+            box-shadow: 0 24px 60px rgba(8, 39, 63, 0.24);
+            text-align: center;
+        }
+
+        body.client-documents-page .documents-upload-card p {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0b3b6f;
+        }
+
+        body.client-documents-page .documents-upload-spinner {
+            width: 54px;
+            height: 54px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            border: 4px solid #dbeafe;
+            border-top-color: #0f766e;
+            border-right-color: #0b3b6f;
+            animation: documentsSpin .9s linear infinite;
+        }
+
+        @keyframes documentsSpin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         body.client-documents-page .company-docs-wrap {

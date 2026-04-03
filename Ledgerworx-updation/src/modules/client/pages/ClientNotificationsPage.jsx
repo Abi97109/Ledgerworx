@@ -2,11 +2,14 @@ import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ClientConfirmModal from '../components/ClientConfirmModal';
 import ClientPortalNavbar from '../components/ClientPortalNavbar';
+import { PortalPageError, PortalPageLoader } from '../components/PortalPageState';
+import { usePortalSession } from '../context/PortalSessionProvider';
 import { clientPrimaryNavLinks } from '../data/clientNavData';
 import {
-    clientNotificationItems,
+    buildClientNotificationItems,
     clientNotificationsPageMeta
 } from '../data/notificationsData';
+import { usePortalDashboardQuery } from '../hooks/usePortalQueries';
 import {
     CLIENT_DASHBOARD_ROUTE,
     CLIENT_NOTIFICATION_DETAIL_ROUTE
@@ -22,6 +25,11 @@ import '../styles/client-breadcrumb.css';
 
 export default function ClientNotificationsPage() {
     const navigate = useNavigate();
+    const bootstrapQuery = usePortalSession();
+    const dashboardQuery = usePortalDashboardQuery({
+        staleTime: 0,
+        refetchOnMount: 'always'
+    });
     const { theme, toggleTheme } = useClientPortalPage(clientNotificationsPageMeta.pageTitle);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortValue, setSortValue] = useState('latest');
@@ -31,10 +39,15 @@ export default function ClientNotificationsPage() {
         title: 'Confirm',
         body: 'Are you sure?'
     });
+    const sessionProfile = bootstrapQuery.data && bootstrapQuery.data.profile ? bootstrapQuery.data.profile : null;
+    const notificationItems = useMemo(
+        () => buildClientNotificationItems(dashboardQuery.data && dashboardQuery.data.notifications),
+        [dashboardQuery.data]
+    );
 
     const visibleNotifications = useMemo(() => {
         const query = searchQuery.trim().toLowerCase();
-        const filtered = clientNotificationItems
+        const filtered = notificationItems
             .map((item) => {
                 const hasStoredSeenState = Object.prototype.hasOwnProperty.call(seenMap, item.id);
                 return {
@@ -62,7 +75,7 @@ export default function ClientNotificationsPage() {
 
             return new Date(right.timestamp).getTime() - new Date(left.timestamp).getTime();
         });
-    }, [searchQuery, seenMap, sortValue]);
+    }, [notificationItems, searchQuery, seenMap, sortValue]);
 
     function handleNotificationClick(notificationId) {
         setClientNotificationSeen(notificationId);
@@ -73,11 +86,25 @@ export default function ClientNotificationsPage() {
         navigate(`${CLIENT_NOTIFICATION_DETAIL_ROUTE}?id=${encodeURIComponent(notificationId)}`);
     }
 
+    if (dashboardQuery.isLoading) {
+        return <PortalPageLoader label="Loading notifications..." />;
+    }
+
+    if (dashboardQuery.isError) {
+        return (
+            <PortalPageError
+                title="Unable to load notifications"
+                message={dashboardQuery.error && dashboardQuery.error.message}
+                onRetry={() => dashboardQuery.refetch()}
+            />
+        );
+    }
+
     return (
         <>
             <ClientPortalNavbar
-                profileName={clientNotificationsPageMeta.profileName}
-                profileImage={clientNotificationsPageMeta.profileImage}
+                profileName={(sessionProfile && sessionProfile.name) || clientNotificationsPageMeta.profileName}
+                profileImage={(sessionProfile && sessionProfile.avatarUrl) || clientNotificationsPageMeta.profileImage}
                 navLinks={clientPrimaryNavLinks}
                 activeNavKey="notifications"
                 homeRoute={CLIENT_DASHBOARD_ROUTE}

@@ -1,88 +1,54 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import ClientPortalNavbar from '../components/ClientPortalNavbar';
+import { PortalPageError, PortalPageLoader } from '../components/PortalPageState';
+import { usePortalSession } from '../context/PortalSessionProvider';
 import {
     CLIENT_DASHBOARD_ROUTE,
-    clientInvoicesList,
     clientInvoicesPageMeta,
     clientPrimaryNavLinks
 } from '../data/invoicesData';
-import {
-    CLIENT_INVOICE_PDF_ROUTE,
-    CLIENT_INVOICES_ROUTE
-} from '../utils/routePaths';
-import { getClientSavedTheme, saveClientTheme } from '../utils/themeStorage';
+import { usePortalInvoicesQuery } from '../hooks/usePortalQueries';
+import { CLIENT_INVOICE_PDF_ROUTE, CLIENT_INVOICES_ROUTE } from '../utils/routePaths';
+import { useClientPortalPage } from '../utils/useClientPortalPage';
 import '../styles/client-invoices.css';
 import '../styles/dark-mode.css';
 import '../styles/client-breadcrumb.css';
 
 export default function ClientInvoicesPage() {
-    const [theme, setTheme] = useState(() => {
-        const initialTheme = getClientSavedTheme();
+    const bootstrapQuery = usePortalSession();
+    const invoicesQuery = usePortalInvoicesQuery();
+    const { theme, toggleTheme } = useClientPortalPage(clientInvoicesPageMeta.pageTitle);
 
-        if (typeof document !== 'undefined') {
-            document.documentElement.classList.toggle('dark-mode', initialTheme === 'dark');
-        }
+    const sessionProfile = bootstrapQuery.data?.profile || null;
+    const invoices = useMemo(() => {
+        return Array.isArray(invoicesQuery.data?.invoices) ? invoicesQuery.data.invoices : [];
+    }, [invoicesQuery.data]);
 
-        return initialTheme;
-    });
-
-    const [modalState, setModalState] = useState({
-        isOpen: false,
-        title: 'Confirm',
-        body: 'Are you sure?',
-        onConfirm: null
-    });
-
-    useEffect(() => {
-        const root = document.documentElement;
-        root.classList.toggle('dark-mode', theme === 'dark');
-        saveClientTheme(theme);
-    }, [theme]);
-
-    useEffect(() => {
-        document.title = clientInvoicesPageMeta.pageTitle;
-    }, []);
-
-    useEffect(() => {
-        const existing = document.getElementById('font-awesome-6-5-0');
-        if (existing) {
-            return;
-        }
-
-        const link = document.createElement('link');
-        link.id = 'font-awesome-6-5-0';
-        link.rel = 'stylesheet';
-        link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css';
-        document.head.appendChild(link);
-    }, []);
-
-    function closeModal() {
-        setModalState((prev) => ({
-            ...prev,
-            isOpen: false,
-            onConfirm: null
-        }));
+    if (invoicesQuery.isLoading) {
+        return <PortalPageLoader label="Loading invoices..." />;
     }
 
-    function handleModalConfirm() {
-        const callback = modalState.onConfirm;
-        closeModal();
-        if (typeof callback === 'function') {
-            callback();
-        }
+    if (invoicesQuery.isError) {
+        return (
+            <PortalPageError
+                title="Unable to load invoices"
+                message={invoicesQuery.error?.message || 'Please try again.'}
+                onRetry={() => invoicesQuery.refetch()}
+            />
+        );
     }
 
     return (
         <div className="client-invoices-page">
             <ClientPortalNavbar
-                profileName={clientInvoicesPageMeta.profileName}
-                profileImage={clientInvoicesPageMeta.profileImage}
+                profileName={(sessionProfile && sessionProfile.name) || clientInvoicesPageMeta.profileName}
+                profileImage={(sessionProfile && sessionProfile.avatarUrl) || clientInvoicesPageMeta.profileImage}
                 navLinks={clientPrimaryNavLinks}
-                activeNavKey=""
+                activeNavKey="payments"
                 homeRoute={CLIENT_DASHBOARD_ROUTE}
                 theme={theme}
-                onToggleTheme={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
+                onToggleTheme={toggleTheme}
             />
 
             <div className="container">
@@ -94,69 +60,46 @@ export default function ClientInvoicesPage() {
                 <h1 className="page-title">{clientInvoicesPageMeta.heading}</h1>
                 <p className="page-subtitle">{clientInvoicesPageMeta.subtitle}</p>
 
-                <ul className="invoice-list">
-                    {clientInvoicesList.map((invoice) => {
-                        const query = new URLSearchParams({
-                            id: invoice.id,
-                            date: invoice.date,
-                            time: invoice.time,
-                            amount: invoice.amount
-                        }).toString();
+                {invoices.length ? (
+                    <ul className="invoice-list">
+                        {invoices.map((invoice) => {
+                            const query = new URLSearchParams({
+                                id: String(invoice.id || invoice.invoiceNumber || ''),
+                            }).toString();
 
-                        return (
-                            <Link
-                                key={invoice.id}
-                                className="invoice-item"
-                                to={`${CLIENT_INVOICE_PDF_ROUTE}?${query}`}
-                                state={{ from: CLIENT_INVOICES_ROUTE }}
-                            >
-                                <div>
-                                    <div className="invoice-label">Invoice ID</div>
-                                    <div className="invoice-id">{invoice.id}</div>
-                                </div>
-                                <div>
-                                    <div className="invoice-label">Generated Date</div>
-                                    <div className="invoice-value">{invoice.date}</div>
-                                </div>
-                                <div>
-                                    <div className="invoice-label">Generated Time</div>
-                                    <div className="invoice-value">{invoice.time}</div>
-                                </div>
-                                <div>
-                                    <div className="invoice-label">Amount</div>
-                                    <div className="invoice-value">{invoice.amount}</div>
-                                </div>
-                            </Link>
-                        );
-                    })}
-                </ul>
-            </div>
-
-            <div
-                id="modal"
-                className="modal"
-                aria-hidden={modalState.isOpen ? 'false' : 'true'}
-                onClick={(event) => {
-                    if (event.target.id === 'modal') {
-                        closeModal();
-                    }
-                }}
-            >
-                <div className="modal-content">
-                    <button className="modal-close" aria-label="Close" type="button" onClick={closeModal}>
-                        &times;
-                    </button>
-                    <h3 id="modal-title">{modalState.title}</h3>
-                    <p id="modal-body">{modalState.body}</p>
-                    <div className="modal-actions">
-                        <button type="button" className="primary modal-confirm" onClick={handleModalConfirm}>
-                            Confirm
-                        </button>
-                        <button type="button" className="secondary modal-cancel" onClick={closeModal}>
-                            Cancel
-                        </button>
-                    </div>
-                </div>
+                            return (
+                                <Link
+                                    key={invoice.id || invoice.invoiceNumber}
+                                    className="invoice-item"
+                                    to={`${CLIENT_INVOICE_PDF_ROUTE}?${query}`}
+                                    state={{ from: CLIENT_INVOICES_ROUTE, invoice }}
+                                >
+                                    <div>
+                                        <div className="invoice-label">Invoice ID</div>
+                                        <div className="invoice-id">{invoice.invoiceNumber || invoice.id}</div>
+                                    </div>
+                                    <div>
+                                        <div className="invoice-label">Generated Date</div>
+                                        <div className="invoice-value">{invoice.invoiceDate || '-'}</div>
+                                    </div>
+                                    <div>
+                                        <div className="invoice-label">Generated Time</div>
+                                        <div className="invoice-value">{invoice.invoiceTime || '-'}</div>
+                                    </div>
+                                    <div>
+                                        <div className="invoice-label">Amount</div>
+                                        <div className="invoice-value">{invoice.amount || 'AED 0.00'}</div>
+                                    </div>
+                                </Link>
+                            );
+                        })}
+                    </ul>
+                ) : (
+                    <section className="requests-empty-state payment-empty-state">
+                        <h3>No invoices yet</h3>
+                        <p>No live Zoho invoices were found for this client.</p>
+                    </section>
+                )}
             </div>
         </div>
     );

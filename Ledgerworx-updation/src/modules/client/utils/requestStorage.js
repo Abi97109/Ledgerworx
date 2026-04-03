@@ -12,10 +12,15 @@ export function buildClientProgressFromStatus(status) {
     const normalizedStatus = String(status || '').trim().toLowerCase();
     const templates = {
         submitted: [true, false, false, false, false],
+        'documents required': [true, true, false, false, false],
         'under review': [true, true, false, false, false],
         processing: [true, true, true, false, false],
         'in progress': [true, true, true, false, false],
+        'payment pending': [true, true, true, true, false],
+        'payment required': [true, true, true, true, false],
+        'awaiting payment confirmation': [true, true, true, true, false],
         pending: [true, true, true, true, false],
+        cancelled: [true, false, false, false, false],
         completed: [true, true, true, true, true]
     };
     const completedStates = templates[normalizedStatus] || templates.submitted;

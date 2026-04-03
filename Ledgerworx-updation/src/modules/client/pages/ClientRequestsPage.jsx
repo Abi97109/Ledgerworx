@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ClientConfirmModal from '../components/ClientConfirmModal';
 import ClientPortalNavbar from '../components/ClientPortalNavbar';
 import { PortalPageError, PortalPageLoader } from '../components/PortalPageState';
@@ -8,25 +8,34 @@ import { clientPrimaryNavLinks } from '../data/clientNavData';
 import { clientRequestsPageMeta } from '../data/requestsData';
 import {
     CLIENT_DASHBOARD_ROUTE,
-    CLIENT_DOCUMENTS_ROUTE
+    CLIENT_DOCUMENTS_ROUTE,
+    CLIENT_PAYMENTS_ROUTE,
+    CLIENT_REQUESTS_ROUTE
 } from '../utils/routePaths';
 import { getClientRequestIconTone } from '../utils/requestStorage';
 import { useClientPortalPage } from '../utils/useClientPortalPage';
-import { useClientRequestsQuery } from '../hooks/useClientRequestsQuery';
+import {
+    useDeleteClientRequestMutation,
+    useClientRequestsQuery
+} from '../hooks/useClientRequestsQuery';
 import '../styles/client-request.css';
 import '../styles/dark-mode.css';
 import '../styles/client-breadcrumb.css';
 
+function normalizeDocumentKey(value) {
+    return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
 export default function ClientRequestsPage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const bootstrapQuery = usePortalSession();
     const { theme, toggleTheme } = useClientPortalPage(clientRequestsPageMeta.pageTitle);
     const modalBodyRef = useRef(null);
-    const documentInputRef = useRef(null);
     const requestsQuery = useClientRequestsQuery();
+    const deleteRequestMutation = useDeleteClientRequestMutation();
     const [activeRequestIndex, setActiveRequestIndex] = useState(null);
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
-    const [uploadedDocumentsByRequest, setUploadedDocumentsByRequest] = useState({});
     const [isReviewHighlightActive, setIsReviewHighlightActive] = useState(false);
     const [modalState, setModalState] = useState({
         isOpen: false,
@@ -53,6 +62,20 @@ export default function ClientRequestsPage() {
         return requests[activeRequestIndex] || null;
     }, [activeRequestIndex, requests]);
 
+    React.useEffect(() => {
+        const requestId = String(searchParams.get('request') || '').trim();
+        if (!requestId || !requests.length) {
+            return;
+        }
+
+        const requestIndex = requests.findIndex((item) => item.requestId === requestId);
+        if (requestIndex >= 0) {
+            setActiveRequestIndex(requestIndex);
+            setIsRequestModalOpen(true);
+            navigate(CLIENT_REQUESTS_ROUTE, { replace: true });
+        }
+    }, [navigate, requests, searchParams]);
+
     function closeModal() {
         setModalState((prev) => ({
             ...prev,
@@ -78,44 +101,25 @@ export default function ClientRequestsPage() {
         setIsRequestModalOpen(false);
     }
 
-    function handleUploadedDocumentsChange(event) {
-        if (typeof activeRequestIndex !== 'number') {
-            return;
-        }
-
-        const selectedFiles = Array.from(event.target.files || []);
-        if (!selectedFiles.length) {
-            return;
-        }
-
-        setUploadedDocumentsByRequest((prev) => {
-            const nextExisting = [...(prev[activeRequestIndex] || [])];
-            selectedFiles.forEach((file) => {
-                if (!nextExisting.includes(file.name)) {
-                    nextExisting.push(file.name);
-                }
-            });
-
-            return {
-                ...prev,
-                [activeRequestIndex]: nextExisting
-            };
-        });
-
-        event.target.value = '';
-    }
-
     function handleRequestPrimaryAction() {
         if (!activeRequest) {
             return;
         }
 
         const action = String(activeRequest.actionBtn || '').toLowerCase();
+        const requiredDocuments = Array.isArray(activeRequest.requiredDocuments) ? activeRequest.requiredDocuments : [];
+        const uploadedDocuments = Array.isArray(activeRequest.uploadedDocuments) ? activeRequest.uploadedDocuments : [];
+        const uploadedDocumentSet = new Set(uploadedDocuments.map(normalizeDocumentKey));
+        const allRequiredDocsUploaded =
+            requiredDocuments.length > 0 &&
+            requiredDocuments.every((item) => uploadedDocumentSet.has(normalizeDocumentKey(item)));
 
         if (action.includes('upload')) {
-            if (documentInputRef.current) {
-                documentInputRef.current.click();
+            if (allRequiredDocsUploaded) {
+                navigate(`${CLIENT_PAYMENTS_ROUTE}?request=${encodeURIComponent(activeRequest.requestId)}`);
+                return;
             }
+            navigate(`${CLIENT_DOCUMENTS_ROUTE}?request=${encodeURIComponent(activeRequest.requestId)}`);
             return;
         }
 
@@ -134,12 +138,34 @@ export default function ClientRequestsPage() {
             return;
         }
 
-        if (action.includes('confirmation')) {
-            navigate(CLIENT_DOCUMENTS_ROUTE);
+        if (action.includes('payment') || action.includes('whatsapp') || action.includes('confirmation') || action.includes('awaiting')) {
+            navigate(`${CLIENT_PAYMENTS_ROUTE}?request=${encodeURIComponent(activeRequest.requestId)}`);
+            return;
         }
+
+        navigate(`${CLIENT_DOCUMENTS_ROUTE}?request=${encodeURIComponent(activeRequest.requestId)}`);
     }
 
-    const uploadedDocuments = typeof activeRequestIndex === 'number' ? uploadedDocumentsByRequest[activeRequestIndex] || [] : [];
+    async function handleDeleteRequest() {
+        if (!activeRequest) {
+            return;
+        }
+
+        closeRequestModal();
+
+        setModalState({
+            isOpen: true,
+            title: 'Cancel Request',
+            body: `Delete request ${activeRequest.requestId}? This will remove it from My Requests.`,
+            onConfirm: async () => {
+                await deleteRequestMutation.mutateAsync(activeRequest.requestId);
+                await requestsQuery.refetch();
+                setActiveRequestIndex(null);
+            }
+        });
+    }
+
+    const uploadedDocuments = Array.isArray(activeRequest?.uploadedDocuments) ? activeRequest.uploadedDocuments : [];
 
     return (
         <>
@@ -320,19 +346,20 @@ export default function ClientRequestsPage() {
 
                     <div className="modal-footer">
                         <button className="modal-btn modal-btn-secondary" type="button" onClick={closeRequestModal}>Close</button>
+                        {activeRequest ? (
+                            <button
+                                className="modal-btn modal-btn-secondary"
+                                type="button"
+                                onClick={handleDeleteRequest}
+                                disabled={deleteRequestMutation.isPending}
+                            >
+                                Cancel Request
+                            </button>
+                        ) : null}
                         <button className="modal-btn modal-btn-primary" id="modalActionBtn" type="button" onClick={handleRequestPrimaryAction}>
                             {activeRequest ? activeRequest.actionBtn : 'Submit Report'}
                         </button>
                     </div>
-                    <input
-                        type="file"
-                        id="requestDocumentInput"
-                        ref={documentInputRef}
-                        className="hidden-file-input"
-                        accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
-                        multiple
-                        onChange={handleUploadedDocumentsChange}
-                    />
                 </div>
             </div>
 

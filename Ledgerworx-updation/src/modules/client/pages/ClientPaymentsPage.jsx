@@ -1,29 +1,129 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useMemo, useRef, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ClientConfirmModal from '../components/ClientConfirmModal';
 import ClientPortalNavbar from '../components/ClientPortalNavbar';
+import { PortalPageError, PortalPageLoader } from '../components/PortalPageState';
+import { usePortalSession } from '../context/PortalSessionProvider';
 import { clientPrimaryNavLinks } from '../data/clientNavData';
-import {
-    clientPaymentItems,
-    clientPaymentSummaryCards,
-    clientPaymentsPageMeta
-} from '../data/paymentsData';
+import { clientPaymentsPageMeta } from '../data/paymentsData';
 import {
     CLIENT_DASHBOARD_ROUTE,
-    CLIENT_RECEIPT_PDF_ROUTE
+    CLIENT_RECEIPT_PDF_ROUTE,
+    CLIENT_REQUESTS_ROUTE
 } from '../utils/routePaths';
 import {
-    CLIENT_DUE_NOW_STORAGE_KEY,
     formatAedAmount,
-    getClientPaymentTotals
+    parseAedAmount
 } from '../utils/paymentUtils';
+import { buildClientProgressFromStatus } from '../utils/requestStorage';
 import { useClientPortalPage } from '../utils/useClientPortalPage';
+import { useClientRequestsQuery, useUpdateClientRequestMutation } from '../hooks/useClientRequestsQuery';
 import '../styles/client-payments.css';
 import '../styles/dark-mode.css';
 import '../styles/client-breadcrumb.css';
 
+const DEFAULT_PAYMENT_CONTACT_PHONE = '+971506708639';
+const DEFAULT_PAYMENT_WHATSAPP_LINK = 'https://wa.me/971506708639';
+
+function normalizeStage(text) {
+    return String(text || '').trim().toLowerCase();
+}
+
+function buildPaymentRows(requests) {
+    return requests
+        .filter((request) => {
+            const stage = normalizeStage(request.workflowStage || request.status);
+            return stage.includes('payment') || stage.includes('completed');
+        })
+        .map((request) => {
+            const stage = normalizeStage(request.workflowStage || request.status);
+            const amountValue = parseAedAmount(request.amount);
+
+            if (stage.includes('payment pending') || stage.includes('payment required')) {
+                return {
+                    id: request.requestId,
+                    title: request.title,
+                    requestId: request.requestId,
+                    amount: request.amount || 'Amount to be confirmed',
+                    amountValue,
+                    statusKey: 'payment-required',
+                    statusLabel: 'Payment Required',
+                    actionLabel: 'Contact on WhatsApp',
+                    iconTone: 'orange',
+                    iconClass: 'fas fa-wallet',
+                    request
+                };
+            }
+
+            if (stage.includes('awaiting payment confirmation')) {
+                return {
+                    id: request.requestId,
+                    title: request.title,
+                    requestId: request.requestId,
+                    amount: request.amount || 'Amount submitted',
+                    amountValue,
+                    statusKey: 'upcoming',
+                    statusLabel: 'Awaiting Confirmation',
+                    actionLabel: 'Awaiting Confirmation',
+                    iconTone: 'blue',
+                    iconClass: 'fas fa-hourglass-half',
+                    request
+                };
+            }
+
+            return {
+                id: request.requestId,
+                title: request.title,
+                requestId: request.requestId,
+                amount: request.amount || 'Amount confirmed',
+                amountValue,
+                statusKey: 'paid',
+                statusLabel: 'Completed',
+                actionLabel: 'View Receipt',
+                iconTone: 'green',
+                iconClass: 'fas fa-check-circle',
+                request
+            };
+        });
+}
+
+function buildPaymentSummary(rows) {
+    const summary = {
+        dueNow: 0,
+        pendingCount: 0,
+        awaitingCount: 0,
+        paidTotal: 0,
+        paidCount: 0
+    };
+
+    rows.forEach((row) => {
+        if (row.statusKey === 'payment-required') {
+            summary.dueNow += row.amountValue;
+            summary.pendingCount += 1;
+            return;
+        }
+
+        if (row.statusKey === 'upcoming') {
+            summary.awaitingCount += 1;
+            return;
+        }
+
+        if (row.statusKey === 'paid') {
+            summary.paidTotal += row.amountValue;
+            summary.paidCount += 1;
+        }
+    });
+
+    return summary;
+}
+
 export default function ClientPaymentsPage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const requestId = String(searchParams.get('request') || '').trim();
+    const bootstrapQuery = usePortalSession();
+    const requestsQuery = useClientRequestsQuery();
+    const updateRequestMutation = useUpdateClientRequestMutation();
     const { theme, toggleTheme } = useClientPortalPage(clientPaymentsPageMeta.pageTitle);
     const [modalState, setModalState] = useState({
         isOpen: false,
@@ -31,27 +131,21 @@ export default function ClientPaymentsPage() {
         body: 'Are you sure?',
         onConfirm: null
     });
-    const [paymentDetailsState, setPaymentDetailsState] = useState({
-        isOpen: false,
-        data: null
-    });
     const [toastState, setToastState] = useState({
         isVisible: false,
         message: ''
     });
     const toastTimeoutRef = useRef(null);
 
-    const paymentTotals = useMemo(() => getClientPaymentTotals(clientPaymentItems), []);
+    const sessionProfile = bootstrapQuery.data && bootstrapQuery.data.profile ? bootstrapQuery.data.profile : null;
+    const requestList = Array.isArray(requestsQuery.data?.requests) ? requestsQuery.data.requests : [];
+    const activeRequest = requestList.find((item) => item.requestId === requestId) || null;
+    const isRequestMode = Boolean(requestId);
 
-    useEffect(() => {
-        try {
-            window.localStorage.setItem(CLIENT_DUE_NOW_STORAGE_KEY, String(paymentTotals.dueNow));
-        } catch (error) {
-            // Ignore storage access failures.
-        }
-    }, [paymentTotals.dueNow]);
+    const paymentRows = useMemo(() => buildPaymentRows(requestList), [requestList]);
+    const paymentSummary = useMemo(() => buildPaymentSummary(paymentRows), [paymentRows]);
 
-    useEffect(() => {
+    React.useEffect(() => {
         return function cleanupToastTimeout() {
             if (toastTimeoutRef.current) {
                 window.clearTimeout(toastTimeoutRef.current);
@@ -102,20 +196,6 @@ export default function ClientPaymentsPage() {
         }, 2200);
     }
 
-    function openPaymentDetails(data) {
-        setPaymentDetailsState({
-            isOpen: true,
-            data
-        });
-    }
-
-    function closePaymentDetails() {
-        setPaymentDetailsState({
-            isOpen: false,
-            data: null
-        });
-    }
-
     function buildPaymentQuery(data) {
         const query = new URLSearchParams({
             title: data.title || 'Service Payment',
@@ -126,59 +206,94 @@ export default function ClientPaymentsPage() {
         return `${CLIENT_RECEIPT_PDF_ROUTE}?${query.toString()}`;
     }
 
-    function handlePaymentAction(data, label) {
-        const normalizedLabel = String(label || '').trim().toLowerCase();
+    async function markRequestPaid(request) {
+        await updateRequestMutation.mutateAsync({
+            requestId: request.requestId,
+            requestData: {
+                status: 'Completed',
+                workflowStage: 'Completed',
+                progress: buildClientProgressFromStatus('completed'),
+                actionBtn: 'View Receipt',
+                dueDate: 'Payment handoff completed',
+                instructions: [
+                    'You have been redirected to our WhatsApp payment contact.',
+                    'This request has been marked as paid after the WhatsApp payment handoff.',
+                    'You can now review the receipt from the Payments page.'
+                ]
+            }
+        });
+    }
 
-        if (normalizedLabel === 'pay now' || normalizedLabel === 'retry payment') {
-            openModal(
-                'Redirect To Payment Gateway',
-                `You are being redirected to payment gateway for ${data.title} (${data.amount}). Continue?`,
-                () => {
-                    showPayNowNotification('Redirecting to payment gateway...');
+    function handleWhatsAppPayment(request) {
+        if (!request) {
+            return;
+        }
+
+        const whatsappLink = request.paymentWhatsappLink || DEFAULT_PAYMENT_WHATSAPP_LINK;
+        const whatsappMessage = encodeURIComponent(`Hello, I would like to complete payment for request ${request.requestId} (${request.title}).`);
+        const targetUrl = `${whatsappLink}${whatsappLink.includes('?') ? '&' : '?'}text=${whatsappMessage}`;
+
+        openModal(
+            'Continue to WhatsApp',
+            `You will be redirected to ${request.paymentContactName || 'our payment contact'} on WhatsApp. Continue?`,
+            async () => {
+                window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                try {
+                    await markRequestPaid(request);
+                    showPayNowNotification('WhatsApp opened. The request has been marked as paid.');
+                } catch (error) {
+                    showPayNowNotification(error?.message || 'WhatsApp opened, but we could not update the request status right away.');
                 }
+            }
+        );
+    }
+
+    function handlePaymentAction(row) {
+        if (row.actionLabel === 'Contact on WhatsApp') {
+            handleWhatsAppPayment(row.request);
+            return;
+        }
+
+        if (row.actionLabel === 'View Receipt') {
+            navigate(
+                buildPaymentQuery({
+                    title: row.title,
+                    requestId: row.requestId,
+                    amount: row.amount
+                })
             );
-            return;
-        }
-
-        if (normalizedLabel === 'view receipt') {
-            navigate(buildPaymentQuery(data));
-            return;
-        }
-
-        if (normalizedLabel === 'view details') {
-            openPaymentDetails(data);
         }
     }
 
-    function getSummaryAmount(cardKey) {
-        if (cardKey === 'due-now') {
-            return formatAedAmount(paymentTotals.dueNow);
-        }
-
-        if (cardKey === 'upcoming') {
-            return formatAedAmount(paymentTotals.upcoming);
-        }
-
-        return formatAedAmount(paymentTotals.paid);
+    if (requestsQuery.isLoading) {
+        return <PortalPageLoader label="Loading payment handoff..." />;
     }
 
-    function buildSummaryActionData(card) {
-        return {
-            title: card.title,
-            requestId: card.key === 'due-now' ? 'LW-REQ-024' : 'N/A',
-            amount: getSummaryAmount(card.key),
-            status: card.subtitle,
-            note: 'Review summary payment details and choose Pay Now or Pay Later.'
-        };
+    if (requestsQuery.isError) {
+        return (
+            <PortalPageError
+                title="Unable to load payment handoff"
+                message={requestsQuery.error && requestsQuery.error.message}
+                onRetry={() => requestsQuery.refetch()}
+            />
+        );
     }
 
-    const activePaymentDetails = paymentDetailsState.data;
+    if (isRequestMode && !activeRequest) {
+        return (
+            <PortalPageError
+                title="Request not found"
+                message="We could not find the selected request. Please reopen it from My Requests."
+                onRetry={() => navigate(CLIENT_REQUESTS_ROUTE)}
+            />
+        );
+    }
 
     return (
         <>
             <ClientPortalNavbar
-                profileName={clientPaymentsPageMeta.profileName}
-                profileImage={clientPaymentsPageMeta.profileImage}
+                profileName={(sessionProfile && sessionProfile.name) || clientPaymentsPageMeta.profileName}
+                profileImage={(sessionProfile && sessionProfile.avatarUrl) || clientPaymentsPageMeta.profileImage}
                 navLinks={clientPrimaryNavLinks}
                 activeNavKey="payments"
                 homeRoute={CLIENT_DASHBOARD_ROUTE}
@@ -195,82 +310,117 @@ export default function ClientPaymentsPage() {
 
                 <div className="page-header">
                     <h1 className="page-title">{clientPaymentsPageMeta.heading}</h1>
-                    <p className="page-subtitle">{clientPaymentsPageMeta.subtitle}</p>
+                    <p className="page-subtitle">
+                        {isRequestMode
+                            ? 'Complete the payment handoff for this request by contacting our team on WhatsApp.'
+                            : 'Payment summary and actions are powered by your live request-tracker stages.'}
+                    </p>
                 </div>
 
-                <div className="payment-summary">
-                    {clientPaymentSummaryCards.map((card) => (
-                        <div key={card.key} className={`payment-card ${card.variant}`}>
-                            <div className="payment-card-content">
-                                <div className="payment-card-title">{card.title}</div>
-                                <div className="payment-card-amount">{getSummaryAmount(card.key)}</div>
-                                <div className="payment-card-sub">
-                                    {card.subtitleIconClass ? <i className={card.subtitleIconClass}></i> : null}
-                                    {card.subtitleIconClass ? ' ' : ''}
-                                    {card.subtitle}
+                {isRequestMode ? (
+                    <div className="request-payment-layout">
+                        <div className="payment-summary single-request-payment-card">
+                            <div className="payment-card due-now request-handoff-card">
+                                <div className="payment-card-content">
+                                    <div className="payment-card-title">Payment Handoff</div>
+                                    <div className="payment-card-amount">{activeRequest.amount || 'Amount to be confirmed'}</div>
+                                    <div className="payment-card-sub">Request ID: {activeRequest.requestId}</div>
                                 </div>
+                                <button
+                                    type="button"
+                                    className="payment-card-button"
+                                    onClick={() => handleWhatsAppPayment(activeRequest)}
+                                    disabled={updateRequestMutation.isPending || String(activeRequest.actionBtn || '').toLowerCase().includes('awaiting')}
+                                >
+                                    {String(activeRequest.actionBtn || '').toLowerCase().includes('awaiting') ? 'Awaiting Confirmation' : 'Contact on WhatsApp'}
+                                </button>
                             </div>
-                            <button
-                                type="button"
-                                className="payment-card-button"
-                                onClick={() => handlePaymentAction(buildSummaryActionData(card), card.buttonLabel)}
-                            >
-                                {card.buttonLabel}
-                            </button>
                         </div>
-                    ))}
-                </div>
 
-                <div className="search-section">
-                    <div className="search-box">
-                        <i className="fas fa-search"></i>
-                        <input type="text" placeholder="Search" />
-                        <i className="fas fa-arrow-right"></i>
+                        <section className="payment-request-panel">
+                            <div className="payment-request-head">
+                                <div>
+                                    <span className="payment-request-kicker">Selected Request</span>
+                                    <h2>{activeRequest.title}</h2>
+                                </div>
+                                <span className="payment-request-status">{activeRequest.status}</span>
+                            </div>
+                            <div className="payment-request-grid">
+                                <div><span>Category</span><strong>{activeRequest.category || 'Client Request'}</strong></div>
+                                <div><span>Stage</span><strong>{activeRequest.workflowStage || activeRequest.status}</strong></div>
+                                <div><span>Contact Person</span><strong>{activeRequest.paymentContactName || 'LedgerWorx Accounts Team'}</strong></div>
+                                <div><span>Phone</span><strong>{activeRequest.paymentContactPhone || DEFAULT_PAYMENT_CONTACT_PHONE}</strong></div>
+                            </div>
+                        </section>
                     </div>
-                </div>
-
-                <div className="payment-items">
-                    {clientPaymentItems.map((item) => {
-                        const isSecondaryAction = item.actionLabel === 'View Details' || item.actionLabel === 'View Receipt';
-                        return (
-                            <div key={item.id} className="payment-item">
-                                <div className={`payment-item-icon ${item.iconTone}`}>
-                                    <i className={item.iconClass}></i>
-                                </div>
-                                <div className="payment-item-info">
-                                    <div className="payment-item-title">{item.title}</div>
-                                    <div className="payment-item-request-id">Request ID: {item.requestId}</div>
-                                </div>
-                                <div className="payment-item-amount">{item.amount}</div>
-                                <div className="payment-item-status">
-                                    <span className={`status-badge ${item.statusKey}`}>
-                                        <i className={item.statusIconClass}></i> {item.statusLabel}
-                                    </span>
-                                </div>
-                                <div className="payment-item-action">
-                                    <button
-                                        type="button"
-                                        className={`action-btn${isSecondaryAction ? ' secondary' : ''}`}
-                                        onClick={() =>
-                                            handlePaymentAction(
-                                                {
-                                                    title: item.title,
-                                                    requestId: item.requestId,
-                                                    amount: item.amount,
-                                                    status: item.statusLabel,
-                                                    note: 'Review the service payment details and choose Pay Now or Pay Later.'
-                                                },
-                                                item.actionLabel
-                                            )
-                                        }
-                                    >
-                                        {item.actionLabel}
-                                    </button>
+                ) : (
+                    <>
+                        <div className="payment-summary">
+                            <div className="payment-card due-now">
+                                <div className="payment-card-content">
+                                    <div className="payment-card-title">Due Now</div>
+                                    <div className="payment-card-amount">{formatAedAmount(paymentSummary.dueNow)}</div>
+                                    <div className="payment-card-sub">{paymentSummary.pendingCount} request(s) need payment handoff</div>
                                 </div>
                             </div>
-                        );
-                    })}
-                </div>
+                            <div className="payment-card upcoming">
+                                <div className="payment-card-content">
+                                    <div className="payment-card-title">Awaiting Confirmation</div>
+                                    <div className="payment-card-amount">{paymentSummary.awaitingCount}</div>
+                                    <div className="payment-card-sub">Request(s) waiting for staff confirmation</div>
+                                </div>
+                            </div>
+                            <div className="payment-card paid">
+                                <div className="payment-card-content">
+                                    <div className="payment-card-title">Completed</div>
+                                    <div className="payment-card-amount">{formatAedAmount(paymentSummary.paidTotal)}</div>
+                                    <div className="payment-card-sub">{paymentSummary.paidCount} request(s) completed</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {paymentRows.length ? (
+                            <div className="payment-items">
+                                {paymentRows.map((item) => (
+                                    <div key={item.id} className="payment-item">
+                                        <div className={`payment-item-icon ${item.iconTone}`}>
+                                            <i className={item.iconClass}></i>
+                                        </div>
+                                        <div className="payment-item-info">
+                                            <div className="payment-item-title">{item.title}</div>
+                                            <div className="payment-item-request-id">Request ID: {item.requestId}</div>
+                                        </div>
+                                        <div className="payment-item-amount">{item.amount}</div>
+                                        <div className="payment-item-status">
+                                            <span className={`status-badge ${item.statusKey}`}>{item.statusLabel}</span>
+                                        </div>
+                                        <div className="payment-item-action">
+                                            {item.actionLabel === 'Awaiting Confirmation' ? (
+                                                <button type="button" className="action-btn secondary" disabled>
+                                                    Awaiting Confirmation
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    className={`action-btn${item.actionLabel === 'View Receipt' ? ' secondary' : ''}`}
+                                                    onClick={() => handlePaymentAction(item)}
+                                                >
+                                                    {item.actionLabel}
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <section className="requests-empty-state payment-empty-state">
+                                <h3>No payment requests yet</h3>
+                                <p>Once a package or service request reaches the payment stage, it will appear here.</p>
+                                <Link to={CLIENT_REQUESTS_ROUTE} className="requests-empty-link">Go to My Requests</Link>
+                            </section>
+                        )}
+                    </>
+                )}
             </div>
 
             <ClientConfirmModal
@@ -280,90 +430,6 @@ export default function ClientPaymentsPage() {
                 onClose={closeModal}
                 onConfirm={handleModalConfirm}
             />
-
-            <div
-                id="paymentDetailsModal"
-                className="modal"
-                aria-hidden={paymentDetailsState.isOpen ? 'false' : 'true'}
-                onClick={(event) => {
-                    if (event.target.id === 'paymentDetailsModal') {
-                        closePaymentDetails();
-                    }
-                }}
-            >
-                <div className="modal-content">
-                    <button className="modal-close" id="paymentDetailsClose" aria-label="Close" type="button" onClick={closePaymentDetails}>
-                        &times;
-                    </button>
-                    <h3 id="paymentDetailsTitle">Payment Details</h3>
-                    <div className="payment-details-grid">
-                        <div className="payment-detail">
-                            <div className="payment-detail-label">Service</div>
-                            <div className="payment-detail-value" id="paymentDetailService">{activePaymentDetails ? activePaymentDetails.title : 'N/A'}</div>
-                        </div>
-                        <div className="payment-detail">
-                            <div className="payment-detail-label">Request ID</div>
-                            <div className="payment-detail-value" id="paymentDetailRequest">{activePaymentDetails ? activePaymentDetails.requestId : 'N/A'}</div>
-                        </div>
-                        <div className="payment-detail">
-                            <div className="payment-detail-label">Amount</div>
-                            <div className="payment-detail-value" id="paymentDetailAmount">{activePaymentDetails ? activePaymentDetails.amount : 'N/A'}</div>
-                        </div>
-                        <div className="payment-detail">
-                            <div className="payment-detail-label">Status</div>
-                            <div className="payment-detail-value" id="paymentDetailStatus">{activePaymentDetails ? activePaymentDetails.status : 'N/A'}</div>
-                        </div>
-                    </div>
-                    <p className="payment-detail-note" id="paymentDetailNote">
-                        {activePaymentDetails ? activePaymentDetails.note : 'Review the payment details and choose how you want to proceed.'}
-                    </p>
-                    <div className="modal-actions">
-                        <button
-                            type="button"
-                            className="btn-pay-now"
-                            id="paymentDetailPayNow"
-                            onClick={() => {
-                                if (!activePaymentDetails) {
-                                    return;
-                                }
-
-                                closePaymentDetails();
-                                openModal(
-                                    'Redirect To Payment Gateway',
-                                    `You are being redirected to payment gateway for ${activePaymentDetails.title} (${activePaymentDetails.amount}). Continue?`,
-                                    () => {
-                                        showPayNowNotification('Redirecting to payment gateway...');
-                                    }
-                                );
-                            }}
-                        >
-                            Pay Now
-                        </button>
-                        <button
-                            type="button"
-                            className="btn-pay-later"
-                            id="paymentDetailPayLater"
-                            onClick={() => {
-                                if (!activePaymentDetails) {
-                                    return;
-                                }
-
-                                closePaymentDetails();
-                                openModal(
-                                    'Pay Later',
-                                    `${activePaymentDetails.title} has been marked as pay later. You can complete payment anytime from this page.`,
-                                    () => {}
-                                );
-                            }}
-                        >
-                            Pay Later
-                        </button>
-                        <button type="button" className="btn-cancel" id="paymentDetailCancel" onClick={closePaymentDetails}>
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            </div>
 
             <div
                 id="payNowToast"

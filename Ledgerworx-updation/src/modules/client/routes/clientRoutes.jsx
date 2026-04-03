@@ -2,6 +2,7 @@ import React from 'react';
 import ClientDashboardPage from '../pages/ClientDashboardPage';
 import ClientActiveServicesPage from '../pages/ClientActiveServicesPage';
 import ClientDocumentsPage from '../pages/ClientDocumentsPage';
+import ClientMorePackagesPage from '../pages/ClientMorePackagesPage';
 import ClientMoreServicesPage from '../pages/ClientMoreServicesPage';
 import ClientInvoicesPage from '../pages/ClientInvoicesPage';
 import ClientInvoicePdfPage from '../pages/ClientInvoicePdfPage';
@@ -19,6 +20,7 @@ import {
     CLIENT_ACTIVE_SERVICES_ROUTE,
     CLIENT_DASHBOARD_ROUTE,
     CLIENT_DOCUMENTS_ROUTE,
+    CLIENT_MORE_PACKAGES_ROUTE,
     CLIENT_NOTIFICATION_DETAIL_ROUTE,
     CLIENT_NOTIFICATIONS_ROUTE,
     CLIENT_MORE_SERVICES_ROUTE,
@@ -46,6 +48,10 @@ export const clientRoutes = [
     {
         path: CLIENT_DOCUMENTS_ROUTE,
         element: <ClientDocumentsPage />
+    },
+    {
+        path: CLIENT_MORE_PACKAGES_ROUTE,
+        element: <ClientMorePackagesPage />
     },
     {
         path: CLIENT_MORE_SERVICES_ROUTE,

@@ -14,6 +14,14 @@ export default function ClientConfirmModal({
             id="modal"
             className="modal"
             aria-hidden={isOpen ? 'false' : 'true'}
+            style={{
+                display: isOpen ? 'flex' : 'none',
+                position: 'fixed',
+                inset: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 20000
+            }}
             onClick={(event) => {
                 if (event.target.id === 'modal') {
                     onClose();

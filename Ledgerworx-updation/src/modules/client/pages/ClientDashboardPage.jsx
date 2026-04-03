@@ -11,6 +11,7 @@ import { usePortalDashboardQuery } from '../hooks/usePortalQueries';
 import {
     CLIENT_DASHBOARD_ROUTE,
     CLIENT_INVOICES_ROUTE,
+    CLIENT_MORE_PACKAGES_ROUTE,
     CLIENT_MORE_SERVICES_ROUTE,
     CLIENT_PAYMENTS_ROUTE
 } from '../utils/routePaths';
@@ -24,6 +25,7 @@ function normalizeDashboardPayload(payload, sessionProfile) {
     const profile = payload && payload.profile ? payload.profile : {};
     const stats = payload && payload.stats ? payload.stats : {};
     const payments = payload && payload.payments ? payload.payments : {};
+    const meta = payload && payload.meta ? payload.meta : {};
 
     return {
         profile: {
@@ -40,7 +42,11 @@ function normalizeDashboardPayload(payload, sessionProfile) {
         packages: Array.isArray(payload && payload.packages) ? payload.packages.map(normalizeCatalogPackage) : [],
         services: Array.isArray(payload && payload.services) ? payload.services.map(normalizeServiceCategory) : [],
         recentActivity: Array.isArray(payload && payload.recentActivity) ? payload.recentActivity : [],
-        notifications: Array.isArray(payload && payload.notifications) ? payload.notifications : []
+        notifications: Array.isArray(payload && payload.notifications) ? payload.notifications : [],
+        meta: {
+            crmUnavailable: Boolean(meta && meta.crmUnavailable),
+            crmMessage: String(meta && meta.crmMessage ? meta.crmMessage : '').trim()
+        }
     };
 }
 
@@ -72,6 +78,7 @@ export default function ClientDashboardPage() {
 
     const sessionProfile = bootstrapQuery.data && bootstrapQuery.data.profile ? bootstrapQuery.data.profile : null;
     const dashboardData = normalizeDashboardPayload(dashboardQuery.data || {}, sessionProfile);
+    const displayedPackages = (dashboardData.packages || []).slice(0, 3);
 
     useEffect(() => {
         const root = document.documentElement;
@@ -203,32 +210,57 @@ export default function ClientDashboardPage() {
                     <p>Here&apos;s what&apos;s happening with your account today</p>
                 </section>
 
-                <section className="packages" id="packages">
-                    {dashboardData.packages.map((pkg) => (
-                        <article
-                            key={pkg.id}
-                            className="card"
-                            data-plan={pkg.key}
-                            data-href={pkg.routePath.replace('/client/', '')}
-                            onClick={() => navigate(pkg.routePath)}
-                            onKeyDown={(event) => {
-                                if (event.key === 'Enter' || event.key === ' ') {
-                                    event.preventDefault();
-                                    navigate(pkg.routePath);
-                                }
-                            }}
-                            role="button"
-                            tabIndex={0}
-                        >
-                            <h3>{pkg.title}</h3>
-                            <div className="price">{pkg.monthlyPrice}</div>
-                            <ul>
-                                {(pkg.features.length ? pkg.features : pkg.includedServices.slice(0, 3)).map((feature) => (
-                                    <li key={feature}>{feature}</li>
-                                ))}
-                            </ul>
-                        </article>
-                    ))}
+                <section className="packages-showcase" id="packages">
+                    <div className="packages-head">
+                        <div>
+                            <span className="packages-eyebrow">Live Zoho catalogue</span>
+                            <h2>Packages</h2>
+                            <p>Request a package directly from the live catalog. Additional packages are available from the full packages page.</p>
+                        </div>
+                        <Link to={CLIENT_MORE_PACKAGES_ROUTE} className="more-packages-link">
+                            More Packages <i className="fas fa-arrow-right"></i>
+                        </Link>
+                    </div>
+
+                    <div className="packages-grid">
+                        {displayedPackages.length ? (
+                            displayedPackages.map((pkg, index) => (
+                                <article
+                                    key={pkg.id}
+                                    className="package-card"
+                                    data-featured={index === 1 ? 'highlight' : 'standard'}
+                                    onClick={() => navigate(pkg.routePath)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === 'Enter' || event.key === ' ') {
+                                            event.preventDefault();
+                                            navigate(pkg.routePath);
+                                        }
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
+                                >
+                                    <div className="package-card-top">
+                                        <span className="package-card-badge">{pkg.category || 'Package'}</span>
+                                        <span className="package-card-status">{pkg.productStatus || 'Available'}</span>
+                                    </div>
+                                    <h3>{pkg.title}</h3>
+                                    <div className="package-card-price">{pkg.monthlyPrice || 'Price on request'}</div>
+                                    <p className="package-card-copy">{pkg.tagline || pkg.description || 'Package details are available on the request page.'}</p>
+                                    <div className="package-card-meta">
+                                        <span>{pkg.duration || pkg.servicesLimit || 'Details available on request'}</span>
+                                        <span>{pkg.supportWindow || pkg.support || 'Client support included'}</span>
+                                    </div>
+                                    <div className="package-card-footer">
+                                        <span className="package-card-cta">Request Package</span>
+                                    </div>
+                                </article>
+                            ))
+                        ) : (
+                            <div className="activity-empty-state">
+                                {dashboardData.meta.crmMessage || 'Live package data is temporarily unavailable from Zoho CRM. Please wait or contact support.'}
+                            </div>
+                        )}
+                    </div>
                 </section>
 
                 <section className="stats">
@@ -283,17 +315,23 @@ export default function ClientDashboardPage() {
                         </Link>
                     </div>
                     <div className="services">
-                        {dashboardData.services.map((service) => (
-                            <Link key={service.id} to={service.routePath} className="service-box">
-                                <div className="service-left">
-                                    <div className="service-icon">
-                                        <i className={service.iconClass}></i>
+                        {dashboardData.services.length ? (
+                            dashboardData.services.map((service) => (
+                                <Link key={service.id} to={service.routePath} className="service-box">
+                                    <div className="service-left">
+                                        <div className="service-icon">
+                                            <i className={service.iconClass}></i>
+                                        </div>
+                                        <span>{service.label}</span>
                                     </div>
-                                    <span>{service.label}</span>
-                                </div>
-                                <i className="fas fa-chevron-right"></i>
-                            </Link>
-                        ))}
+                                    <i className="fas fa-chevron-right"></i>
+                                </Link>
+                            ))
+                        ) : (
+                            <div className="activity-empty-state">
+                                {dashboardData.meta.crmMessage || 'Live service data is temporarily unavailable from Zoho CRM. Please wait or contact support.'}
+                            </div>
+                        )}
                     </div>
                 </section>
 

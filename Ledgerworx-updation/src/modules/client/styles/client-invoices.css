@@ -203,7 +203,7 @@
     box-shadow: 0 10px 22px rgba(11, 59, 111, 0.10);
     padding: 16px;
     display: grid;
-    grid-template-columns: 1.2fr 1fr 1fr 0.8fr;
+    grid-template-columns: 1.4fr 1.3fr 0.9fr 0.9fr 1fr 1fr 0.9fr;
     gap: 12px;
     align-items: center;
     text-decoration: none;
@@ -270,70 +270,3 @@
     }
 }
 
-.client-invoices-page #modal.modal {
-    position: fixed;
-    inset: 0;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.35);
-    padding: 20px;
-}
-
-.client-invoices-page #modal[aria-hidden='false'] {
-    display: flex;
-}
-
-.client-invoices-page #modal .modal-content {
-    background: var(--card);
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 420px;
-    width: 100%;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
-}
-
-.client-invoices-page #modal .modal-close {
-    float: right;
-    border: 0;
-    background: none;
-    font-size: 22px;
-    cursor: pointer;
-}
-
-.client-invoices-page #modal .modal-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    margin-top: 12px;
-}
-
-.client-invoices-page #modal .primary {
-    background: var(--accent);
-    color: var(--primary);
-    border: 0;
-    padding: 8px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 700;
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-
-.client-invoices-page #modal .primary:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(244, 180, 0, 0.25);
-}
-
-.client-invoices-page #modal .secondary {
-    background: #f3f4f6;
-    border: 0;
-    padding: 8px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-
-.client-invoices-page #modal .secondary:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}

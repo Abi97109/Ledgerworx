@@ -1,5 +1,3 @@
-export const CLIENT_DUE_NOW_STORAGE_KEY = 'ledgerworx_due_now_total';
-
 export function parseAedAmount(text) {
     if (!text) {
         return 0;

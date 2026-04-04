@@ -1,50 +1,50 @@
 export const dashboardSidebarLinks = [
   {
     key: "dashboard",
-    path: "/admin/dashboard",
+    path: "/dashboard",
     icon: "🏠",
     label: "Dashboard",
     className: "active"
   },
   {
     key: "sales",
-    path: "/admin/sales",
+    path: "/sales",
     icon: "💼",
     label: "Sales Department"
   },
   {
     key: "accounts",
-    path: "/admin/accounts",
+    path: "/accounts",
     icon: "📊",
     label: "Accounts Department"
   },
   {
     key: "services",
-    path: "/admin/services",
+    path: "/services",
     icon: "🧾",
     label: "Services & Packages"
   },
   {
     key: "users",
-    path: "/admin/users",
+    path: "/users",
     icon: "👥",
     label: "Users & Roles"
   },
   {
     key: "payments",
-    path: "/admin/payments",
+    path: "/payments",
     icon: "💳",
     label: "Payments & Reports"
   },
   {
     key: "settings",
-    path: "/admin/settings",
+    path: "/settings",
     icon: "⚙️",
     label: "Settings"
   },
   {
     key: "logout",
-    path: "/admin/logout",
+    path: "/logout",
     icon: "🚪",
     label: "Logout"
   }

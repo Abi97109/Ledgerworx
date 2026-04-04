@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import AdminAccountsPage from "./modules/admin/pages/AdminAccountsPage";
 import AdminCompanyManagementPage from "./modules/admin/pages/AdminCompanyManagementPage";
 import AdminDashboardPage from "./modules/admin/pages/AdminDashboardPage";
@@ -11,23 +11,75 @@ import AdminServicesPackagesPage from "./modules/admin/pages/AdminServicesPackag
 import AdminSettingsPage from "./modules/admin/pages/AdminSettingsPage";
 import AdminUsersRolesPage from "./modules/admin/pages/AdminUsersRolesPage";
 import AdminZohoPage from "./modules/admin/pages/AdminZohoPage";
+import { PortalSessionProvider, usePortalSession } from "./session/PortalSessionProvider";
+import EmployeePortalLoader from "../../shared/employee-ui/EmployeePortalLoader";
+
+function AdminAuthGate({ children }) {
+  const location = useLocation();
+  const session = usePortalSession();
+  const isAllowedUnauthenticatedRoute = location.pathname === "/logout";
+
+  if (session.isLoading) {
+    return (
+      <EmployeePortalLoader
+        fullHeight
+        title="Checking employee session"
+        message="Validating your Admin portal access and preparing the control workspace."
+      />
+    );
+  }
+
+  if (session.isError) {
+    return (
+      <EmployeePortalLoader
+        fullHeight
+        state="error"
+        title="Unable to verify your session"
+        message="We couldn't confirm your Admin portal session right now. Please try again."
+        actionLabel="Retry"
+        onAction={() => window.location.reload()}
+      />
+    );
+  }
+
+  if (!session.data?.authenticated) {
+    if (isAllowedUnauthenticatedRoute) {
+      return children;
+    }
+
+    window.location.assign(session.data?.config?.loginUrl || "https://ledgerworx.me/login/");
+    return null;
+  }
+
+  if (!["administrator"].includes(session.data.role)) {
+    window.location.assign(session.data?.config?.portalBaseUrl || "https://ledgerworx.me/portal/client/");
+    return null;
+  }
+
+  return children;
+}
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-      <Route path="/admin/sales" element={<AdminSalesPage />} />
-      <Route path="/admin/accounts" element={<AdminAccountsPage />} />
-      <Route path="/admin/operations" element={<AdminOperationsPage />} />
-      <Route path="/admin/company" element={<AdminCompanyManagementPage />} />
-      <Route path="/admin/services" element={<AdminServicesPackagesPage />} />
-      <Route path="/admin/users" element={<AdminUsersRolesPage />} />
-      <Route path="/admin/payments" element={<AdminPaymentsReportsPage />} />
-      <Route path="/admin/settings" element={<AdminSettingsPage />} />
-      <Route path="/admin/zoho" element={<AdminZohoPage />} />
-      <Route path="/admin/profile" element={<AdminProfilePage />} />
-      <Route path="/admin/logout" element={<AdminLogoutPage />} />
-      <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
-    </Routes>
+    <PortalSessionProvider>
+      <AdminAuthGate>
+        <Routes>
+          <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route path="sales" element={<AdminSalesPage />} />
+          <Route path="accounts" element={<AdminAccountsPage />} />
+          <Route path="operations" element={<AdminOperationsPage />} />
+          <Route path="company" element={<AdminCompanyManagementPage />} />
+          <Route path="services" element={<AdminServicesPackagesPage />} />
+          <Route path="users" element={<AdminUsersRolesPage />} />
+          <Route path="payments" element={<AdminPaymentsReportsPage />} />
+          <Route path="settings" element={<AdminSettingsPage />} />
+          <Route path="zoho" element={<AdminZohoPage />} />
+          <Route path="profile" element={<AdminProfilePage />} />
+          <Route path="logout" element={<AdminLogoutPage />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </AdminAuthGate>
+    </PortalSessionProvider>
   );
 }

@@ -5,8 +5,6 @@ import {
   ACCOUNTANT_NAV_LINKS,
   ACCOUNTANT_PROFILE_ACTIONS,
   ACCOUNTANT_PROFILE_PAGE_TITLE,
-  ACCOUNTANT_PROFILE_STATS,
-  ACCOUNTANT_PROFILE_USER,
   ACCOUNTANT_ROUTE_PATHS,
 } from "../data/accountantProfileData";
 import { applyBodyTheme, buildUserAvatar, getSavedTheme, saveTheme } from "../utils/accountantDashHelpers";
@@ -16,40 +14,59 @@ import {
   isPasswordConfirmationValid,
 } from "../utils/accountantProfileHelpers";
 import { buildLegacyUrl } from "../../../utils/legacyLinks";
+import { usePortalSession } from "../../../session/PortalSessionProvider";
 import "../styles/accountant-settings.css";
 import "../styles/accountant-profile.css";
 
+function buildAccountantProfileFromSession(profile) {
+  return {
+    name: profile?.name || "",
+    role: profile?.role || "",
+    image: profile?.avatarUrl || "",
+    email: profile?.email || "",
+    phone: profile?.phone || "",
+    department: profile?.department || "",
+    employeeId: profile?.employeeId || "",
+    joinDate: profile?.joinDate || "",
+    location: profile?.location || "",
+    status: profile?.status || "",
+    username: profile?.username || "",
+    designation: profile?.designation || "",
+  };
+}
+
 function AccountantProfilePage() {
+  const session = usePortalSession();
   const userProfileRef = useRef(null);
   const profileDropdownRef = useRef(null);
+  const liveProfile = useMemo(
+    () => buildAccountantProfileFromSession(session.data?.profile),
+    [session.data?.profile],
+  );
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [theme, setTheme] = useState(() => getSavedTheme());
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
-  const [profileDisplay, setProfileDisplay] = useState(() => ({
-    name: ACCOUNTANT_PROFILE_USER.name,
-    email: ACCOUNTANT_PROFILE_USER.email,
-    phone: ACCOUNTANT_PROFILE_USER.phone,
-    location: ACCOUNTANT_PROFILE_USER.location,
-  }));
-  const [editFormValues, setEditFormValues] = useState(() => ({
-    name: ACCOUNTANT_PROFILE_USER.name,
-    email: ACCOUNTANT_PROFILE_USER.email,
-    phone: ACCOUNTANT_PROFILE_USER.phone,
-    location: ACCOUNTANT_PROFILE_USER.location,
-  }));
+  const [profileDisplay, setProfileDisplay] = useState(liveProfile);
+  const [editFormValues, setEditFormValues] = useState(liveProfile);
   const [passwordFormValues, setPasswordFormValues] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   const userImage = useMemo(
-    () => ACCOUNTANT_PROFILE_USER.image || buildUserAvatar(ACCOUNTANT_PROFILE_USER.name),
-    [],
+    () => liveProfile.image || buildUserAvatar(liveProfile.name || "Accountant User"),
+    [liveProfile.image, liveProfile.name],
   );
   const isAnyModalOpen = isEditProfileModalOpen || isChangePasswordModalOpen;
+
+  useEffect(() => {
+    setProfileDisplay(liveProfile);
+    setEditFormValues(liveProfile);
+  }, [liveProfile]);
 
   useEffect(() => {
     document.title = "LedgerWorx | My Profile";
@@ -104,8 +121,8 @@ function AccountantProfilePage() {
     }
 
     event.currentTarget.dataset.fallbackApplied = "true";
-    event.currentTarget.src = buildUserAvatar(ACCOUNTANT_PROFILE_USER.name);
-  }, []);
+    event.currentTarget.src = buildUserAvatar(liveProfile.name);
+  }, [liveProfile.name]);
 
   const handleLargeAvatarError = useCallback((event) => {
     if (event.currentTarget.dataset.fallbackApplied === "true") {
@@ -113,8 +130,8 @@ function AccountantProfilePage() {
     }
 
     event.currentTarget.dataset.fallbackApplied = "true";
-    event.currentTarget.src = buildLargeAvatarUrl(profileDisplay.name || ACCOUNTANT_PROFILE_USER.name);
-  }, [profileDisplay.name]);
+    event.currentTarget.src = buildLargeAvatarUrl(profileDisplay.name || liveProfile.name);
+  }, [liveProfile.name, profileDisplay.name]);
 
   const openEditProfileModal = useCallback(() => {
     setEditFormValues({
@@ -142,21 +159,47 @@ function AccountantProfilePage() {
   }, []);
 
   const handleSaveProfile = useCallback(
-    (event) => {
+    async (event) => {
       event.preventDefault();
 
       const draft = buildProfileDraft(editFormValues);
-      setProfileDisplay({
-        name: draft.name,
-        email: draft.email,
-        phone: draft.phone,
-        location: draft.location,
+      setIsSavingProfile(true);
+
+      const response = await fetch("/wp-admin/admin-ajax.php?action=lw_save_portal_profile", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          Accept: "application/json",
+        },
+        body: new URLSearchParams({
+          name: draft.name,
+          email: draft.email,
+          phone: draft.phone,
+          location: draft.location,
+          department: liveProfile.department || "",
+          designation: liveProfile.role || "",
+        }),
       });
 
+      const payload = await response.json();
+      setIsSavingProfile(false);
+
+      if (!response.ok || !payload?.profile) {
+        window.alert(payload?.message || "Unable to update profile right now.");
+        return;
+      }
+
+      if (session.data) {
+        session.data.profile = payload.profile;
+      }
+
+      setProfileDisplay(buildAccountantProfileFromSession(payload.profile));
+      setEditFormValues(buildAccountantProfileFromSession(payload.profile));
       window.alert("Profile details updated successfully.");
       closeModal("editProfileModal");
     },
-    [closeModal, editFormValues],
+    [closeModal, editFormValues, liveProfile.department, liveProfile.role],
   );
 
   const handleChangePassword = useCallback(
@@ -219,8 +262,8 @@ function AccountantProfilePage() {
           >
             <img src={userImage} alt="User" className="user-avatar" onError={handleAvatarError} />
             <div className="user-info">
-              <div className="user-name">{ACCOUNTANT_PROFILE_USER.name}</div>
-              <div className="user-role">{ACCOUNTANT_PROFILE_USER.role}</div>
+              <div className="user-name">{profileDisplay.name}</div>
+              <div className="user-role">{liveProfile.role}</div>
             </div>
             <i className="fas fa-chevron-down dropdown-arrow" />
           </div>
@@ -230,9 +273,9 @@ function AccountantProfilePage() {
       <div className={`profile-dropdown${isProfileOpen ? " active" : ""}`} id="profileDropdown" ref={profileDropdownRef}>
         <div className="dropdown-header">
           <img src={userImage} alt="User" className="user-avatar" onError={handleAvatarError} />
-          <h4>{ACCOUNTANT_PROFILE_USER.name}</h4>
-          <p>{ACCOUNTANT_PROFILE_USER.role}</p>
-          <p style={{ fontSize: "12px", opacity: "0.8" }}>{ACCOUNTANT_PROFILE_USER.email}</p>
+          <h4>{profileDisplay.name}</h4>
+          <p>{liveProfile.role}</p>
+          <p style={{ fontSize: "12px", opacity: "0.8" }}>{profileDisplay.email}</p>
         </div>
         <div className="dropdown-body">
           <Link to={ACCOUNTANT_ROUTE_PATHS.profile} className="dropdown-item">
@@ -285,7 +328,7 @@ function AccountantProfilePage() {
           <img src={userImage} alt="Profile" className="profile-avatar-large" onError={handleLargeAvatarError} />
           <div className="profile-info-main">
             <h3 id="profileDisplayName">{profileDisplay.name}</h3>
-            <span className="role-badge">{ACCOUNTANT_PROFILE_USER.role}</span>
+            <span className="role-badge">{liveProfile.role}</span>
             <div className="profile-meta">
               <div className="meta-item">
                 <i className="fas fa-envelope" />
@@ -297,10 +340,10 @@ function AccountantProfilePage() {
               </div>
               <div className="meta-item">
                 <i className="fas fa-location-dot" />
-                <span id="profileDisplayLocation">{profileDisplay.location}</span>
-              </div>
+              <span id="profileDisplayLocation">{profileDisplay.location || "Not Available"}</span>
             </div>
           </div>
+        </div>
         </div>
 
         <div className="info-grid">
@@ -310,41 +353,41 @@ function AccountantProfilePage() {
             </h4>
             <div className="info-row">
               <span className="info-label">Role</span>
-              <span className="info-value">{ACCOUNTANT_PROFILE_USER.role}</span>
+              <span className="info-value">{liveProfile.role || "Accountant"}</span>
             </div>
             <div className="info-row">
               <span className="info-label">Department</span>
-              <span className="info-value">{ACCOUNTANT_PROFILE_USER.department}</span>
+              <span className="info-value">{liveProfile.department || "Not Available"}</span>
             </div>
             <div className="info-row">
               <span className="info-label">Employee ID</span>
-              <span className="info-value">{ACCOUNTANT_PROFILE_USER.employeeId}</span>
+              <span className="info-value">{liveProfile.employeeId || "Not Available"}</span>
             </div>
             <div className="info-row">
               <span className="info-label">Joined</span>
-              <span className="info-value">{ACCOUNTANT_PROFILE_USER.joinDate}</span>
+              <span className="info-value">{liveProfile.joinDate || "Not Available"}</span>
             </div>
           </div>
 
           <div className="info-card">
             <h4>
-              <i className="fas fa-chart-line" /> Performance Snapshot
+              <i className="fas fa-id-card" /> Account Details
             </h4>
             <div className="info-row">
-              <span className="info-label">Monthly Collections</span>
-              <span className="info-value">{ACCOUNTANT_PROFILE_STATS.monthlyCollection}</span>
+              <span className="info-label">Username</span>
+              <span className="info-value">{liveProfile.username || "Not Available"}</span>
             </div>
             <div className="info-row">
-              <span className="info-label">Pending Reconciliations</span>
-              <span className="info-value">{ACCOUNTANT_PROFILE_STATS.pendingReconciliations}</span>
+              <span className="info-label">Designation</span>
+              <span className="info-value">{liveProfile.designation || liveProfile.role || "Not Available"}</span>
             </div>
             <div className="info-row">
-              <span className="info-label">Open Tasks</span>
-              <span className="info-value">{ACCOUNTANT_PROFILE_STATS.openTasks}</span>
+              <span className="info-label">Status</span>
+              <span className="info-value">{liveProfile.status || "Active"}</span>
             </div>
             <div className="info-row">
-              <span className="info-label">Accuracy Score</span>
-              <span className="info-value profile-score">{ACCOUNTANT_PROFILE_STATS.accuracyScore}</span>
+              <span className="info-label">Workspace</span>
+              <span className="info-value profile-score">Accountant Portal</span>
             </div>
           </div>
         </div>
@@ -472,8 +515,8 @@ function AccountantProfilePage() {
               <button className="btn-secondary" type="button" onClick={() => closeModal("editProfileModal")}>
                 Cancel
               </button>
-              <button className="btn-primary" type="submit">
-                Save Changes
+              <button className="btn-primary" type="submit" disabled={isSavingProfile}>
+                {isSavingProfile ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </form>

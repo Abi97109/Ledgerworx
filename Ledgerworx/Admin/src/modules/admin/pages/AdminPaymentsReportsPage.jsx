@@ -1,24 +1,28 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AdminHeader from "../components/AdminHeader";
 import {
   paymentCustomerOptions,
   paymentPageSizeOptions,
-  paymentRows,
   paymentStatusOptions,
   paymentTypeOptions,
-  paymentsKpis,
   paymentsTopActions
 } from "../data/adminPaymentsReportsData";
+import { advanceAdminRequestStage, approveAdminPayment, fetchAdminPayments } from "../api/adminPortalApi";
 import { useAdminPageStyles } from "../utils/useAdminPageStyles";
 import adminPaymentsReportsCss from "../styles/admin_paymentsandreport.css?raw";
+import EmployeePortalLoader from "../../../../../shared/employee-ui/EmployeePortalLoader";
 
 function renderStatusTag(status) {
-  if (status === "Paid") {
+  if (status === "Completed") {
     return (
       <span className="payp-status-tag paid payp-status-text">
-        <i className="fa-solid fa-circle-check"></i> Paid
+        <i className="fa-solid fa-circle-check"></i> Completed
       </span>
     );
+  }
+
+  if (status === "Processing" || status === "Confirmation") {
+    return <span className="payp-status-tag created payp-status-text">{status}</span>;
   }
 
   return <span className="payp-status-tag created payp-status-text">{status}</span>;
@@ -29,27 +33,119 @@ export default function AdminPaymentsReportsPage() {
     pageKey: "payments-reports",
     pageCssText: adminPaymentsReportsCss
   });
-  const [payments, setPayments] = useState(paymentRows);
-  const [selectedPaymentId, setSelectedPaymentId] = useState(paymentRows[0]?.id ?? null);
+  const [payments, setPayments] = useState([]);
+  const [selectedPaymentId, setSelectedPaymentId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [isApproving, setIsApproving] = useState(false);
 
   const selectedPayment = payments.find((payment) => payment.id === selectedPaymentId) ?? payments[0] ?? null;
+
+  const paymentsKpis = useMemo(() => [
+    {
+      key: "revenue",
+      cardClass: "payp-kpi-revenue",
+      iconClass: "fa-solid fa-bolt",
+      label: "Total Revenue",
+      value: `AED ${payments
+        .reduce((sum, payment) => sum + Number(String(payment.total || "").replace(/[^0-9.]/g, "") || 0), 0)
+        .toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      meta: "Invoice"
+    },
+    {
+      key: "pending",
+      cardClass: "payp-kpi-pending",
+      iconClass: "fa-solid fa-hourglass-half",
+      label: "Pending Payments",
+      value: String(payments.filter((payment) => payment.status !== "Completed").length),
+      meta: "Requests"
+    },
+    {
+      key: "paid",
+      cardClass: "payp-kpi-paid",
+      iconClass: "fa-solid fa-check",
+      label: "Paid Invoices",
+      value: String(payments.filter((payment) => payment.status === "Completed").length),
+      meta: "Processed"
+    },
+    {
+      key: "overdue",
+      cardClass: "payp-kpi-overdue",
+      iconClass: "fa-solid fa-exclamation",
+      label: "Overdue Payments",
+      value: "0",
+      meta: "Overdue"
+    }
+  ], [payments]);
+
+  function loadPayments() {
+    setIsLoading(true);
+    setError("");
+
+    fetchAdminPayments()
+      .then((payload) => {
+        const rows = Array.isArray(payload?.payments) ? payload.payments : [];
+        setPayments(rows);
+        setSelectedPaymentId(rows[0]?.id ?? null);
+      })
+      .catch((loadError) => {
+        setError(loadError?.message || "Unable to load admin payments.");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }
+
+  useEffect(() => {
+    loadPayments();
+  }, []);
 
   function markSelectedAsPaid() {
     if (!selectedPaymentId) {
       return;
     }
-
-    setPayments((currentPayments) =>
-      currentPayments.map((payment) =>
-        payment.id === selectedPaymentId
-          ? {
-              ...payment,
-              status: "Paid"
-            }
-          : payment
-      )
-    );
+    setIsApproving(true);
+    approveAdminPayment(selectedPaymentId)
+      .then(() => loadPayments())
+      .catch((approveError) => {
+        window.alert(approveError?.message || "Unable to approve payment right now.");
+      })
+      .finally(() => {
+        setIsApproving(false);
+      });
   }
+
+  function advanceSelectedStage() {
+    if (!selectedPaymentId) {
+      return;
+    }
+    setIsApproving(true);
+    advanceAdminRequestStage(selectedPaymentId)
+      .then(() => loadPayments())
+      .catch((advanceError) => {
+        window.alert(advanceError?.message || "Unable to move this request to the next stage right now.");
+      })
+      .finally(() => {
+        setIsApproving(false);
+      });
+  }
+
+  const selectedStage = selectedPayment?.stage || selectedPayment?.status || "";
+  const primaryAction = (() => {
+    if (!selectedPaymentId) {
+      return { label: "Select a Request", disabled: true, onClick: () => {} };
+    }
+    if (selectedStage === "Payment") {
+      return { label: isApproving ? "Approving..." : "Approve Payment", disabled: isApproving, onClick: markSelectedAsPaid };
+    }
+    if (selectedStage === "Processing") {
+      return { label: isApproving ? "Updating..." : "Move to Confirmation", disabled: isApproving, onClick: advanceSelectedStage };
+    }
+    if (selectedStage === "Confirmation") {
+      return { label: isApproving ? "Updating..." : "Mark Completed", disabled: isApproving, onClick: advanceSelectedStage };
+    }
+    return { label: "No Action Needed", disabled: true, onClick: () => {} };
+  })();
 
   return (
     <>
@@ -66,6 +162,8 @@ export default function AdminPaymentsReportsPage() {
             ))}
           </div>
         </div>
+
+        {error ? <div style={{ color: "#dc2626", marginBottom: "16px" }}>{error}</div> : null}
 
         <section className="payp-kpi-grid">
           {paymentsKpis.map((kpi) => (
@@ -162,7 +260,17 @@ export default function AdminPaymentsReportsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {payments.map((payment) => (
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan="7" style={{ textAlign: "center", padding: "24px" }}>
+                        <EmployeePortalLoader
+                          compact
+                          title="Loading payment queue"
+                          message="Refreshing real request payment stages for the admin workspace."
+                        />
+                      </td>
+                    </tr>
+                  ) : payments.map((payment) => (
                     <tr
                       key={payment.id}
                       className={`payp-row${payment.id === selectedPaymentId ? " active" : ""}`}
@@ -219,9 +327,10 @@ export default function AdminPaymentsReportsPage() {
                 type="button"
                 id="paypMarkAsPaidBtn"
                 className="payp-primary-btn"
-                onClick={markSelectedAsPaid}
+                onClick={primaryAction.onClick}
+                disabled={primaryAction.disabled}
               >
-                Mark as Paid
+                {primaryAction.label}
               </button>
             </div>
 

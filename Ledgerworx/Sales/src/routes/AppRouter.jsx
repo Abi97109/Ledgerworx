@@ -2,6 +2,8 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-route
 import { useEffect } from "react";
 import { SalesWorkspaceProvider } from "../modules/sales/context/SalesWorkspaceProvider";
 import { salesRoutes } from "../modules/sales/routes/salesRoutes";
+import { PortalSessionProvider, usePortalSession } from "../session/PortalSessionProvider";
+import EmployeePortalLoader from "../../../shared/employee-ui/EmployeePortalLoader";
 import {
   SALES_CONTACT_DETAIL_ROUTE,
   SALES_CONTACTS_ROUTE,
@@ -35,6 +37,7 @@ const managedBodyClasses = Object.values(routeBodyClassByPath);
 
 function detectBasename() {
   const pathname = window.location.pathname;
+  const moduleRoot = "/sales";
   const routeRoots = [
     SALES_DASHBOARD_ROUTE,
     SALES_LEADS_ROUTE,
@@ -54,8 +57,9 @@ function detectBasename() {
     }
   }
 
-  if (pathname !== "/") {
-    return pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  const moduleRootIndex = pathname.indexOf(moduleRoot);
+  if (moduleRootIndex >= 0) {
+    return pathname.slice(0, moduleRootIndex + moduleRoot.length);
   }
 
   return "";
@@ -102,17 +106,66 @@ function renderSalesRoute(route) {
   return <Route key={route.path} path={route.path} element={route.element} />;
 }
 
+function SalesAuthGate({ children }) {
+  const location = useLocation();
+  const session = usePortalSession();
+  const isAllowedUnauthenticatedRoute = location.pathname === SALES_SIGNOUT_ROUTE;
+
+  if (session.isLoading) {
+    return (
+      <EmployeePortalLoader
+        fullHeight
+        title="Checking employee session"
+        message="Validating your Sales portal access and restoring your workspace."
+      />
+    );
+  }
+
+  if (session.isError) {
+    return (
+      <EmployeePortalLoader
+        fullHeight
+        state="error"
+        title="Unable to verify your session"
+        message="We couldn't confirm your Sales portal session right now. Please try again."
+        actionLabel="Retry"
+        onAction={() => window.location.reload()}
+      />
+    );
+  }
+
+  if (!session.data?.authenticated) {
+    if (isAllowedUnauthenticatedRoute) {
+      return children;
+    }
+
+    window.location.assign(session.data?.config?.loginUrl || "https://ledgerworx.me/login/");
+    return null;
+  }
+
+  if (!["lw_salesperson", "administrator", "lw_manager"].includes(session.data.role)) {
+    window.location.assign(session.data?.config?.portalBaseUrl || "https://ledgerworx.me/portal/client/");
+    return null;
+  }
+
+  return children;
+}
+
 export default function AppRouter() {
   return (
-    <SalesWorkspaceProvider>
-      <BrowserRouter basename={routerBaseName}>
-        <RouteBodyClassSync />
-        <Routes>
-          <Route path={SALES_ROOT_ROUTE} element={<Navigate to={SALES_DASHBOARD_ROUTE} replace />} />
-          {salesRoutes.map(renderSalesRoute)}
-          <Route path="*" element={<Navigate to={SALES_DASHBOARD_ROUTE} replace />} />
-        </Routes>
-      </BrowserRouter>
-    </SalesWorkspaceProvider>
+    <PortalSessionProvider>
+      <SalesWorkspaceProvider>
+        <BrowserRouter basename={routerBaseName}>
+          <RouteBodyClassSync />
+          <SalesAuthGate>
+            <Routes>
+              <Route path={SALES_ROOT_ROUTE} element={<Navigate to={SALES_DASHBOARD_ROUTE} replace />} />
+              {salesRoutes.map(renderSalesRoute)}
+              <Route path="*" element={<Navigate to={SALES_DASHBOARD_ROUTE} replace />} />
+            </Routes>
+          </SalesAuthGate>
+        </BrowserRouter>
+      </SalesWorkspaceProvider>
+    </PortalSessionProvider>
   );
 }

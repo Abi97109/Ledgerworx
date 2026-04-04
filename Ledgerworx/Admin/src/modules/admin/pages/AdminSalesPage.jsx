@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import AdminHeader from "../components/AdminHeader";
 import {
   salespersonStatusOptions,
@@ -39,6 +38,7 @@ function buildInitialSalespeople() {
 
 export default function AdminSalesPage() {
   useAdminPageStyles({ pageKey: "sales", pageCssText: adminSalesCss });
+  const adminBasePath = `${String(import.meta.env.BASE_URL || "/portal/admin/").replace(/\/+$/, "")}`;
   const [statusFilter, setStatusFilter] = useState("All Statuses");
   const [companyFilter, setCompanyFilter] = useState("All Companies");
   const [currentInvoicePage, setCurrentInvoicePage] = useState(1);
@@ -185,7 +185,7 @@ export default function AdminSalesPage() {
 
       <div className="page">
         <div className="breadcrumb">
-          <Link to="/admin/dashboard">Dashboard</Link>
+          <a href={`${adminBasePath}/dashboard`}>Dashboard</a>
           <span>&rsaquo;</span>
           <span>Sales Department</span>
         </div>

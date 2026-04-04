@@ -104,6 +104,86 @@ function lw_handle_save_company_name_ajax() {
 
 add_action( 'wp_ajax_lw_save_company_name', 'lw_handle_save_company_name_ajax' );
 
+function lw_save_profile_payload( $payload ) {
+	$user = wp_get_current_user();
+
+	if ( ! lw_can_access_portal_api( $user ) ) {
+		return new WP_Error(
+			'lw_forbidden',
+			'You must be logged in to access the portal API.',
+			array( 'status' => 401 )
+		);
+	}
+
+	$payload     = is_array( $payload ) ? $payload : array();
+	$name        = sanitize_text_field( (string) ( $payload['name'] ?? '' ) );
+	$email       = sanitize_email( (string) ( $payload['email'] ?? '' ) );
+	$phone       = sanitize_text_field( (string) ( $payload['phone'] ?? '' ) );
+	$location    = sanitize_text_field( (string) ( $payload['location'] ?? '' ) );
+	$department  = sanitize_text_field( (string) ( $payload['department'] ?? '' ) );
+	$designation = sanitize_text_field( (string) ( $payload['designation'] ?? '' ) );
+
+	if ( ! $name ) {
+		return new WP_Error( 'lw_invalid_name', 'Full name is required.', array( 'status' => 400 ) );
+	}
+
+	if ( ! $email || ! is_email( $email ) ) {
+		return new WP_Error( 'lw_invalid_email', 'A valid email address is required.', array( 'status' => 400 ) );
+	}
+
+	$update_result = wp_update_user(
+		array(
+			'ID'           => $user->ID,
+			'display_name' => $name,
+			'user_email'   => $email,
+		)
+	);
+
+	if ( is_wp_error( $update_result ) ) {
+		return $update_result;
+	}
+
+	$name_parts = preg_split( '/\s+/', trim( $name ) );
+	$first_name = array_shift( $name_parts );
+	$last_name  = implode( ' ', $name_parts );
+
+	update_user_meta( $user->ID, 'first_name', $first_name );
+	update_user_meta( $user->ID, 'last_name', $last_name );
+	update_user_meta( $user->ID, 'phone', $phone );
+	update_user_meta( $user->ID, 'billing_phone', $phone );
+	update_user_meta( $user->ID, 'location', $location );
+	update_user_meta( $user->ID, 'department', $department );
+	update_user_meta( $user->ID, 'designation', $designation );
+
+	return rest_ensure_response(
+		array(
+			'saved'   => true,
+			'profile' => lw_build_profile_payload( get_userdata( $user->ID ) ),
+		)
+	);
+}
+
+function lw_save_profile_for_current_user( WP_REST_Request $request ) {
+	return lw_save_profile_payload( (array) $request->get_json_params() );
+}
+
+function lw_handle_save_profile_ajax() {
+	$result = lw_save_profile_payload( $_POST );
+
+	if ( is_wp_error( $result ) ) {
+		wp_send_json(
+			array(
+				'message' => $result->get_error_message(),
+			),
+			(int) $result->get_error_data( 'status' ) ?: 400
+		);
+	}
+
+	wp_send_json( $result->get_data() );
+}
+
+add_action( 'wp_ajax_lw_save_portal_profile', 'lw_handle_save_profile_ajax' );
+
 function lw_handle_client_invoices_ajax() {
 	if ( ! lw_can_access_portal_api() ) {
 		wp_send_json(
@@ -149,6 +229,29 @@ add_action(
 				'callback'            => function() {
 					return rest_ensure_response( lw_get_bootstrap_payload() );
 				},
+			)
+		);
+
+		register_rest_route(
+			'lw/v1',
+			'/profile',
+			array(
+				array(
+					'methods'             => 'GET',
+					'permission_callback' => 'lw_rest_permissions_check',
+					'callback'            => function() {
+						return rest_ensure_response(
+							array(
+								'profile' => lw_build_profile_payload( wp_get_current_user() ),
+							)
+						);
+					},
+				),
+				array(
+					'methods'             => 'POST',
+					'permission_callback' => 'lw_rest_permissions_check',
+					'callback'            => 'lw_save_profile_for_current_user',
+				),
 			)
 		);
 

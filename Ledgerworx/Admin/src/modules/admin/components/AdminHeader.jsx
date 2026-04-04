@@ -1,12 +1,13 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { adminNavigationItems } from "../utils/adminNavigation";
+import { usePortalSession } from "../../../session/PortalSessionProvider";
 
 const adminLogoPath = `${import.meta.env.BASE_URL}assets/images/logowhite.png`;
 
 export default function AdminHeader({ adminName = "Admin" }) {
+  const session = usePortalSession();
   const location = useLocation();
-  const navigate = useNavigate();
   const dropdownRef = useRef(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -18,6 +19,11 @@ export default function AdminHeader({ adminName = "Admin" }) {
   });
 
   const activePath = useMemo(() => location.pathname, [location.pathname]);
+  const displayName = session.data?.profile?.name || adminName;
+  const adminBasePath = useMemo(() => {
+    const baseUrl = String(import.meta.env.BASE_URL || "/portal/admin/").replace(/\/+$/, "");
+    return baseUrl || "/portal/admin";
+  }, []);
 
   useLayoutEffect(() => {
     const root = document.documentElement;
@@ -55,12 +61,16 @@ export default function AdminHeader({ adminName = "Admin" }) {
   }, []);
 
   function goToEditProfile() {
-    navigate("/admin/profile");
+    window.location.assign(`${adminBasePath}/profile`);
     setIsDropdownOpen(false);
   }
 
   function goToLogout() {
-    navigate("/admin/logout");
+    if (session.data?.config?.logoutUrl) {
+      window.location.assign(session.data.config.logoutUrl);
+      return;
+    }
+    window.location.assign(`${adminBasePath}/logout`);
     setIsDropdownOpen(false);
   }
 
@@ -78,10 +88,10 @@ export default function AdminHeader({ adminName = "Admin" }) {
               const icon = <i className={item.iconClass} />;
 
               return (
-                <Link key={item.key} to={item.path} className={className}>
+                <a key={item.key} href={`${adminBasePath}${item.path}`} className={className}>
                   {icon}
                   {item.label}
-                </Link>
+                </a>
               );
             })}
           </div>
@@ -100,7 +110,7 @@ export default function AdminHeader({ adminName = "Admin" }) {
                 setIsDropdownOpen((current) => !current);
               }}
             >
-              {adminName}
+              {displayName}
             </button>
             <div
               className={`dropdown${isDropdownOpen ? " show" : ""}`}

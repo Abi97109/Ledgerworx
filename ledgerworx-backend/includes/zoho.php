@@ -1,6 +1,11 @@
 <?php
 
 function lw_get_access_token() {
+	$cached_access_token = get_transient( 'lw_zoho_access_token' );
+	if ( is_string( $cached_access_token ) && '' !== trim( $cached_access_token ) ) {
+		return trim( $cached_access_token );
+	}
+
 	$client_id     = get_option( 'lw_zoho_client_id' );
 	$client_secret = get_option( 'lw_zoho_client_secret' );
 	$refresh_token = get_option( 'lw_zoho_refresh_token' );
@@ -26,9 +31,21 @@ function lw_get_access_token() {
 		return null;
 	}
 
+	$status_code = (int) wp_remote_retrieve_response_code( $response );
 	$body = json_decode( wp_remote_retrieve_body( $response ), true );
 
-	return $body['access_token'] ?? null;
+	if ( $status_code < 200 || $status_code >= 300 || empty( $body['access_token'] ) ) {
+		error_log( 'Zoho Token Response Error: ' . wp_remote_retrieve_body( $response ) );
+		return null;
+	}
+
+	$access_token = sanitize_text_field( (string) $body['access_token'] );
+	$expires_in   = isset( $body['expires_in'] ) ? (int) $body['expires_in'] : 3600;
+	$ttl          = max( 60, $expires_in - 60 );
+
+	set_transient( 'lw_zoho_access_token', $access_token, $ttl );
+
+	return $access_token;
 }
 
 function lw_get_zoho_services_module_api_name() {

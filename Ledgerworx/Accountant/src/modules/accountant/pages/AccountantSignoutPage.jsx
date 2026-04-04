@@ -1,12 +1,19 @@
 import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
-import { ACCOUNTANT_ROUTE_PATHS } from "../data/accountantDashData";
+import { usePortalSession } from "../../../session/PortalSessionProvider";
 
 function AccountantSignoutPage() {
+  const session = usePortalSession();
+
   useEffect(() => {
     document.title = "LedgerWorx | Signed Out";
     document.body.classList.remove("dark");
   }, []);
+
+  useEffect(() => {
+    if (session.data?.authenticated && session.data?.config?.logoutUrl) {
+      window.location.replace(session.data.config.logoutUrl);
+    }
+  }, [session.data]);
 
   return (
     <div
@@ -46,10 +53,10 @@ function AccountantSignoutPage() {
         </div>
         <h1 style={{ margin: "0 0 12px", color: "#0f172a" }}>You have been signed out</h1>
         <p style={{ margin: "0 0 24px", color: "#475569", lineHeight: 1.6 }}>
-          This accountant portal is running in preview mode, so your session has simply been reset locally.
+          Your accountant portal session has ended. Sign in again to continue.
         </p>
-        <Link
-          to={ACCOUNTANT_ROUTE_PATHS.dashboard}
+        <a
+          href={session.data?.config?.loginUrl || "https://ledgerworx.me/login/"}
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -63,8 +70,8 @@ function AccountantSignoutPage() {
           }}
         >
           <i className="fas fa-arrow-left" />
-          Return to Dashboard
-        </Link>
+          Return to Login
+        </a>
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
 import AdminHeader from "../components/AdminHeader";
-import { Link } from "react-router-dom";
 import {
   accountsOverview,
   companyFeed,
@@ -17,6 +16,7 @@ const adminLogoPath = `${import.meta.env.BASE_URL}assets/images/logowhite.png`;
 
 export default function AdminDashboardPage() {
   useAdminPageStyles({ pageKey: "dashboard", pageCssText: adminDashboardCss });
+  const adminBasePath = `${String(import.meta.env.BASE_URL || "/portal/admin/").replace(/\/+$/, "")}`;
 
   return (
     <div className="admin-dashboard-page wrap">
@@ -32,9 +32,9 @@ export default function AdminDashboardPage() {
 
         <nav className="side-nav">
           {dashboardSidebarLinks.map((item) => (
-            <Link key={item.key} to={item.path} className={item.className ?? ""}>
+            <a key={item.key} href={`${adminBasePath}${item.path}`} className={item.className ?? ""}>
               {item.icon} {item.label}
-            </Link>
+            </a>
           ))}
         </nav>
       </aside>

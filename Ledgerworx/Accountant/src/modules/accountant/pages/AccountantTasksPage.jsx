@@ -9,7 +9,6 @@ import {
   ACCOUNTANT_TASKS_PAGE_TITLE,
   ACCOUNTANT_TASKS_SYNC_DEFAULT_TEXT,
   ACCOUNTANT_TASKS_SYNC_SOURCE_TEXT,
-  ACCOUNTANT_USER,
 } from "../data/accountantTasksData";
 import { applyBodyTheme, buildUserAvatar, getSavedTheme, saveTheme } from "../utils/accountantDashHelpers";
 import {
@@ -20,10 +19,12 @@ import {
   normalizeTasksList,
 } from "../utils/accountantTasksHelpers";
 import { buildLegacyUrl } from "../../../utils/legacyLinks";
+import { usePortalSession } from "../../../session/PortalSessionProvider";
 import "../styles/accountant-tasks.css";
 
 function AccountantTasksPage() {
   const navigate = useNavigate();
+  const session = usePortalSession();
   const userProfileRef = useRef(null);
   const profileDropdownRef = useRef(null);
 
@@ -35,7 +36,14 @@ function AccountantTasksPage() {
   const [deadlineSortDirection, setDeadlineSortDirection] = useState("asc");
   const [syncStatusText, setSyncStatusText] = useState(ACCOUNTANT_TASKS_SYNC_DEFAULT_TEXT);
 
-  const userImage = useMemo(() => ACCOUNTANT_USER.image || buildUserAvatar(ACCOUNTANT_USER.name), []);
+  const accountantUser = useMemo(() => ({
+    name: session.data?.profile?.name || "Accountant User",
+    role: session.data?.profile?.role || "Accountant",
+    email: session.data?.profile?.email || "",
+    image: session.data?.profile?.avatarUrl || "",
+  }), [session.data?.profile]);
+
+  const userImage = useMemo(() => accountantUser.image || buildUserAvatar(accountantUser.name), [accountantUser.image, accountantUser.name]);
   const counts = useMemo(() => buildTaskCounts(allTasks), [allTasks]);
 
   const filteredTasks = useMemo(
@@ -98,7 +106,7 @@ function AccountantTasksPage() {
     }
 
     event.currentTarget.dataset.fallbackApplied = "true";
-    event.currentTarget.src = buildUserAvatar(ACCOUNTANT_USER.name);
+    event.currentTarget.src = buildUserAvatar(accountantUser.name);
   }, []);
 
   const handleFilterChange = useCallback((filterKey) => {
@@ -157,8 +165,8 @@ function AccountantTasksPage() {
           >
             <img src={userImage} alt="User" className="user-avatar" onError={handleAvatarError} />
             <div className="user-info">
-              <div className="user-name">{ACCOUNTANT_USER.name}</div>
-              <div className="user-role">{ACCOUNTANT_USER.role}</div>
+              <div className="user-name">{accountantUser.name}</div>
+              <div className="user-role">{accountantUser.role}</div>
             </div>
             <i className="fas fa-chevron-down dropdown-arrow" />
           </div>
@@ -168,9 +176,9 @@ function AccountantTasksPage() {
       <div className={`profile-dropdown${isProfileOpen ? " active" : ""}`} id="profileDropdown" ref={profileDropdownRef}>
         <div className="dropdown-header">
           <img src={userImage} alt="User" className="user-avatar" onError={handleAvatarError} />
-          <h4>{ACCOUNTANT_USER.name}</h4>
-          <p>{ACCOUNTANT_USER.role}</p>
-          <p style={{ fontSize: "12px", opacity: "0.8" }}>{ACCOUNTANT_USER.email}</p>
+          <h4>{accountantUser.name}</h4>
+          <p>{accountantUser.role}</p>
+          <p style={{ fontSize: "12px", opacity: "0.8" }}>{accountantUser.email}</p>
         </div>
         <div className="dropdown-body">
           <Link to={ACCOUNTANT_ROUTE_PATHS.profile} className="dropdown-item">

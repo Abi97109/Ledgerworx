@@ -40,6 +40,21 @@ function lw_decode_json_column( $value, $fallback = array() ) {
 	return is_array( $decoded ) ? $decoded : $fallback;
 }
 
+function lw_normalize_request_due_date( $value ) {
+	$value = trim( (string) $value );
+
+	if ( '' === $value ) {
+		return '';
+	}
+
+	$timestamp = strtotime( $value );
+	if ( false === $timestamp ) {
+		return '';
+	}
+
+	return $value;
+}
+
 function lw_get_stored_client_requests( $user_id = null ) {
 	if ( ! $user_id ) {
 		$user_id = get_current_user_id();
@@ -142,7 +157,7 @@ function lw_normalize_client_request( $request ) {
 		'workflowStage'   => $workflow_stage,
 		'requestId'       => isset( $request['requestId'] ) ? trim( (string) $request['requestId'] ) : ( isset( $request['request_uid'] ) ? trim( (string) $request['request_uid'] ) : $id ),
 		'submittedOn'     => isset( $request['submittedOn'] ) ? trim( (string) $request['submittedOn'] ) : trim( (string) ( $request['submitted_on'] ?? wp_date( 'd M Y' ) ) ),
-		'dueDate'         => isset( $request['dueDate'] ) ? trim( (string) $request['dueDate'] ) : trim( (string) ( $request['due_date'] ?? '' ) ),
+		'dueDate'         => lw_normalize_request_due_date( isset( $request['dueDate'] ) ? (string) $request['dueDate'] : (string) ( $request['due_date'] ?? '' ) ),
 		'category'        => isset( $request['category'] ) ? trim( (string) $request['category'] ) : '',
 		'overview'        => isset( $request['overview'] ) ? trim( (string) $request['overview'] ) : '',
 		'instructions'    => $instructions,
@@ -1592,21 +1607,10 @@ function lw_handle_delete_client_document_ajax() {
 	lw_send_client_request_ajax_response( $result );
 }
 
-function lw_handle_advance_client_request_debug_ajax() {
-	if ( ! lw_can_access_portal_api() ) {
-		wp_send_json( array( 'message' => 'You must be logged in to access the portal API.' ), 401 );
-	}
-
-	$request_id = sanitize_text_field( wp_unslash( $_POST['requestId'] ?? '' ) );
-	$result     = lw_advance_client_request_debug( $request_id );
-	lw_send_client_request_ajax_response( $result );
-}
-
 add_action( 'wp_ajax_lw_create_client_request', 'lw_handle_create_client_request_ajax' );
 add_action( 'wp_ajax_lw_update_client_request', 'lw_handle_update_client_request_ajax' );
 add_action( 'wp_ajax_lw_delete_client_request', 'lw_handle_delete_client_request_ajax' );
 add_action( 'wp_ajax_lw_delete_client_document', 'lw_handle_delete_client_document_ajax' );
-add_action( 'wp_ajax_lw_advance_client_request_debug', 'lw_handle_advance_client_request_debug_ajax' );
 
 add_action(
 	'rest_api_init',
@@ -1666,19 +1670,6 @@ add_action(
 				'callback'            => function( WP_REST_Request $request ) {
 					$request_id = $request->get_param( 'id' );
 					return lw_delete_client_request( $request_id );
-				},
-			)
-		);
-
-		register_rest_route(
-			'lw/v1',
-			'/client/requests/(?P<id>[^/]+)/advance-debug',
-			array(
-				'methods'             => 'POST',
-				'permission_callback' => 'lw_rest_permissions_check',
-				'callback'            => function( WP_REST_Request $request ) {
-					$request_id = $request->get_param( 'id' );
-					return lw_advance_client_request_debug( $request_id );
 				},
 			)
 		);

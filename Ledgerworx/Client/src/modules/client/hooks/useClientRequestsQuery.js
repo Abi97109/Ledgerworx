@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-    advanceClientRequestDebug,
     createClientRequest,
     deleteClientDocument,
     deleteClientRequest,
@@ -95,22 +94,6 @@ export function useDeleteClientDocumentMutation() {
                 queryClient.invalidateQueries({ queryKey: CLIENT_DOCUMENTS_QUERY_KEY }),
                 queryClient.invalidateQueries({ queryKey: CLIENT_REQUESTS_QUERY_KEY }),
                 queryClient.invalidateQueries({ queryKey: ['portal-dashboard'] }),
-            ]);
-        },
-    });
-}
-
-export function useAdvanceClientRequestDebugMutation() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: advanceClientRequestDebug,
-        onSuccess: async () => {
-            await Promise.all([
-                queryClient.invalidateQueries({ queryKey: CLIENT_DOCUMENTS_QUERY_KEY }),
-                queryClient.invalidateQueries({ queryKey: CLIENT_REQUESTS_QUERY_KEY }),
-                queryClient.invalidateQueries({ queryKey: ['portal-dashboard'] }),
-                queryClient.invalidateQueries({ queryKey: ['portal-notifications'] }),
             ]);
         },
     });

@@ -82,7 +82,7 @@ body {background: var(--bg-main);color: var(--text-dark);transition: background 
 .toggle-switch.active {background: var(--primary);}
 .toggle-switch.active::after {left: 26px;}
 .dropdown-divider {height: 1px;background: var(--border);margin: 8px 0;}
-.logo-zoom {width: 200px;height: 80px;object-fit: cover;object-position: center;}
+.logo-zoom { width: 148px; height: 44px; object-fit: contain; object-position: left center; display: block; }
 .main {padding: 30px;max-width: 1600px;margin: 0 auto;}
 .page-header {margin-bottom: 24px;display: flex;justify-content: space-between;align-items: center;}
 .page-header h1 {font-size: 32px;color: var(--text-dark);}
@@ -160,3 +160,4 @@ body {background: var(--bg-main);color: var(--text-dark);transition: background 
 
 /* Nav icons spacing */
 .nav-links a { display: inline-flex; align-items: center; gap: 8px; }
+

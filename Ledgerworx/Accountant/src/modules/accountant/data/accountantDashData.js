@@ -1,17 +1,17 @@
 ﻿export const ACCOUNTANT_THEME_STORAGE_KEY = "theme";
 
 export const ACCOUNTANT_ROUTE_PATHS = {
-  dashboard: "/accountant/dashboard",
-  clients: "/accountant/clients",
-  tasks: "/accountant/tasks",
-  taskView: "/accountant/task-view",
-  profile: "/accountant/profile",
-  settings: "/accountant/settings",
-  payments: "/accountant/payments",
-  eachClient: "/accountant/client-details",
-  help: "/accountant/help",
-  invoices: "/accountant/invoices",
-  signout: "/accountant/signout",
+  dashboard: "/dashboard",
+  clients: "/clients",
+  tasks: "/tasks",
+  taskView: "/task-view",
+  profile: "/profile",
+  settings: "/settings",
+  payments: "/payments",
+  eachClient: "/client-details",
+  help: "/help",
+  invoices: "/invoices",
+  signout: "/signout",
 };
 
 export const ACCOUNTANT_LEGACY_PATHS = {

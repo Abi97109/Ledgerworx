@@ -11,7 +11,6 @@ import {
   ACCOUNTANT_LEGACY_PATHS,
   ACCOUNTANT_NAV_LINKS,
   ACCOUNTANT_ROUTE_PATHS,
-  ACCOUNTANT_USER,
 } from "../data/accountantInvoicesData";
 import { applyBodyTheme, buildUserAvatar, getSavedTheme, saveTheme } from "../utils/accountantDashHelpers";
 import {
@@ -24,6 +23,7 @@ import {
   normalizeInvoiceList,
 } from "../utils/accountantInvoicesHelpers";
 import { buildLegacyUrl } from "../../../utils/legacyLinks";
+import { usePortalSession } from "../../../session/PortalSessionProvider";
 import "../styles/accountant-invoices.css";
 
 const SUMMARY_IDS = {
@@ -35,6 +35,7 @@ const SUMMARY_IDS = {
 
 function AccountantInvoicesPage() {
   const location = useLocation();
+  const session = usePortalSession();
   const userProfileRef = useRef(null);
   const profileDropdownRef = useRef(null);
 
@@ -50,7 +51,14 @@ function AccountantInvoicesPage() {
     normalizeInvoiceList(ACCOUNTANT_DEMO_INVOICES, getVerifiedInvoiceMap()),
   );
 
-  const userImage = useMemo(() => ACCOUNTANT_USER.image || buildUserAvatar(ACCOUNTANT_USER.name), []);
+  const accountantUser = useMemo(() => ({
+    name: session.data?.profile?.name || "Accountant User",
+    role: session.data?.profile?.role || "Accountant",
+    email: session.data?.profile?.email || "",
+    image: session.data?.profile?.avatarUrl || "",
+  }), [session.data?.profile]);
+
+  const userImage = useMemo(() => accountantUser.image || buildUserAvatar(accountantUser.name), [accountantUser.image, accountantUser.name]);
 
   const filteredInvoices = useMemo(
     () => filterInvoices(allInvoices, searchTerm, statusFilter, dueDateFilter),
@@ -164,7 +172,7 @@ function AccountantInvoicesPage() {
     }
 
     event.currentTarget.dataset.fallbackApplied = "true";
-    event.currentTarget.src = buildUserAvatar(ACCOUNTANT_USER.name);
+    event.currentTarget.src = buildUserAvatar(accountantUser.name);
   }, []);
 
   const handleSearchChange = useCallback((event) => {
@@ -269,8 +277,8 @@ function AccountantInvoicesPage() {
           >
             <img src={userImage} alt="User" className="user-avatar" onError={handleAvatarError} />
             <div className="user-info">
-              <div className="user-name">{ACCOUNTANT_USER.name}</div>
-              <div className="user-role">{ACCOUNTANT_USER.role}</div>
+              <div className="user-name">{accountantUser.name}</div>
+              <div className="user-role">{accountantUser.role}</div>
             </div>
             <i className="fas fa-chevron-down dropdown-arrow" />
           </div>
@@ -280,9 +288,9 @@ function AccountantInvoicesPage() {
       <div className={`profile-dropdown${isProfileOpen ? " active" : ""}`} id="profileDropdown" ref={profileDropdownRef}>
         <div className="dropdown-header">
           <img src={userImage} alt="User" className="user-avatar" onError={handleAvatarError} />
-          <h4>{ACCOUNTANT_USER.name}</h4>
-          <p>{ACCOUNTANT_USER.role}</p>
-          <p style={{ fontSize: "12px", opacity: "0.8" }}>{ACCOUNTANT_USER.email}</p>
+          <h4>{accountantUser.name}</h4>
+          <p>{accountantUser.role}</p>
+          <p style={{ fontSize: "12px", opacity: "0.8" }}>{accountantUser.email}</p>
         </div>
         <div className="dropdown-body">
           <Link to={ACCOUNTANT_ROUTE_PATHS.profile} className="dropdown-item">

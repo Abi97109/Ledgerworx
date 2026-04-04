@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import SalesLayout from "../components/SalesLayout";
+import EmployeePortalLoader from "../../../shared/employee-ui/EmployeePortalLoader";
 import { useSalesWorkspace } from "../modules/sales/context/SalesWorkspaceProvider";
 import { buildSalesContactDetailRoute } from "../modules/sales/utils/routePaths";
 
 export default function ContactsPage() {
-  const { contacts } = useSalesWorkspace();
+  const { contacts, isLoading, error, refreshWorkspace } = useSalesWorkspace();
 
   return (
     <SalesLayout pageClass="sales-page--contacts">
@@ -13,6 +14,15 @@ export default function ContactsPage() {
           <h1>Contacts</h1>
           <p>Converted leads appear here once the salesperson moves them into the client pipeline.</p>
         </div>
+
+        {error ? (
+          <div className="crm-status-banner crm-status-banner--error">
+            <span>{error}</span>
+            <button type="button" className="add-btn" onClick={refreshWorkspace}>
+              Retry
+            </button>
+          </div>
+        ) : null}
 
         <div className="leads-toolbar-card">
           <div className="leads-toolbar-top">
@@ -37,7 +47,17 @@ export default function ContactsPage() {
               </tr>
             </thead>
             <tbody>
-              {contacts.length ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan="7" className="crm-empty-cell">
+                    <EmployeePortalLoader
+                      compact
+                      title="Loading live contacts"
+                      message="Refreshing converted contacts from Zoho CRM and the portal directory."
+                    />
+                  </td>
+                </tr>
+              ) : contacts.length ? (
                 contacts.map((contact) => (
                   <tr key={contact.id}>
                     <td>

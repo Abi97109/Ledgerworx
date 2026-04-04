@@ -1,15 +1,16 @@
-const ACCOUNTANT_ROUTE_ROOTS = [
-  "/accountant/dashboard",
-  "/accountant/clients",
-  "/accountant/client-details",
-  "/accountant/help",
-  "/accountant/invoices",
-  "/accountant/payments",
-  "/accountant/profile",
-  "/accountant/settings",
-  "/accountant/signout",
-  "/accountant/tasks",
-  "/accountant/task-view",
+const ACCOUNTANT_MODULE_ROOT = "/accountant";
+const ACCOUNTANT_ROUTE_SUFFIXES = [
+  "/dashboard",
+  "/clients",
+  "/client-details",
+  "/help",
+  "/invoices",
+  "/payments",
+  "/profile",
+  "/settings",
+  "/signout",
+  "/tasks",
+  "/task-view",
 ];
 
 function normalizeBasePath(basePath = "") {
@@ -33,17 +34,18 @@ function detectRuntimeBasePath() {
 
   const pathname = window.location.pathname || "";
 
-  for (const routeRoot of ACCOUNTANT_ROUTE_ROOTS) {
+  for (const routeSuffix of ACCOUNTANT_ROUTE_SUFFIXES) {
+    const routeRoot = `${ACCOUNTANT_MODULE_ROOT}${routeSuffix}`;
     const routeIndex = pathname.indexOf(routeRoot);
 
     if (routeIndex > 0) {
-      return pathname.slice(0, routeIndex);
+      return pathname.slice(0, routeIndex + ACCOUNTANT_MODULE_ROOT.length);
     }
   }
 
-  const lastSlashIndex = pathname.lastIndexOf("/");
-  if (lastSlashIndex > 0) {
-    return pathname.slice(0, lastSlashIndex);
+  const moduleRootIndex = pathname.indexOf(ACCOUNTANT_MODULE_ROOT);
+  if (moduleRootIndex >= 0) {
+    return pathname.slice(0, moduleRootIndex + ACCOUNTANT_MODULE_ROOT.length);
   }
 
   return "";

@@ -36,6 +36,9 @@ require_once LW_PORTAL_PLUGIN_DIR . 'includes/zoho.php';
 require_once LW_PORTAL_PLUGIN_DIR . 'includes/portal-data.php';
 require_once LW_PORTAL_PLUGIN_DIR . 'includes/requests.php';
 require_once LW_PORTAL_PLUGIN_DIR . 'includes/api.php';
+require_once LW_PORTAL_PLUGIN_DIR . 'includes/sales-crm.php';
+require_once LW_PORTAL_PLUGIN_DIR . 'includes/accountant-portal.php';
+require_once LW_PORTAL_PLUGIN_DIR . 'includes/admin-portal.php';
 require_once LW_PORTAL_PLUGIN_DIR . 'includes/registration.php';
 require_once LW_PORTAL_PLUGIN_DIR . 'includes/ur-hardening.php';
 

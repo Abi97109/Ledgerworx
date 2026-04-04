@@ -15,7 +15,6 @@ import {
 import { getClientRequestIconTone } from '../utils/requestStorage';
 import { useClientPortalPage } from '../utils/useClientPortalPage';
 import {
-    useAdvanceClientRequestDebugMutation,
     useDeleteClientRequestMutation,
     useClientRequestsQuery
 } from '../hooks/useClientRequestsQuery';
@@ -35,7 +34,6 @@ export default function ClientRequestsPage() {
     const modalBodyRef = useRef(null);
     const requestsQuery = useClientRequestsQuery();
     const deleteRequestMutation = useDeleteClientRequestMutation();
-    const advanceRequestDebugMutation = useAdvanceClientRequestDebugMutation();
     const [activeRequestIndex, setActiveRequestIndex] = useState(null);
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
     const [isReviewHighlightActive, setIsReviewHighlightActive] = useState(false);
@@ -63,7 +61,6 @@ export default function ClientRequestsPage() {
 
         return requests[activeRequestIndex] || null;
     }, [activeRequestIndex, requests]);
-    const isDebugStageMode = searchParams.get('debug') === '1';
 
     React.useEffect(() => {
         const requestId = String(searchParams.get('request') || '').trim();
@@ -166,26 +163,6 @@ export default function ClientRequestsPage() {
                 setActiveRequestIndex(null);
             }
         });
-    }
-
-    async function handleAdvanceDebugStage() {
-        if (!activeRequest) {
-            return;
-        }
-
-        try {
-            await advanceRequestDebugMutation.mutateAsync(activeRequest.requestId);
-            await requestsQuery.refetch();
-        } catch (error) {
-            setModalState({
-                isOpen: true,
-                title: 'Stage Advance Blocked',
-                body:
-                    (error && error.message) ||
-                    'This stage can only move forward through the real client action.',
-                onConfirm: null
-            });
-        }
     }
 
     const uploadedDocuments = Array.isArray(activeRequest?.uploadedDocuments) ? activeRequest.uploadedDocuments : [];
@@ -386,16 +363,6 @@ export default function ClientRequestsPage() {
                                 disabled={deleteRequestMutation.isPending}
                             >
                                 Cancel Request
-                            </button>
-                        ) : null}
-                        {activeRequest && isDebugStageMode ? (
-                            <button
-                                className="modal-btn modal-btn-debug"
-                                type="button"
-                                onClick={handleAdvanceDebugStage}
-                                disabled={advanceRequestDebugMutation.isPending}
-                            >
-                                {advanceRequestDebugMutation.isPending ? 'Advancing...' : 'Debug: Move To Next Internal Stage'}
                             </button>
                         ) : null}
                         <button className="modal-btn modal-btn-primary" id="modalActionBtn" type="button" onClick={handleRequestPrimaryAction}>

@@ -71,6 +71,23 @@ export function getSalesProfileState() {
   return readJson(SALES_PROFILE_STORAGE_KEY, SALES_USER);
 }
 
+export function buildSalesProfileFromSession(profile = null) {
+  if (!profile) {
+    return getSalesProfileState();
+  }
+
+  return {
+    name: profile.name || SALES_USER.name,
+    role: profile.role || SALES_USER.role,
+    email: profile.email || SALES_USER.email,
+    phone: profile.phone || SALES_USER.phone,
+    location: profile.location || SALES_USER.location,
+    department: profile.department || SALES_USER.department,
+    employeeId: profile.employeeId || SALES_USER.employeeId,
+    joinDate: profile.joinDate || SALES_USER.joinDate
+  };
+}
+
 export function saveSalesProfileState(nextState) {
   if (typeof window !== "undefined") {
     window.localStorage.setItem(SALES_PROFILE_STORAGE_KEY, JSON.stringify(nextState));

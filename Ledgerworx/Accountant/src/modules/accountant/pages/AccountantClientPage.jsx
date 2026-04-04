@@ -3,13 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ACCOUNTANT_CLIENT_FILTER_GROUPS,
   ACCOUNTANT_CLIENT_PAGE_CONTENT,
-  ACCOUNTANT_CLIENT_ROWS,
   ACCOUNTANT_CLIENTS_PER_PAGE,
   ACCOUNTANT_CLIENT_TAB_FILTERS,
   ACCOUNTANT_LEGACY_PATHS,
   ACCOUNTANT_NAV_LINKS,
   ACCOUNTANT_ROUTE_PATHS,
-  ACCOUNTANT_USER,
 } from "../data/accountantClientData";
 import {
   applyBodyTheme,
@@ -22,33 +20,43 @@ import {
   buildClientCounts,
   buildPagination,
   formatSyncRelativeTime,
-  getMockSyncFeed,
   getStatusBadgeData,
   normalizeClientRows,
-  resolveSyncSourceLabel,
 } from "../utils/accountantClientHelpers";
 import { buildLegacyUrl } from "../../../utils/legacyLinks";
+import { usePortalSession } from "../../../session/PortalSessionProvider";
+import { fetchAccountantClients } from "../api/accountantPortalApi";
+import EmployeePortalLoader from "../../../../../shared/employee-ui/EmployeePortalLoader";
 import "../styles/accountant-client.css";
 
 function AccountantClientPage() {
   const navigate = useNavigate();
+  const session = usePortalSession();
   const userProfileRef = useRef(null);
   const profileDropdownRef = useRef(null);
-  const syncFeedIndexRef = useRef(0);
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [theme, setTheme] = useState(() => getSavedTheme());
-  const [allClients, setAllClients] = useState(() => normalizeClientRows(ACCOUNTANT_CLIENT_ROWS));
+  const [allClients, setAllClients] = useState(() => normalizeClientRows([]));
   const [currentFilter, setCurrentFilter] = useState("all");
   const [activeTabFilter, setActiveTabFilter] = useState("all");
   const [advancedFilter, setAdvancedFilter] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [syncSourceLabel, setSyncSourceLabel] = useState("Preview Feed");
+  const [syncSourceLabel, setSyncSourceLabel] = useState("Backend Feed");
   const [syncTimestampText, setSyncTimestampText] = useState("Last Sync: --");
   const [lastSyncTime, setLastSyncTime] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const userImage = useMemo(() => ACCOUNTANT_USER.image || buildUserAvatar(ACCOUNTANT_USER.name), []);
+  const accountantUser = useMemo(() => ({
+    name: session.data?.profile?.name || "Accountant User",
+    role: session.data?.profile?.role || "Accountant",
+    email: session.data?.profile?.email || "",
+    image: session.data?.profile?.avatarUrl || "",
+  }), [session.data?.profile]);
+
+  const userImage = useMemo(() => accountantUser.image || buildUserAvatar(accountantUser.name), [accountantUser.image, accountantUser.name]);
 
   useEffect(() => {
     applyBodyTheme(theme);
@@ -80,49 +88,37 @@ function AccountantClientPage() {
     };
   }, []);
 
-  const applyMockSync = useCallback(() => {
-    const feed = getMockSyncFeed(syncFeedIndexRef.current);
-    syncFeedIndexRef.current += 1;
+  const loadClients = useCallback(async () => {
+    setIsLoading(true);
+    setError("");
 
-    const source = String(feed.source || "").toLowerCase();
-    const normalizedRows = normalizeClientRows(feed.rows);
-
-    if (source === "zoho" && normalizedRows.length > 0) {
-      setAllClients(normalizedRows);
-      setSyncSourceLabel(resolveSyncSourceLabel(source));
+    try {
+      const payload = await fetchAccountantClients();
+      const rows = normalizeClientRows(payload?.clients || []);
+      setAllClients(rows);
+      setSyncSourceLabel("Backend Feed");
       setSyncTimestampText("Last Sync: Just now");
       setLastSyncTime(new Date());
-      return;
+    } catch (loadError) {
+      setError(loadError?.message || "Unable to load accountant client data.");
+      setSyncSourceLabel("Backend Feed Issue");
+      setSyncTimestampText("Sync failed");
+    } finally {
+      setIsLoading(false);
     }
-
-    if (source === "none") {
-      setAllClients((previousRows) => (previousRows.length === 0 ? normalizeClientRows(ACCOUNTANT_CLIENT_ROWS) : previousRows));
-      setSyncSourceLabel(resolveSyncSourceLabel(source));
-      setSyncTimestampText("Preview feed not available");
-      return;
-    }
-
-    if (source === "error") {
-      setSyncSourceLabel(resolveSyncSourceLabel(source));
-      setSyncTimestampText("Preview feed refresh failed");
-      return;
-    }
-
-    setSyncSourceLabel(resolveSyncSourceLabel(source));
-    setSyncTimestampText("Last Sync: --");
   }, []);
 
   useEffect(() => {
-    applyMockSync();
+    loadClients();
 
     const syncIntervalId = window.setInterval(() => {
-      applyMockSync();
+      loadClients();
     }, 30000);
 
     return () => {
       window.clearInterval(syncIntervalId);
     };
-  }, [applyMockSync]);
+  }, [loadClients]);
 
   useEffect(() => {
     const relativeTimeIntervalId = window.setInterval(() => {
@@ -188,7 +184,7 @@ function AccountantClientPage() {
     }
 
     event.currentTarget.dataset.fallbackApplied = "true";
-    event.currentTarget.src = buildUserAvatar(ACCOUNTANT_USER.name);
+    event.currentTarget.src = buildUserAvatar(accountantUser.name);
   }, []);
 
   const handleSearchChange = useCallback((event) => {
@@ -262,8 +258,8 @@ function AccountantClientPage() {
           >
             <img src={userImage} alt="User" className="user-avatar" onError={handleAvatarError} />
             <div className="user-info">
-              <div className="user-name">{ACCOUNTANT_USER.name}</div>
-              <div className="user-role">{ACCOUNTANT_USER.role}</div>
+              <div className="user-name">{accountantUser.name}</div>
+              <div className="user-role">{accountantUser.role}</div>
             </div>
             <i className="fas fa-chevron-down dropdown-arrow" />
           </div>
@@ -273,9 +269,9 @@ function AccountantClientPage() {
       <div className={`profile-dropdown${isProfileOpen ? " active" : ""}`} id="profileDropdown" ref={profileDropdownRef}>
         <div className="dropdown-header">
           <img src={userImage} alt="User" className="user-avatar" onError={handleAvatarError} />
-          <h4>{ACCOUNTANT_USER.name}</h4>
-          <p>{ACCOUNTANT_USER.role}</p>
-          <p style={{ fontSize: "12px", opacity: "0.8" }}>{ACCOUNTANT_USER.email}</p>
+          <h4>{accountantUser.name}</h4>
+          <p>{accountantUser.role}</p>
+          <p style={{ fontSize: "12px", opacity: "0.8" }}>{accountantUser.email}</p>
         </div>
         <div className="dropdown-body">
           <Link to={ACCOUNTANT_ROUTE_PATHS.profile} className="dropdown-item">
@@ -312,6 +308,15 @@ function AccountantClientPage() {
           <h1>{ACCOUNTANT_CLIENT_PAGE_CONTENT.heading}</h1>
           <p className="page-subtitle">{ACCOUNTANT_CLIENT_PAGE_CONTENT.subtitle}</p>
         </div>
+
+        {error ? (
+          <div className="sync-indicator" style={{ marginBottom: "16px", color: "var(--danger)" }}>
+            <span>{error}</span>
+            <button className="view-btn" type="button" onClick={loadClients} style={{ marginLeft: "auto" }}>
+              Retry
+            </button>
+          </div>
+        ) : null}
 
         <div className="top-section">
           <div className="search-box">
@@ -385,7 +390,17 @@ function AccountantClientPage() {
                 </tr>
               </thead>
               <tbody id="clientsTableBody">
-                {visibleClients.length === 0 ? (
+                {isLoading ? (
+                  <tr>
+                    <td colSpan="4" style={{ textAlign: "center", padding: "40px" }}>
+                      <EmployeePortalLoader
+                        compact
+                        title="Loading client records"
+                        message="Syncing the latest client workflow data for the accountant workspace."
+                      />
+                    </td>
+                  </tr>
+                ) : visibleClients.length === 0 ? (
                   <tr>
                     <td colSpan="4" style={{ textAlign: "center", padding: "40px" }}>
                       <i

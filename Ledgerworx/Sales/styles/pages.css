@@ -439,6 +439,33 @@
   padding-top: 4px;
 }
 
+.crm-status-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--lw-border);
+  background: linear-gradient(180deg, var(--lw-surface) 0%, var(--lw-surface-alt) 100%);
+}
+
+.crm-status-banner--error {
+  border-color: rgba(220, 38, 38, 0.25);
+  color: var(--lw-text-soft);
+}
+
+.crm-inline-error {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  background: rgba(220, 38, 38, 0.06);
+  color: #b91c1c;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 @media (max-width: 1200px) {
   .container {
     width: min(1280px, 100% - 24px);
@@ -576,6 +603,56 @@
   overflow: hidden;
 }
 
+.contact-tracker-strip {
+  margin-top: 18px;
+  margin-bottom: 18px;
+}
+
+.contact-request-tracker-group {
+  display: grid;
+  gap: 16px;
+}
+
+.contact-request-tracker-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--lw-border);
+  border-radius: 16px;
+  background: var(--lw-surface-alt);
+}
+
+.contact-request-tracker-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.contact-request-stage-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(47, 183, 176, 0.12);
+  color: var(--lw-primary-strong);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.contact-empty-inline {
+  padding: 14px 16px;
+  border: 1px dashed var(--lw-border);
+  border-radius: 12px;
+  color: var(--lw-text-muted);
+}
+
+.lw-grid--contact-detail {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(280px, 0.8fr);
+  align-items: start;
+}
+
 .contact-section-header {
   display: flex;
   justify-content: space-between;
@@ -600,6 +677,11 @@
   gap: 14px;
 }
 
+.contact-tracking-list--horizontal {
+  grid-template-columns: repeat(7, minmax(120px, 1fr));
+  align-items: stretch;
+}
+
 .contact-tracking-item,
 .contact-document-row {
   display: flex;
@@ -615,6 +697,12 @@
 .contact-tracking-item {
   position: relative;
   align-items: flex-start;
+}
+
+.contact-tracking-list--horizontal .contact-tracking-item {
+  min-height: 108px;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .contact-tracking-step-marker {
@@ -672,6 +760,42 @@
 .contact-payment-status p {
   margin: 0;
   color: var(--lw-text-soft);
+}
+
+.contact-payment-request {
+  display: grid;
+  gap: 6px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--lw-border);
+}
+
+.contact-payment-request:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+@media (max-width: 1240px) {
+  .contact-tracking-list--horizontal {
+    grid-template-columns: repeat(4, minmax(120px, 1fr));
+  }
+
+  .lw-grid--contact-detail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .contact-tracking-list--horizontal {
+    grid-template-columns: repeat(2, minmax(140px, 1fr));
+  }
+
+  .contact-request-tracker-head {
+    flex-direction: column;
+  }
+
+  .lw-grid--contact-detail {
+    grid-template-columns: 1fr;
+  }
 }
 
 .sales-account-page-header {

@@ -13,47 +13,47 @@ import AccountantTasksPage from "../modules/accountant/pages/AccountantTasksPage
 
 export const accountantRoutes = [
   {
-    path: "/accountant/dashboard",
+    path: "/dashboard",
     element: <AccountantDashboardPage />,
   },
   {
-    path: "/accountant/clients",
+    path: "/clients",
     element: <AccountantClientPage />,
   },
   {
-    path: "/accountant/client-details",
+    path: "/client-details",
     element: <AccountantEachClientPage />,
   },
   {
-    path: "/accountant/help",
+    path: "/help",
     element: <AccountantHelpPage />,
   },
   {
-    path: "/accountant/invoices",
+    path: "/invoices",
     element: <AccountantInvoicesPage />,
   },
   {
-    path: "/accountant/payments",
+    path: "/payments",
     element: <AccountantPaymentPage />,
   },
   {
-    path: "/accountant/profile",
+    path: "/profile",
     element: <AccountantProfilePage />,
   },
   {
-    path: "/accountant/settings",
+    path: "/settings",
     element: <AccountantSettingsPage />,
   },
   {
-    path: "/accountant/signout",
+    path: "/signout",
     element: <AccountantSignoutPage />,
   },
   {
-    path: "/accountant/tasks",
+    path: "/tasks",
     element: <AccountantTasksPage />,
   },
   {
-    path: "/accountant/task-view",
+    path: "/task-view",
     element: <AccountantTaskViewPage />,
   },
 ];

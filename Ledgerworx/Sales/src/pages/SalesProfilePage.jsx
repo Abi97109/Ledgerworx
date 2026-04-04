@@ -3,24 +3,30 @@ import { Link } from "react-router-dom";
 import SalesLayout from "../components/SalesLayout";
 import {
   applySalesTheme,
+  buildSalesProfileFromSession,
   getPasswordLastChangedLabel,
   getSalesPasswordState,
-  getSalesProfileState,
   getSalesSettingsState,
   SALES_PROFILE_STATS,
   saveSalesPasswordState,
-  saveSalesProfileState
 } from "../modules/sales/utils/salesAccountState";
 import { SALES_DASHBOARD_ROUTE, SALES_SETTINGS_ROUTE } from "../modules/sales/utils/routePaths";
+import { usePortalSession } from "../session/PortalSessionProvider";
 
 export default function SalesProfilePage() {
-  const [profile, setProfile] = useState(() => getSalesProfileState());
+  const session = usePortalSession();
+  const profile = useMemo(
+    () => buildSalesProfileFromSession(session.data?.profile),
+    [session.data?.profile]
+  );
+  const [liveProfile, setLiveProfile] = useState(profile);
   const [settings] = useState(() => getSalesSettingsState());
   const [passwordState, setPasswordState] = useState(() => getSalesPasswordState());
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isPasswordOpen, setIsPasswordOpen] = useState(false);
-  const [draft, setDraft] = useState(() => getSalesProfileState());
+  const [draft, setDraft] = useState(profile);
   const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   useEffect(() => {
     applySalesTheme(settings.preferences?.theme_preference === "dark" ? "dark" : "light");
@@ -33,12 +39,50 @@ export default function SalesProfilePage() {
     };
   }, [isEditOpen, isPasswordOpen]);
 
+  useEffect(() => {
+    setLiveProfile(profile);
+    setDraft(profile);
+  }, [profile]);
+
   const passwordLastChanged = useMemo(() => getPasswordLastChangedLabel(passwordState), [passwordState]);
 
-  const saveProfile = (event) => {
+  const saveProfile = async (event) => {
     event.preventDefault();
-    saveSalesProfileState(draft);
-    setProfile(draft);
+
+    setIsSavingProfile(true);
+
+    const response = await fetch("/wp-admin/admin-ajax.php?action=lw_save_portal_profile", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        Accept: "application/json"
+      },
+      body: new URLSearchParams({
+        name: draft.name,
+        email: draft.email,
+        phone: draft.phone || "",
+        location: draft.location || "",
+        department: draft.department || "",
+        designation: draft.role || ""
+      })
+    });
+
+    const payload = await response.json();
+    setIsSavingProfile(false);
+
+    if (!response.ok || !payload?.profile) {
+      window.alert(payload?.message || "Unable to save profile right now.");
+      return;
+    }
+
+    if (session.data) {
+      session.data.profile = payload.profile;
+    }
+
+    const nextProfile = buildSalesProfileFromSession(payload.profile);
+    setLiveProfile(nextProfile);
+    setDraft(nextProfile);
     setIsEditOpen(false);
   };
 
@@ -82,20 +126,20 @@ export default function SalesProfilePage() {
 
         <div className="page-header sales-account-page-header">
           <h1>My Profile</h1>
-          <button className="lw-btn" type="button" onClick={() => { setDraft(profile); setIsEditOpen(true); }}>
+          <button className="lw-btn" type="button" onClick={() => { setDraft(liveProfile); setIsEditOpen(true); }}>
             Edit Profile
           </button>
         </div>
 
         <div className="profile-card sales-profile-card">
-          <div className="profile-avatar-large sales-avatar">{profile.name.slice(0, 2).toUpperCase()}</div>
+          <div className="profile-avatar-large sales-avatar">{liveProfile.name.slice(0, 2).toUpperCase()}</div>
           <div className="profile-info-main">
-            <h3>{profile.name}</h3>
-            <span className="role-badge">{profile.role}</span>
+            <h3>{liveProfile.name}</h3>
+            <span className="role-badge">{liveProfile.role}</span>
             <div className="profile-meta">
-              <div className="meta-item"><span>{profile.email}</span></div>
-              <div className="meta-item"><span>{profile.phone}</span></div>
-              <div className="meta-item"><span>{profile.location}</span></div>
+              <div className="meta-item"><span>{liveProfile.email}</span></div>
+              <div className="meta-item"><span>{liveProfile.phone}</span></div>
+              <div className="meta-item"><span>{liveProfile.location}</span></div>
             </div>
           </div>
         </div>
@@ -103,10 +147,10 @@ export default function SalesProfilePage() {
         <div className="info-grid sales-account-grid">
           <div className="info-card">
             <h4>Professional Information</h4>
-            <div className="info-row"><span className="info-label">Role</span><span className="info-value">{profile.role}</span></div>
-            <div className="info-row"><span className="info-label">Department</span><span className="info-value">{profile.department}</span></div>
-            <div className="info-row"><span className="info-label">Employee ID</span><span className="info-value">{profile.employeeId}</span></div>
-            <div className="info-row"><span className="info-label">Joined</span><span className="info-value">{profile.joinDate}</span></div>
+            <div className="info-row"><span className="info-label">Role</span><span className="info-value">{liveProfile.role}</span></div>
+            <div className="info-row"><span className="info-label">Department</span><span className="info-value">{liveProfile.department}</span></div>
+            <div className="info-row"><span className="info-label">Employee ID</span><span className="info-value">{liveProfile.employeeId}</span></div>
+            <div className="info-row"><span className="info-label">Joined</span><span className="info-value">{liveProfile.joinDate}</span></div>
           </div>
 
           <div className="info-card">
@@ -160,7 +204,7 @@ export default function SalesProfilePage() {
               <div className="form-group sales-form-field"><label>Email</label><input type="email" value={draft.email} onChange={(e) => setDraft((p) => ({ ...p, email: e.target.value }))} required /></div>
               <div className="form-group sales-form-field"><label>Phone</label><input value={draft.phone} onChange={(e) => setDraft((p) => ({ ...p, phone: e.target.value }))} /></div>
               <div className="form-group sales-form-field"><label>Location</label><input value={draft.location} onChange={(e) => setDraft((p) => ({ ...p, location: e.target.value }))} /></div>
-              <div className="modal-footer"><button className="btn-secondary" type="button" onClick={() => setIsEditOpen(false)}>Cancel</button><button className="btn-primary" type="submit">Save Changes</button></div>
+              <div className="modal-footer"><button className="btn-secondary" type="button" onClick={() => setIsEditOpen(false)}>Cancel</button><button className="btn-primary" type="submit" disabled={isSavingProfile}>{isSavingProfile ? "Saving..." : "Save Changes"}</button></div>
             </form>
           </div>
         </div>

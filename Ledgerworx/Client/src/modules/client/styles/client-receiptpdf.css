@@ -23,10 +23,14 @@
 
         body.client-receipt-pdf-page .toolbar {
             max-width: 860px;
-            margin: 0 auto 14px;
+            margin: 0 auto;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             gap: 10px;
+        }
+
+        body.client-receipt-pdf-page .toolbar-bottom {
+            margin-top: 24px;
         }
 
         body.client-receipt-pdf-page .toolbar a,
@@ -67,6 +71,19 @@ body.client-receipt-pdf-page .toolbar button {
             border-bottom: 1px solid #e8edf7;
             padding-bottom: 14px;
             margin-bottom: 16px;
+        }
+
+        body.client-receipt-pdf-page .receipt-brand-block {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        body.client-receipt-pdf-page .receipt-logo {
+            width: 152px;
+            height: auto;
+            object-fit: contain;
         }
 
         body.client-receipt-pdf-page .title {

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import SalesLayout from "../components/SalesLayout";
+import EmployeePortalLoader from "../../../shared/employee-ui/EmployeePortalLoader";
 import { leadNotes } from "../data/mockData";
 import { useSalesWorkspace } from "../modules/sales/context/SalesWorkspaceProvider";
 import { buildSalesContactDetailRoute, SALES_LEADS_ROUTE } from "../modules/sales/utils/routePaths";
@@ -8,13 +9,27 @@ import { buildSalesContactDetailRoute, SALES_LEADS_ROUTE } from "../modules/sale
 export default function LeadDetailPage() {
   const navigate = useNavigate();
   const { leadId } = useParams();
-  const { leads, getLeadById, convertLead } = useSalesWorkspace();
+  const { leads, getLeadById, convertLead, deleteLead, isLoading, error, refreshWorkspace } = useSalesWorkspace();
   const [notes, setNotes] = useState(leadNotes);
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [noteText, setNoteText] = useState("");
   const [followUpDate, setFollowUpDate] = useState("");
+  const [isConverting, setIsConverting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const lead = useMemo(() => getLeadById(leadId) || leads[0] || null, [leadId, leads, getLeadById]);
+
+  if (!lead && isLoading) {
+    return (
+      <SalesLayout pageClass="sales-page--lead-detail">
+        <EmployeePortalLoader
+          fullHeight
+          title="Loading lead details"
+          message="Pulling the latest lead record and related sales context from Zoho CRM."
+        />
+      </SalesLayout>
+    );
+  }
 
   if (!lead) {
     return (
@@ -22,7 +37,12 @@ export default function LeadDetailPage() {
         <div className="container">
           <div className="lw-page-header">
             <h1>Lead Not Found</h1>
-            <p>This lead is no longer available in the active sales workspace.</p>
+            <p>{isLoading ? "Loading live lead data..." : "This lead is no longer available in the active sales workspace."}</p>
+            {error ? (
+              <button type="button" className="add-btn" onClick={refreshWorkspace}>
+                Retry Zoho CRM Load
+              </button>
+            ) : null}
           </div>
         </div>
       </SalesLayout>
@@ -54,10 +74,36 @@ export default function LeadDetailPage() {
     }
   };
 
-  const handleConvert = () => {
-    const contact = convertLead(lead.id);
-    if (contact) {
-      navigate(buildSalesContactDetailRoute(contact.id));
+  const handleConvert = async () => {
+    setIsConverting(true);
+
+    try {
+      const contact = await convertLead(lead.id);
+      if (contact) {
+        navigate(buildSalesContactDetailRoute(contact.id));
+      }
+    } catch (convertError) {
+      window.alert(convertError?.message || "Unable to convert this lead right now.");
+    } finally {
+      setIsConverting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm("Delete this lead from Zoho CRM?");
+    if (!confirmed) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      await deleteLead(lead.id);
+      navigate(SALES_LEADS_ROUTE);
+    } catch (deleteError) {
+      window.alert(deleteError?.message || "Unable to delete this lead right now.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -114,8 +160,11 @@ export default function LeadDetailPage() {
               <button className="lw-btn btn-primary" onClick={sendProposal}>
                 Send Proposal
               </button>
-              <button className="lw-btn btn-secondary" onClick={handleConvert}>
-                Convert to Client
+              <button className="lw-btn btn-secondary" onClick={handleConvert} disabled={isConverting}>
+                {isConverting ? "Converting..." : "Convert to Client"}
+              </button>
+              <button className="btn-cancel" onClick={handleDelete} disabled={isDeleting}>
+                {isDeleting ? "Deleting..." : "Delete Lead"}
               </button>
             </div>
           </div>

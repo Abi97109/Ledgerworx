@@ -1,7 +1,15 @@
-import { Link } from "react-router-dom";
-import { SALES_DASHBOARD_ROUTE } from "../modules/sales/utils/routePaths";
+import { useEffect } from "react";
+import { usePortalSession } from "../session/PortalSessionProvider";
 
 export default function SalesSignoutPage() {
+  const session = usePortalSession();
+
+  useEffect(() => {
+    if (session.data?.authenticated && session.data?.config?.logoutUrl) {
+      window.location.replace(session.data.config.logoutUrl);
+    }
+  }, [session.data]);
+
   return (
     <div className="sales-signout-shell">
       <div className="sales-signout-card">
@@ -12,10 +20,10 @@ export default function SalesSignoutPage() {
           </svg>
         </div>
         <h1>You have been signed out</h1>
-        <p>This sales portal runs in preview mode right now, so your local session has simply been reset.</p>
-        <Link to={SALES_DASHBOARD_ROUTE} className="lw-btn">
-          Return to Dashboard
-        </Link>
+        <p>Your sales portal session has ended. Sign in again to continue working with live CRM data.</p>
+        <a href={session.data?.config?.loginUrl || "https://ledgerworx.me/login/"} className="lw-btn">
+          Return to Login
+        </a>
       </div>
     </div>
   );

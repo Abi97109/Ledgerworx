@@ -2,17 +2,13 @@
 import { Link, useLocation } from "react-router-dom";
 import {
   ACCOUNTANT_AVAILABLE_STATUSES,
+  ACCOUNTANT_DEFAULT_CLIENT_DETAIL,
   ACCOUNTANT_LEGACY_PATHS,
   ACCOUNTANT_NAV_LINKS,
   ACCOUNTANT_ROUTE_PATHS,
-  ACCOUNTANT_UPLOAD_DOCUMENT_TYPES,
-  ACCOUNTANT_UPLOAD_REPORT_TYPES,
-  ACCOUNTANT_USER,
-  getClientDetailById,
 } from "../data/accountantEachClientData";
 import { applyBodyTheme, buildUserAvatar, getSavedTheme, saveTheme } from "../utils/accountantDashHelpers";
 import {
-  buildUploadAreaText,
   calculatePaymentTotal,
   formatAedNoDecimals,
   getClientHeaderStatusMeta,
@@ -20,17 +16,17 @@ import {
   normalizeStatusFilterValue,
 } from "../utils/accountantEachClientHelpers";
 import { buildLegacyUrl } from "../../../utils/legacyLinks";
+import { usePortalSession } from "../../../session/PortalSessionProvider";
+import { approveAccountantDocuments, fetchAccountantClientDetail } from "../api/accountantPortalApi";
+import EmployeePortalLoader from "../../../../../shared/employee-ui/EmployeePortalLoader";
 import "../styles/accountant-each-client.css";
 
 function AccountantEachClientPage() {
   const location = useLocation();
 
+  const session = usePortalSession();
   const userProfileRef = useRef(null);
   const profileDropdownRef = useRef(null);
-  const uploadFormRef = useRef(null);
-  const uploadReportFormRef = useRef(null);
-  const fileInputRef = useRef(null);
-  const reportFileInputRef = useRef(null);
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [theme, setTheme] = useState(() => getSavedTheme());
@@ -40,23 +36,24 @@ function AccountantEachClientPage() {
 
   const [selectedService, setSelectedService] = useState(null);
   const [selectedDocument, setSelectedDocument] = useState(null);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [isUploadReportModalOpen, setIsUploadReportModalOpen] = useState(false);
+  const [clientData, setClientData] = useState(ACCOUNTANT_DEFAULT_CLIENT_DETAIL);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [isApprovingRequestId, setIsApprovingRequestId] = useState("");
 
-  const [uploadFormState, setUploadFormState] = useState({ documentName: "", documentType: "" });
-  const [uploadFileName, setUploadFileName] = useState("");
+  const accountantUser = useMemo(() => ({
+    name: session.data?.profile?.name || "Accountant User",
+    role: session.data?.profile?.role || "Accountant",
+    email: session.data?.profile?.email || "",
+    image: session.data?.profile?.avatarUrl || "",
+  }), [session.data?.profile]);
 
-  const [uploadReportFormState, setUploadReportFormState] = useState({ reportType: "", reportPeriod: "" });
-  const [uploadReportFileName, setUploadReportFileName] = useState("");
-
-  const userImage = useMemo(() => ACCOUNTANT_USER.image || buildUserAvatar(ACCOUNTANT_USER.name), []);
+  const userImage = useMemo(() => accountantUser.image || buildUserAvatar(accountantUser.name), [accountantUser.image, accountantUser.name]);
 
   const clientId = useMemo(() => {
     const query = new URLSearchParams(location.search);
     return query.get("id") || query.get("client_id") || "1";
   }, [location.search]);
-
-  const clientData = useMemo(() => getClientDetailById(clientId), [clientId]);
 
   const filteredServices = useMemo(() => {
     if (!Array.isArray(clientData.assigned_services)) {
@@ -77,19 +74,9 @@ function AccountantEachClientPage() {
 
   const statusHeaderMeta = useMemo(() => getClientHeaderStatusMeta(clientData.status_class), [clientData.status_class]);
 
-  const uploadAreaText = useMemo(
-    () => buildUploadAreaText(uploadFileName, "Click to upload or drag and drop", "PDF, DOC, DOCX (MAX. 10MB)"),
-    [uploadFileName],
-  );
-
-  const reportUploadAreaText = useMemo(
-    () => buildUploadAreaText(uploadReportFileName, "Click to upload or drag and drop", "PDF, XLSX, DOC (MAX. 20MB)"),
-    [uploadReportFileName],
-  );
-
   const isServiceModalOpen = Boolean(selectedService);
   const isDocumentModalOpen = Boolean(selectedDocument);
-  const isAnyModalOpen = isServiceModalOpen || isDocumentModalOpen || isUploadModalOpen || isUploadReportModalOpen;
+  const isAnyModalOpen = isServiceModalOpen || isDocumentModalOpen;
 
   useEffect(() => {
     applyBodyTheme(theme);
@@ -99,6 +86,24 @@ function AccountantEachClientPage() {
   useEffect(() => {
     document.title = `LedgerWorx | ${clientData.name}`;
   }, [clientData.name]);
+
+  const loadClientDetail = useCallback(async () => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const payload = await fetchAccountantClientDetail(clientId);
+      setClientData({ ...ACCOUNTANT_DEFAULT_CLIENT_DETAIL, ...(payload || {}) });
+    } catch (loadError) {
+      setError(loadError?.message || "Unable to load client details.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [clientId]);
+
+  useEffect(() => {
+    loadClientDetail();
+  }, [loadClientDetail]);
 
   useEffect(() => {
     function handleDocumentClick(event) {
@@ -143,7 +148,7 @@ function AccountantEachClientPage() {
     }
 
     event.currentTarget.dataset.fallbackApplied = "true";
-    event.currentTarget.src = buildUserAvatar(ACCOUNTANT_USER.name);
+    event.currentTarget.src = buildUserAvatar(accountantUser.name);
   }, []);
 
   const handleTabSwitch = useCallback((tabName) => {
@@ -170,33 +175,8 @@ function AccountantEachClientPage() {
 
     if (modalId === "documentModal") {
       setSelectedDocument(null);
-      return;
-    }
-
-    if (modalId === "uploadModal") {
-      setIsUploadModalOpen(false);
-      return;
-    }
-
-    if (modalId === "uploadReportModal") {
-      setIsUploadReportModalOpen(false);
     }
   }, []);
-
-  const completeService = useCallback(() => {
-    if (!selectedService) {
-      return;
-    }
-
-    const shouldComplete = window.confirm(`Are you sure you want to mark "${selectedService.name}" as complete?`);
-
-    if (!shouldComplete) {
-      return;
-    }
-
-    window.alert("Service marked as complete!\n\nIn production, this would update the database and refresh the page.");
-    setSelectedService(null);
-  }, [selectedService]);
 
   const viewDocument = useCallback((url) => {
     if (!url) {
@@ -226,17 +206,21 @@ function AccountantEachClientPage() {
     }
   }, [downloadDocument, selectedDocument]);
 
-  const handleUpload = useCallback((event) => {
-    event.preventDefault();
-    window.alert("Document uploaded successfully!\n\nIn production, this would upload to the server and database.");
-    setIsUploadModalOpen(false);
-  }, []);
+  const handleApproveDocuments = useCallback(async (requestId) => {
+    if (!requestId) {
+      return;
+    }
 
-  const handleUploadReport = useCallback((event) => {
-    event.preventDefault();
-    window.alert("Report uploaded successfully!\n\nIn production, this would upload to the server and database.");
-    setIsUploadReportModalOpen(false);
-  }, []);
+    setIsApprovingRequestId(String(requestId));
+    try {
+      await approveAccountantDocuments(requestId);
+      await loadClientDetail();
+    } catch (approveError) {
+      window.alert(approveError?.message || "Unable to approve documents right now.");
+    } finally {
+      setIsApprovingRequestId("");
+    }
+  }, [loadClientDetail]);
 
   return (
     <>
@@ -273,8 +257,8 @@ function AccountantEachClientPage() {
           <div className={`user-profile${isProfileOpen ? " active" : ""}`} id="userProfile" ref={userProfileRef} onClick={handleProfileToggle}>
             <img src={userImage} alt="User" className="user-avatar" onError={handleAvatarError} />
             <div className="user-info">
-              <div className="user-name">{ACCOUNTANT_USER.name}</div>
-              <div className="user-role">{ACCOUNTANT_USER.role}</div>
+              <div className="user-name">{accountantUser.name}</div>
+              <div className="user-role">{accountantUser.role}</div>
             </div>
             <i className="fas fa-chevron-down dropdown-arrow" />
           </div>
@@ -284,9 +268,9 @@ function AccountantEachClientPage() {
       <div className={`profile-dropdown${isProfileOpen ? " active" : ""}`} id="profileDropdown" ref={profileDropdownRef}>
         <div className="dropdown-header">
           <img src={userImage} alt="User" className="user-avatar" onError={handleAvatarError} />
-          <h4>{ACCOUNTANT_USER.name}</h4>
-          <p>{ACCOUNTANT_USER.role}</p>
-          <p style={{ fontSize: "12px", opacity: "0.8" }}>{ACCOUNTANT_USER.email}</p>
+          <h4>{accountantUser.name}</h4>
+          <p>{accountantUser.role}</p>
+          <p style={{ fontSize: "12px", opacity: "0.8" }}>{accountantUser.email}</p>
         </div>
         <div className="dropdown-body">
           <Link to={ACCOUNTANT_ROUTE_PATHS.profile} className="dropdown-item">
@@ -319,12 +303,28 @@ function AccountantEachClientPage() {
       </div>
 
       <div className="main">
+        {error ? (
+          <div className="sync-indicator" style={{ marginBottom: "16px", color: "var(--danger)" }}>
+            <span>{error}</span>
+            <button className="view-btn" type="button" onClick={loadClientDetail} style={{ marginLeft: "auto" }}>
+              Retry
+            </button>
+          </div>
+        ) : null}
+
+        {isLoading ? (
+          <EmployeePortalLoader
+            title="Loading client details"
+            message="Preparing requests, documents, and payment data for this client."
+          />
+        ) : null}
+
         <Link to={ACCOUNTANT_ROUTE_PATHS.clients} className="back-button">
           <i className="fas fa-arrow-left" />
           Back to Clients
         </Link>
 
-        <div className="client-header-card">
+        {!isLoading ? <div className="client-header-card">
           <div className="client-header-left">
             <div className="client-avatar-large" style={{ background: clientData.color }}>
               {clientData.avatar}
@@ -359,9 +359,9 @@ function AccountantEachClientPage() {
               {clientData.status}
             </div>
           </div>
-        </div>
+        </div> : null}
 
-        <div className="status-filter-container">
+        {!isLoading ? <div className="status-filter-container">
           <span className="filter-label">
             <i className="fas fa-filter" /> Filter by Status:
           </span>
@@ -377,9 +377,9 @@ function AccountantEachClientPage() {
               </button>
             );
           })}
-        </div>
+        </div> : null}
 
-        <div className="tab-nav">
+        {!isLoading ? <div className="tab-nav">
           <button className={`tab-btn${activeTab === "overview" ? " active" : ""}`} onClick={() => handleTabSwitch("overview")}>
             Overview
           </button>
@@ -392,9 +392,9 @@ function AccountantEachClientPage() {
           <button className={`tab-btn${activeTab === "reports" ? " active" : ""}`} onClick={() => handleTabSwitch("reports")}>
             Reports
           </button>
-        </div>
+        </div> : null}
 
-        <div className={`tab-content${activeTab === "overview" ? " active" : ""}`} id="overview-tab">
+        {!isLoading ? <div className={`tab-content${activeTab === "overview" ? " active" : ""}`} id="overview-tab">
           <div className="content-grid">
             <div className="card">
               <div className="card-header">
@@ -404,11 +404,11 @@ function AccountantEachClientPage() {
                 {clientData.assigned_services.length === 0 ? (
                   <div className="service-item" style={{ cursor: "default" }}>
                     <div>
-                      <div className="service-name">No client tasks found</div>
+                      <div className="service-name">No requests found for this client</div>
                     </div>
                     <div className="service-status pending">
                       <i className="fas fa-inbox" />
-                      Waiting for preview data
+                      No active workflow items
                     </div>
                   </div>
                 ) : (
@@ -422,9 +422,24 @@ function AccountantEachClientPage() {
                       <div>
                         <div className="service-name">{service.name}</div>
                       </div>
-                      <div className={`service-status ${service.status_class}`}>
-                        <i className={getServiceStatusIconClass(service.status_class)} />
-                        {service.status}
+                      <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+                        <div className={`service-status ${service.status_class}`}>
+                          <i className={getServiceStatusIconClass(service.status_class)} />
+                          {service.status}
+                        </div>
+                        {service.canApproveDocuments ? (
+                          <button
+                            type="button"
+                            className="view-doc-btn"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleApproveDocuments(service.request_id);
+                            }}
+                            disabled={isApprovingRequestId === String(service.request_id)}
+                          >
+                            {isApprovingRequestId === String(service.request_id) ? "Approving..." : "Approve Documents"}
+                          </button>
+                        ) : null}
                       </div>
                     </div>
                   ))
@@ -445,7 +460,7 @@ function AccountantEachClientPage() {
                       </div>
                       <div className="document-details">
                         <h4>No client documents found</h4>
-                        <p>No preview client files are available for this record yet.</p>
+                        <p>This client has not uploaded any documents yet.</p>
                       </div>
                     </div>
                   </div>
@@ -489,9 +504,9 @@ function AccountantEachClientPage() {
               </div>
             </div>
           </div>
-        </div>
+        </div> : null}
 
-        <div className={`tab-content${activeTab === "documents" ? " active" : ""}`} id="documents-tab">
+        {!isLoading ? <div className={`tab-content${activeTab === "documents" ? " active" : ""}`} id="documents-tab">
           <div className="card">
             <div className="card-header">
               <h3>All Documents</h3>
@@ -503,12 +518,12 @@ function AccountantEachClientPage() {
                     <div className="document-icon pdf-icon">
                       <i className="fas fa-inbox" />
                     </div>
-                    <div className="document-details">
-                      <h4>No client documents found</h4>
-                      <p>No preview client files are available for this record yet.</p>
+                      <div className="document-details">
+                        <h4>No client documents found</h4>
+                        <p>This client has not uploaded any documents yet.</p>
+                      </div>
                     </div>
                   </div>
-                </div>
               ) : (
                 clientData.documents.map((doc) => (
                   <div key={doc.id} className="document-item" onClick={() => openDocumentModal(doc)}>
@@ -550,9 +565,9 @@ function AccountantEachClientPage() {
               )}
             </div>
           </div>
-        </div>
+        </div> : null}
 
-        <div className={`tab-content${activeTab === "payments" ? " active" : ""}`} id="payments-tab">
+        {!isLoading ? <div className={`tab-content${activeTab === "payments" ? " active" : ""}`} id="payments-tab">
           <div className="card">
             <div className="payments-summary">
               <h2>{formatAedNoDecimals(paymentTotal)}</h2>
@@ -576,7 +591,7 @@ function AccountantEachClientPage() {
                 {clientData.payments.length === 0 ? (
                   <tr>
                     <td colSpan="4" style={{ textAlign: "center", padding: "32px", color: "var(--text-light)" }}>
-                      No preview payment records are available for this client.
+                      No payment records are available for this client yet.
                     </td>
                   </tr>
                 ) : (
@@ -604,9 +619,9 @@ function AccountantEachClientPage() {
               </div>
             </div>
           </div>
-        </div>
+        </div> : null}
 
-        <div className={`tab-content${activeTab === "reports" ? " active" : ""}`} id="reports-tab">
+        {!isLoading ? <div className={`tab-content${activeTab === "reports" ? " active" : ""}`} id="reports-tab">
           <div className="card">
             <div className="card-header">
               <h3>Reports for {clientData.name}</h3>
@@ -619,12 +634,12 @@ function AccountantEachClientPage() {
                     <div className="document-icon pdf-icon">
                       <i className="fas fa-file-alt" />
                     </div>
-                    <div className="document-details">
-                      <h4>No reports found</h4>
-                      <p>No preview accountant-side reports are available for this client yet.</p>
+                      <div className="document-details">
+                        <h4>No reports found</h4>
+                        <p>No accountant-side reports are available for this client yet.</p>
+                      </div>
                     </div>
                   </div>
-                </div>
               ) : (
                 clientData.reports.map((report) => (
                   <div key={report.id} className="document-item" onClick={() => openDocumentModal(report)}>
@@ -667,7 +682,7 @@ function AccountantEachClientPage() {
               )}
             </div>
           </div>
-        </div>
+        </div> : null}
       </div>
 
       <div
@@ -720,20 +735,9 @@ function AccountantEachClientPage() {
             ) : null}
           </div>
           <div className="modal-footer" id="serviceModalFooter">
-            {selectedService && selectedService.status !== "Completed" ? (
-              <>
-                <button className="btn-primary" onClick={completeService}>
-                  <i className="fas fa-check" /> Mark as Complete
-                </button>
-                <button className="btn-secondary" onClick={() => closeModal("serviceModal")}>
-                  Close
-                </button>
-              </>
-            ) : (
-              <button className="btn-secondary" onClick={() => closeModal("serviceModal")}>
-                Close
-              </button>
-            )}
+            <button className="btn-secondary" onClick={() => closeModal("serviceModal")}>
+              Close
+            </button>
           </div>
         </div>
       </div>
@@ -788,177 +792,6 @@ function AccountantEachClientPage() {
             </button>
             <button className="btn-secondary" onClick={() => closeModal("documentModal")}>
               Close
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div
-        className={`modal${isUploadModalOpen ? " active" : ""}`}
-        id="uploadModal"
-        onClick={(event) => {
-          if (event.target === event.currentTarget) {
-            closeModal("uploadModal");
-          }
-        }}
-      >
-        <div className="modal-content">
-          <div className="modal-header">
-            <h2>
-              <i className="fas fa-upload" /> Upload Document
-            </h2>
-            <button className="close-modal" onClick={() => closeModal("uploadModal")}>
-              &times;
-            </button>
-          </div>
-          <div className="modal-body">
-            <form id="uploadForm" ref={uploadFormRef} onSubmit={handleUpload}>
-              <div className="form-group">
-                <label htmlFor="documentName">Document Name</label>
-                <input
-                  type="text"
-                  id="documentName"
-                  name="documentName"
-                  value={uploadFormState.documentName}
-                  onChange={(event) =>
-                    setUploadFormState((previousState) => ({ ...previousState, documentName: event.target.value }))
-                  }
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="documentType">Document Type</label>
-                <select
-                  id="documentType"
-                  name="documentType"
-                  value={uploadFormState.documentType}
-                  onChange={(event) =>
-                    setUploadFormState((previousState) => ({ ...previousState, documentType: event.target.value }))
-                  }
-                  required
-                >
-                  <option value="">Select Type</option>
-                  {ACCOUNTANT_UPLOAD_DOCUMENT_TYPES.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Choose File</label>
-                <div className="file-upload-area" onClick={() => fileInputRef.current?.click()}>
-                  <i className="fas fa-cloud-upload-alt" />
-                  <h4>{uploadAreaText.heading}</h4>
-                  <p>{uploadAreaText.caption}</p>
-                </div>
-                <input
-                  type="file"
-                  id="fileInput"
-                  name="file"
-                  accept=".pdf,.doc,.docx"
-                  ref={fileInputRef}
-                  onChange={(event) => {
-                    const file = event.target.files && event.target.files[0];
-                    setUploadFileName(file ? file.name : "");
-                  }}
-                  required
-                />
-              </div>
-            </form>
-          </div>
-          <div className="modal-footer">
-            <button className="btn-primary" onClick={() => uploadFormRef.current?.requestSubmit()}>
-              <i className="fas fa-upload" /> Upload
-            </button>
-            <button className="btn-secondary" onClick={() => closeModal("uploadModal")}>
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div
-        className={`modal${isUploadReportModalOpen ? " active" : ""}`}
-        id="uploadReportModal"
-        onClick={(event) => {
-          if (event.target === event.currentTarget) {
-            closeModal("uploadReportModal");
-          }
-        }}
-      >
-        <div className="modal-content">
-          <div className="modal-header">
-            <h2>
-              <i className="fas fa-file-upload" /> Upload Report
-            </h2>
-            <button className="close-modal" onClick={() => closeModal("uploadReportModal")}>
-              &times;
-            </button>
-          </div>
-          <div className="modal-body">
-            <form id="uploadReportForm" ref={uploadReportFormRef} onSubmit={handleUploadReport}>
-              <div className="form-group">
-                <label htmlFor="reportType">Report Type</label>
-                <select
-                  id="reportType"
-                  name="reportType"
-                  value={uploadReportFormState.reportType}
-                  onChange={(event) =>
-                    setUploadReportFormState((previousState) => ({ ...previousState, reportType: event.target.value }))
-                  }
-                  required
-                >
-                  <option value="">Select Type</option>
-                  {ACCOUNTANT_UPLOAD_REPORT_TYPES.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label htmlFor="reportPeriod">Reporting Period</label>
-                <input
-                  type="text"
-                  id="reportPeriod"
-                  name="reportPeriod"
-                  placeholder="e.g., Q1 2024"
-                  value={uploadReportFormState.reportPeriod}
-                  onChange={(event) =>
-                    setUploadReportFormState((previousState) => ({ ...previousState, reportPeriod: event.target.value }))
-                  }
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Choose File</label>
-                <div className="file-upload-area" onClick={() => reportFileInputRef.current?.click()}>
-                  <i className="fas fa-cloud-upload-alt" />
-                  <h4>{reportUploadAreaText.heading}</h4>
-                  <p>{reportUploadAreaText.caption}</p>
-                </div>
-                <input
-                  type="file"
-                  id="reportFileInput"
-                  name="reportFile"
-                  accept=".pdf,.xlsx,.xls,.doc,.docx"
-                  ref={reportFileInputRef}
-                  onChange={(event) => {
-                    const file = event.target.files && event.target.files[0];
-                    setUploadReportFileName(file ? file.name : "");
-                  }}
-                  required
-                />
-              </div>
-            </form>
-          </div>
-          <div className="modal-footer">
-            <button className="btn-primary" onClick={() => uploadReportFormRef.current?.requestSubmit()}>
-              <i className="fas fa-upload" /> Upload Report
-            </button>
-            <button className="btn-secondary" onClick={() => closeModal("uploadReportModal")}>
-              Cancel
             </button>
           </div>
         </div>

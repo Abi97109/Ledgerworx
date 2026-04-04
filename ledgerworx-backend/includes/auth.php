@@ -27,12 +27,79 @@ function lw_get_login_page_url() {
 	return home_url( '/login/' );
 }
 
-function lw_get_client_signout_page_url() {
-	return home_url( '/portal/client/signout' );
+function lw_get_portal_base_url_for_role( $role = '' ) {
+	switch ( (string) $role ) {
+		case 'lw_accountant':
+			return home_url( '/portal/accountant/' );
+		case 'lw_salesperson':
+			return home_url( '/portal/sales/' );
+		case 'lw_manager':
+			return home_url( '/portal/manager/' );
+		case 'administrator':
+			return home_url( '/portal/admin/' );
+		case 'lw_client':
+		default:
+			return home_url( '/portal/client/' );
+	}
 }
 
-function lw_get_portal_base_url() {
-	return home_url( '/portal/client/' );
+function lw_get_signout_page_url_for_role( $role = '' ) {
+	switch ( (string) $role ) {
+		case 'lw_accountant':
+			return home_url( '/portal/accountant/signout' );
+		case 'lw_salesperson':
+			return home_url( '/portal/sales/signout' );
+		case 'lw_manager':
+			return home_url( '/portal/manager/signout' );
+		case 'administrator':
+			return home_url( '/portal/admin/logout' );
+		case 'lw_client':
+		default:
+			return home_url( '/portal/client/signout' );
+	}
+}
+
+function lw_get_current_portal_role( $user = null ) {
+	if ( ! $user ) {
+		$user = wp_get_current_user();
+	}
+
+	if ( ! $user || empty( $user->roles ) ) {
+		return 'lw_client';
+	}
+
+	return (string) ( $user->roles[0] ?? 'lw_client' );
+}
+
+function lw_get_client_signout_page_url() {
+	return lw_get_signout_page_url_for_role( 'lw_client' );
+}
+
+function lw_get_portal_base_url( $user = null ) {
+	return lw_get_portal_base_url_for_role( lw_get_current_portal_role( $user ) );
+}
+
+function lw_get_portal_signout_page_url( $user = null ) {
+	return lw_get_signout_page_url_for_role( lw_get_current_portal_role( $user ) );
+}
+
+function lw_is_portal_signout_request( $uri = '' ) {
+	$uri = (string) $uri;
+	$signout_paths = array(
+		'/portal/client/signout',
+		'/portal/accountant/signout',
+		'/portal/sales/signout',
+		'/portal/manager/signout',
+		'/portal/admin/logout',
+	);
+
+	foreach ( $signout_paths as $path ) {
+		if ( strpos( $uri, $path ) !== false ) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 function lw_is_portal_user( $user = null ) {
@@ -64,8 +131,8 @@ function lw_can_access_portal_api( $user = null ) {
 	return lw_is_portal_user( $user ) || in_array( 'administrator', $roles, true );
 }
 
-function lw_get_logout_url( $redirect_url = '' ) {
-	$target = $redirect_url ? $redirect_url : lw_get_client_signout_page_url();
+function lw_get_logout_url( $redirect_url = '', $user = null ) {
+	$target = $redirect_url ? $redirect_url : lw_get_portal_signout_page_url( $user );
 	return home_url( '/?lw_action=logout&redirect_to=' . rawurlencode( $target ) );
 }
 
@@ -172,7 +239,7 @@ add_action(
 		}
 
 		$uri                    = $_SERVER['REQUEST_URI'] ?? '';
-		$is_client_signout_page = strpos( $uri, '/portal/client/signout' ) !== false;
+		$is_portal_signout_page = lw_is_portal_signout_request( $uri );
 
 		if ( is_user_logged_in() && strpos( $uri, '/login' ) !== false ) {
 			$user = wp_get_current_user();
@@ -180,7 +247,7 @@ add_action(
 			exit;
 		}
 
-		if ( ! is_user_logged_in() && strpos( $uri, '/portal' ) !== false && ! $is_client_signout_page ) {
+		if ( ! is_user_logged_in() && strpos( $uri, '/portal' ) !== false && ! $is_portal_signout_page ) {
 			wp_safe_redirect( lw_get_login_page_url() );
 			exit;
 		}

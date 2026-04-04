@@ -91,30 +91,6 @@ async function deleteClientRequest(requestId) {
     }
 }
 
-async function advanceClientRequestDebug(requestId) {
-    try {
-        return await requestPortalJsonWithBody(
-            `/wp-json/lw/v1/client/requests/${encodeURIComponent(requestId)}/advance-debug`,
-            'POST',
-            {}
-        );
-    } catch (error) {
-        if (!(error instanceof PortalApiError) || error.status !== 401) {
-            throw error;
-        }
-
-        return requestPortalJson('/wp-admin/admin-ajax.php?action=lw_advance_client_request_debug', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-            },
-            body: new URLSearchParams({
-                requestId: String(requestId || '')
-            }).toString()
-        });
-    }
-}
-
 async function uploadClientRequestDocument(requestId, file, documentName = '') {
     if (!requestId) {
         throw new Error('Request ID is required for document upload.');
@@ -214,7 +190,6 @@ export {
     createClientRequest,
     updateClientRequest,
     deleteClientRequest,
-    advanceClientRequestDebug,
     uploadClientRequestDocument,
     fetchClientDocuments,
     deleteClientDocument,

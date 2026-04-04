@@ -1,0 +1,245 @@
+.employee-portal-loader {
+  display: grid;
+  place-items: center;
+  width: 100%;
+}
+
+.employee-portal-loader--full-height {
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.employee-portal-loader__panel {
+  width: min(100%, 720px);
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 28px 30px;
+  border-radius: 24px;
+  border: 1px solid rgba(47, 183, 176, 0.18);
+  background:
+    radial-gradient(circle at top left, rgba(47, 183, 176, 0.16), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(240, 251, 251, 0.96));
+  box-shadow: 0 24px 60px rgba(12, 56, 68, 0.12);
+}
+
+.employee-portal-loader--compact .employee-portal-loader__panel {
+  width: min(100%, 560px);
+  padding: 18px 20px;
+  border-radius: 18px;
+  box-shadow: 0 12px 28px rgba(12, 56, 68, 0.08);
+}
+
+.employee-portal-loader__glyph {
+  position: relative;
+  width: 86px;
+  height: 86px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+}
+
+.employee-portal-loader--compact .employee-portal-loader__glyph {
+  width: 64px;
+  height: 64px;
+}
+
+.employee-portal-loader__glyph-mark {
+  position: relative;
+  z-index: 3;
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font: 700 17px/1 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #ffffff;
+  letter-spacing: 0.12em;
+  background: linear-gradient(135deg, #1f8f8b, #2fb7b0);
+  box-shadow: 0 12px 28px rgba(31, 143, 139, 0.28);
+}
+
+.employee-portal-loader--compact .employee-portal-loader__glyph-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  font-size: 13px;
+}
+
+.employee-portal-loader__glyph-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(31, 143, 139, 0.18);
+}
+
+.employee-portal-loader__glyph-ring--outer {
+  animation: employeePortalPulse 2.2s ease-in-out infinite;
+}
+
+.employee-portal-loader__glyph-ring--inner {
+  inset: 12px;
+  animation: employeePortalPulse 2.2s ease-in-out infinite 0.45s;
+}
+
+.employee-portal-loader__content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.employee-portal-loader__eyebrow {
+  font: 600 11px/1.2 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #1f8f8b;
+  margin-bottom: 10px;
+}
+
+.employee-portal-loader__title {
+  margin: 0;
+  font: 700 clamp(22px, 2.4vw, 30px)/1.1 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #0f1724;
+}
+
+.employee-portal-loader--compact .employee-portal-loader__title {
+  font-size: 20px;
+}
+
+.employee-portal-loader__message {
+  margin: 10px 0 0;
+  max-width: 48ch;
+  font: 400 15px/1.65 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #4b5563;
+}
+
+.employee-portal-loader--compact .employee-portal-loader__message {
+  font-size: 14px;
+}
+
+.employee-portal-loader__bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.employee-portal-loader__bars span {
+  width: 12px;
+  height: 18px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #2fb7b0, #1f8f8b);
+  animation: employeePortalBars 0.95s ease-in-out infinite;
+}
+
+.employee-portal-loader__bars span:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.employee-portal-loader__bars span:nth-child(3) {
+  animation-delay: 0.24s;
+}
+
+.employee-portal-loader__action {
+  margin-top: 18px;
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #1f8f8b, #2fb7b0);
+  color: #ffffff;
+  font: 600 14px/1 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(31, 143, 139, 0.22);
+}
+
+.employee-portal-loader--error .employee-portal-loader__panel {
+  border-color: rgba(220, 38, 38, 0.18);
+  background:
+    radial-gradient(circle at top left, rgba(248, 113, 113, 0.16), transparent 32%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 245, 245, 0.98));
+}
+
+.employee-portal-loader--error .employee-portal-loader__eyebrow {
+  color: #b91c1c;
+}
+
+.employee-portal-loader--error .employee-portal-loader__glyph-mark {
+  background: linear-gradient(135deg, #f97316, #ef4444);
+  box-shadow: 0 12px 28px rgba(239, 68, 68, 0.24);
+}
+
+body.sales-theme-dark .employee-portal-loader__panel,
+body.dark-mode .employee-portal-loader__panel,
+body.dark .employee-portal-loader__panel,
+html.dark body .employee-portal-loader__panel {
+  border-color: rgba(112, 217, 209, 0.16);
+  background:
+    radial-gradient(circle at top left, rgba(47, 183, 176, 0.18), transparent 34%),
+    linear-gradient(135deg, rgba(13, 28, 38, 0.96), rgba(17, 36, 50, 0.98));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
+}
+
+body.sales-theme-dark .employee-portal-loader__title,
+body.dark-mode .employee-portal-loader__title,
+body.dark .employee-portal-loader__title,
+html.dark body .employee-portal-loader__title {
+  color: #eef7fb;
+}
+
+body.sales-theme-dark .employee-portal-loader__message,
+body.dark-mode .employee-portal-loader__message,
+body.dark .employee-portal-loader__message,
+html.dark body .employee-portal-loader__message {
+  color: #b8c9d6;
+}
+
+body.sales-theme-dark .employee-portal-loader--error .employee-portal-loader__panel,
+body.dark-mode .employee-portal-loader--error .employee-portal-loader__panel,
+body.dark .employee-portal-loader--error .employee-portal-loader__panel,
+html.dark body .employee-portal-loader--error .employee-portal-loader__panel {
+  border-color: rgba(248, 113, 113, 0.2);
+  background:
+    radial-gradient(circle at top left, rgba(248, 113, 113, 0.14), transparent 32%),
+    linear-gradient(135deg, rgba(30, 17, 20, 0.96), rgba(46, 22, 26, 0.96));
+}
+
+@keyframes employeePortalPulse {
+  0%,
+  100% {
+    transform: scale(0.96);
+    opacity: 0.34;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 0.78;
+  }
+}
+
+@keyframes employeePortalBars {
+  0%,
+  100% {
+    transform: scaleY(0.72);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scaleY(1.26);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 720px) {
+  .employee-portal-loader__panel {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 22px 20px;
+  }
+
+  .employee-portal-loader__glyph {
+    width: 72px;
+    height: 72px;
+  }
+
+  .employee-portal-loader__glyph-mark {
+    width: 46px;
+    height: 46px;
+  }
+}

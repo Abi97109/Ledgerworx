@@ -1,8 +1,9 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AdminHeader from "../components/AdminHeader";
 import { adminProfileInitialData } from "../data/adminProfileData";
 import { useAdminPageStyles } from "../utils/useAdminPageStyles";
 import adminProfileCss from "../styles/admin_profile.css?raw";
+import { usePortalSession } from "../../../session/PortalSessionProvider";
 
 function buildFormValues(profile) {
   return {
@@ -16,6 +17,19 @@ function buildFormValues(profile) {
     currentPassword: "",
     newPassword: "",
     confirmPassword: ""
+  };
+}
+
+function buildAdminProfileFromSession(profile) {
+  return {
+    fullName: profile?.name || adminProfileInitialData.fullName,
+    username: profile?.username || adminProfileInitialData.username,
+    email: profile?.email || adminProfileInitialData.email,
+    phone: profile?.phone || adminProfileInitialData.phone,
+    employeeId: profile?.employeeId || adminProfileInitialData.employeeId,
+    department: profile?.department || adminProfileInitialData.department,
+    designation: profile?.designation || profile?.role || adminProfileInitialData.designation,
+    profilePhoto: profile?.avatarUrl || adminProfileInitialData.profilePhoto
   };
 }
 
@@ -70,12 +84,22 @@ function validateProfileForm(values) {
 
 export default function AdminProfilePage() {
   useAdminPageStyles({ pageKey: "profile", pageCssText: adminProfileCss });
-  const [savedProfile, setSavedProfile] = useState(adminProfileInitialData);
-  const [formValues, setFormValues] = useState(buildFormValues(adminProfileInitialData));
-  const [photoPreview, setPhotoPreview] = useState(adminProfileInitialData.profilePhoto);
+  const session = usePortalSession();
+  const initialProfile = buildAdminProfileFromSession(session.data?.profile);
+  const [savedProfile, setSavedProfile] = useState(initialProfile);
+  const [formValues, setFormValues] = useState(buildFormValues(initialProfile));
+  const [photoPreview, setPhotoPreview] = useState(initialProfile.profilePhoto);
   const [formErrors, setFormErrors] = useState([]);
   const [formSuccess, setFormSuccess] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const photoInputRef = useRef(null);
+
+  useEffect(() => {
+    const nextProfile = buildAdminProfileFromSession(session.data?.profile);
+    setSavedProfile(nextProfile);
+    setFormValues(buildFormValues(nextProfile));
+    setPhotoPreview(nextProfile.profilePhoto);
+  }, [session.data?.profile]);
 
   function handleFieldChange(field, value) {
     setFormValues((currentValues) => ({
@@ -113,25 +137,56 @@ export default function AdminProfilePage() {
       return;
     }
 
-    const nextSavedProfile = {
-      fullName: formValues.fullName.trim(),
-      username: formValues.username.trim(),
-      email: formValues.email.trim(),
-      phone: formValues.phone.trim(),
-      employeeId: savedProfile.employeeId,
-      department: savedProfile.department,
-      designation: formValues.designation.trim(),
-      profilePhoto: photoPreview
-    };
+    setIsSaving(true);
 
-    setSavedProfile(nextSavedProfile);
-    setFormValues(buildFormValues(nextSavedProfile));
-    setFormErrors([]);
-    setFormSuccess("Profile updated successfully.");
+    fetch("/wp-admin/admin-ajax.php?action=lw_save_portal_profile", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        Accept: "application/json"
+      },
+      body: new URLSearchParams({
+        name: formValues.fullName.trim(),
+        email: formValues.email.trim(),
+        phone: formValues.phone.trim(),
+        department: savedProfile.department,
+        designation: formValues.designation.trim()
+      })
+    })
+      .then(async (response) => ({ ok: response.ok, payload: await response.json() }))
+      .then(({ ok, payload }) => {
+        if (!ok || !payload?.profile) {
+          setFormErrors([payload?.message || "Unable to update profile."]);
+          setFormSuccess("");
+          return;
+        }
 
-    if (photoInputRef.current) {
-      photoInputRef.current.value = "";
-    }
+        if (session.data) {
+          session.data.profile = payload.profile;
+        }
+
+        const nextSavedProfile = {
+          ...buildAdminProfileFromSession(payload.profile)
+        };
+
+        setSavedProfile(nextSavedProfile);
+        setFormValues(buildFormValues(nextSavedProfile));
+        setPhotoPreview(nextSavedProfile.profilePhoto);
+        setFormErrors([]);
+        setFormSuccess("Profile updated successfully.");
+
+        if (photoInputRef.current) {
+          photoInputRef.current.value = "";
+        }
+      })
+      .catch(() => {
+        setFormErrors(["Unable to update profile."]);
+        setFormSuccess("");
+      })
+      .finally(() => {
+        setIsSaving(false);
+      });
   }
 
   function handleCancel() {
@@ -232,10 +287,7 @@ export default function AdminProfilePage() {
                       id="username"
                       name="username"
                       value={formValues.username}
-                      onChange={(event) => {
-                        handleFieldChange("username", event.target.value);
-                      }}
-                      required
+                      readOnly
                     />
                   </div>
 
@@ -357,8 +409,8 @@ export default function AdminProfilePage() {
                 </div>
 
                 <div className="form-actions">
-                  <button type="submit" className="btn primary">
-                    Save
+                  <button type="submit" className="btn primary" disabled={isSaving}>
+                    {isSaving ? "Saving..." : "Save"}
                   </button>
                   <button
                     type="button"

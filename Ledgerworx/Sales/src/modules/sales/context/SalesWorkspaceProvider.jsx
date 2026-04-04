@@ -1,113 +1,208 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { dashboardData } from "../../../data/mockData";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  convertSalesLead,
+  createSalesLead,
+  deleteSalesLead,
+  fetchSalesContacts,
+  fetchSalesLeads
+} from "../api/salesPortalApi";
 
 const SalesWorkspaceContext = createContext(null);
-const SALES_LEADS_STORAGE_KEY = "ledgerworx-sales-leads";
-const SALES_CONTACTS_STORAGE_KEY = "ledgerworx-sales-contacts";
+const SALES_WORKSPACE_CACHE_KEY = "ledgerworx-sales-workspace-cache";
 
-function buildInitialLeads() {
-  return dashboardData.recentLeads.map((lead) => ({
-    company: lead.company || "Website Lead",
-    source: lead.source || "Business Setup",
-    ...lead
-  }));
+function shouldAutoloadWorkspace() {
+  if (typeof window === "undefined") {
+    return true;
+  }
+
+  const pathname = String(window.location.pathname || "");
+  return !/\/sales\/contacts\/[^/]+\/?$/.test(pathname);
 }
 
-function buildContactFromLead(lead) {
+function buildDefaultRequestTracking() {
+  return [
+    { label: "Request for Service", status: "pending" },
+    { label: "Documents Upload", status: "pending" },
+    { label: "Verification", status: "pending" },
+    { label: "Payment", status: "pending" },
+    { label: "Processing", status: "pending" },
+    { label: "Confirmation", status: "pending" },
+    { label: "Service Completion", status: "pending" }
+  ];
+}
+
+function normalizeContact(contact) {
   return {
-    id: `contact-${lead.id}`,
-    leadId: lead.id,
-    name: lead.name,
-    accountName: lead.company || "Website Lead",
-    email: lead.email,
-    phone: lead.phone,
-    owner: lead.owner || "John Carter",
-    leadSource: lead.source || "Business Setup",
-    portalStatus: "Invited",
-    proposalStatus: "Proposal Sent",
     requestedItems: [],
-    requestTracking: [
-      { label: "Request for Service", status: "current" },
-      { label: "Documents Upload", status: "pending" },
-      { label: "Verification", status: "pending" },
-      { label: "Payment", status: "pending" },
-      { label: "Processing", status: "pending" },
-      { label: "Confirmation", status: "pending" },
-      { label: "Service Completion", status: "pending" }
-    ],
+    requestTracking: buildDefaultRequestTracking(),
     documents: [],
     payment: {
       status: "Pending",
-      notes: "Payment confirmation should be handled by Accounts or Admin."
-    }
+      notes: "Payment confirmation will be handled later in the workflow."
+    },
+    portalStatus: "Invited",
+    ...contact
   };
 }
 
-function readStoredCollection(storageKey, fallbackValue) {
+function readSalesWorkspaceCache() {
   if (typeof window === "undefined") {
-    return fallbackValue;
+    return { leads: [], contacts: [] };
   }
 
   try {
-    const rawValue = window.localStorage.getItem(storageKey);
-    if (!rawValue) {
-      return fallbackValue;
+    const raw = window.localStorage.getItem(SALES_WORKSPACE_CACHE_KEY);
+    if (!raw) {
+      return { leads: [], contacts: [] };
     }
 
-    const parsed = JSON.parse(rawValue);
-    return Array.isArray(parsed) ? parsed : fallbackValue;
-  } catch (error) {
-    return fallbackValue;
+    const parsed = JSON.parse(raw);
+    return {
+      leads: Array.isArray(parsed?.leads) ? parsed.leads : [],
+      contacts: Array.isArray(parsed?.contacts) ? parsed.contacts.map(normalizeContact) : []
+    };
+  } catch {
+    return { leads: [], contacts: [] };
+  }
+}
+
+function saveSalesWorkspaceCache(leads, contacts) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(
+      SALES_WORKSPACE_CACHE_KEY,
+      JSON.stringify({
+        leads: Array.isArray(leads) ? leads : [],
+        contacts: Array.isArray(contacts) ? contacts : []
+      })
+    );
+  } catch {
+    // no-op
   }
 }
 
 export function SalesWorkspaceProvider({ children }) {
-  const [leads, setLeads] = useState(() => readStoredCollection(SALES_LEADS_STORAGE_KEY, buildInitialLeads()));
-  const [contacts, setContacts] = useState(() => readStoredCollection(SALES_CONTACTS_STORAGE_KEY, []));
+  const cachedWorkspace = useMemo(() => readSalesWorkspaceCache(), []);
+  const [leads, setLeads] = useState(cachedWorkspace.leads);
+  const [contacts, setContacts] = useState(cachedWorkspace.contacts);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const leadsRef = useRef(cachedWorkspace.leads);
+  const contactsRef = useRef(cachedWorkspace.contacts);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(SALES_LEADS_STORAGE_KEY, JSON.stringify(leads));
-    }
+    leadsRef.current = leads;
   }, [leads]);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(SALES_CONTACTS_STORAGE_KEY, JSON.stringify(contacts));
-    }
+    contactsRef.current = contacts;
   }, [contacts]);
+
+  const loadWorkspace = useCallback(async () => {
+    setIsLoading(true);
+    setError("");
+
+    const [leadsResult, contactsResult] = await Promise.allSettled([
+      fetchSalesLeads(),
+      fetchSalesContacts()
+    ]);
+
+    let nextLeads = leadsRef.current;
+    let nextContacts = contactsRef.current;
+    let nextError = "";
+
+    if (leadsResult.status === "fulfilled") {
+      nextLeads = Array.isArray(leadsResult.value?.leads) ? leadsResult.value.leads : [];
+      setLeads(nextLeads);
+    } else {
+      nextError = leadsResult.reason?.message || "Unable to load live leads from Zoho CRM.";
+    }
+
+    if (contactsResult.status === "fulfilled") {
+      nextContacts = Array.isArray(contactsResult.value?.contacts)
+        ? contactsResult.value.contacts.map(normalizeContact)
+        : [];
+      setContacts(nextContacts);
+    } else {
+      nextError = nextError || contactsResult.reason?.message || "Unable to load live contacts from Zoho CRM.";
+    }
+
+    saveSalesWorkspaceCache(nextLeads, nextContacts);
+    setError(nextError);
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (!shouldAutoloadWorkspace()) {
+      setIsLoading(false);
+      return;
+    }
+
+    loadWorkspace();
+  }, [loadWorkspace]);
 
   const value = useMemo(
     () => ({
       leads,
       contacts,
-      addLead(lead) {
-        setLeads((prev) => [lead, ...prev]);
-      },
-      convertLead(leadId) {
-        const matchedLead = leads.find((lead) => lead.id === leadId);
-        if (!matchedLead) {
-          return null;
+      isLoading,
+      error,
+      refreshWorkspace: loadWorkspace,
+      async addLead(lead) {
+        const payload = await createSalesLead(lead);
+        if (payload?.lead) {
+          setLeads((prev) => {
+            const nextLeads = [payload.lead, ...prev.filter((item) => item.id !== payload.lead.id)];
+            saveSalesWorkspaceCache(nextLeads, contactsRef.current);
+            return nextLeads;
+          });
+          return payload.lead;
         }
+        await loadWorkspace();
+        return null;
+      },
+      async deleteLead(leadId) {
+        await deleteSalesLead(leadId);
+        setLeads((prev) => {
+          const nextLeads = prev.filter((lead) => lead.id !== leadId);
+          saveSalesWorkspaceCache(nextLeads, contactsRef.current);
+          return nextLeads;
+        });
+      },
+      async convertLead(leadId) {
+        const payload = await convertSalesLead(leadId);
+        const nextContact = payload?.contact ? normalizeContact(payload.contact) : null;
 
-        setLeads((prev) => prev.filter((lead) => lead.id !== leadId));
-
-        const contact = buildContactFromLead(matchedLead);
-        setContacts((prev) => {
-          const exists = prev.some((item) => item.leadId === leadId || item.email === contact.email);
-          return exists ? prev : [contact, ...prev];
+        setLeads((prev) => {
+          const nextLeads = prev.filter((lead) => lead.id !== leadId);
+          saveSalesWorkspaceCache(nextLeads, contactsRef.current);
+          return nextLeads;
         });
 
-        return contact;
+        if (nextContact) {
+          setContacts((prev) => {
+            const remaining = prev.filter((contact) => contact.id !== nextContact.id);
+            const nextContacts = [nextContact, ...remaining];
+            saveSalesWorkspaceCache(leadsRef.current.filter((lead) => lead.id !== leadId), nextContacts);
+            return nextContacts;
+          });
+        } else {
+          await loadWorkspace();
+        }
+
+        return nextContact;
       },
       getLeadById(leadId) {
-        return leads.find((lead) => lead.id === leadId) || null;
+        return leads.find((lead) => String(lead.id) === String(leadId)) || null;
       },
       getContactById(contactId) {
-        return contacts.find((contact) => contact.id === contactId) || null;
+        return contacts.find((contact) => String(contact.id) === String(contactId)) || null;
       }
     }),
-    [contacts, leads]
+    [contacts, error, isLoading, leads, loadWorkspace]
   );
 
   return <SalesWorkspaceContext.Provider value={value}>{children}</SalesWorkspaceContext.Provider>;

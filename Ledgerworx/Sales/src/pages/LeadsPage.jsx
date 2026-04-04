@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SalesLayout from "../components/SalesLayout";
+import EmployeePortalLoader from "../../../shared/employee-ui/EmployeePortalLoader";
 import { useSalesWorkspace } from "../modules/sales/context/SalesWorkspaceProvider";
 import { buildSalesContactDetailRoute, buildSalesLeadDetailRoute } from "../modules/sales/utils/routePaths";
 
@@ -16,11 +17,15 @@ const defaultLeadForm = {
 
 export default function LeadsPage() {
   const navigate = useNavigate();
-  const { leads, addLead, convertLead } = useSalesWorkspace();
+  const { leads, addLead, convertLead, deleteLead, isLoading, error, refreshWorkspace } = useSalesWorkspace();
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [newLead, setNewLead] = useState(defaultLeadForm);
+  const [formError, setFormError] = useState("");
+  const [isSavingLead, setIsSavingLead] = useState(false);
+  const [isConvertingLeadId, setIsConvertingLeadId] = useState("");
+  const [isDeletingLeadId, setIsDeletingLeadId] = useState("");
 
   const filteredLeads = useMemo(() => {
     return leads.filter((lead) => {
@@ -36,15 +41,24 @@ export default function LeadsPage() {
     });
   }, [leads, filter, search]);
 
-  const handleAddLead = () => {
+  const handleAddLead = async () => {
     if (!newLead.name.trim() || !newLead.company.trim() || !newLead.email.trim() || !newLead.phone.trim()) {
+      setFormError("Please complete all required lead fields.");
       return;
     }
 
-    const id = newLead.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    addLead({ id, ...newLead });
-    setNewLead(defaultLeadForm);
-    setShowModal(false);
+    setFormError("");
+    setIsSavingLead(true);
+
+    try {
+      await addLead(newLead);
+      setNewLead(defaultLeadForm);
+      setShowModal(false);
+    } catch (saveError) {
+      setFormError(saveError?.message || "Unable to create the lead in Zoho CRM.");
+    } finally {
+      setIsSavingLead(false);
+    }
   };
 
   const sendProposal = (lead) => {
@@ -55,10 +69,35 @@ export default function LeadsPage() {
     }
   };
 
-  const handleConvertLead = (leadId) => {
-    const contact = convertLead(leadId);
-    if (contact) {
-      navigate(buildSalesContactDetailRoute(contact.id));
+  const handleConvertLead = async (leadId) => {
+    setIsConvertingLeadId(String(leadId));
+
+    try {
+      const contact = await convertLead(leadId);
+      if (contact) {
+        navigate(buildSalesContactDetailRoute(contact.id));
+      }
+    } catch (convertError) {
+      window.alert(convertError?.message || "Unable to convert this lead right now.");
+    } finally {
+      setIsConvertingLeadId("");
+    }
+  };
+
+  const handleDeleteLead = async (leadId) => {
+    const confirmed = window.confirm("Delete this lead from Zoho CRM and the Sales workspace?");
+    if (!confirmed) {
+      return;
+    }
+
+    setIsDeletingLeadId(String(leadId));
+
+    try {
+      await deleteLead(leadId);
+    } catch (deleteError) {
+      window.alert(deleteError?.message || "Unable to delete this lead right now.");
+    } finally {
+      setIsDeletingLeadId("");
     }
   };
 
@@ -68,6 +107,15 @@ export default function LeadsPage() {
         <div className="lw-page-header">
           <h1>Leads</h1>
         </div>
+
+        {error ? (
+          <div className="crm-status-banner crm-status-banner--error">
+            <span>{error}</span>
+            <button type="button" className="add-btn" onClick={refreshWorkspace}>
+              Retry
+            </button>
+          </div>
+        ) : null}
 
         <div className="leads-toolbar-card">
           <div className="leads-toolbar-top">
@@ -114,7 +162,17 @@ export default function LeadsPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredLeads.length ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan="7" className="crm-empty-cell">
+                    <EmployeePortalLoader
+                      compact
+                      title="Loading live leads"
+                      message="Syncing the latest lead data from Zoho CRM for your sales workspace."
+                    />
+                  </td>
+                </tr>
+              ) : filteredLeads.length ? (
                 filteredLeads.map((lead) => (
                   <tr key={lead.id}>
                     <td>
@@ -135,8 +193,21 @@ export default function LeadsPage() {
                         <button type="button" className="add-btn" onClick={() => sendProposal(lead)}>
                           Send Proposal
                         </button>
-                        <button type="button" className="lw-btn" onClick={() => handleConvertLead(lead.id)}>
-                          Convert to Client
+                        <button
+                          type="button"
+                          className="lw-btn"
+                          onClick={() => handleConvertLead(lead.id)}
+                          disabled={isConvertingLeadId === String(lead.id)}
+                        >
+                          {isConvertingLeadId === String(lead.id) ? "Converting..." : "Convert to Client"}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-cancel"
+                          onClick={() => handleDeleteLead(lead.id)}
+                          disabled={isDeletingLeadId === String(lead.id)}
+                        >
+                          {isDeletingLeadId === String(lead.id) ? "Deleting..." : "Delete"}
                         </button>
                       </div>
                     </td>
@@ -166,6 +237,7 @@ export default function LeadsPage() {
               </div>
 
               <div className="sales-form-stack">
+                {formError ? <div className="crm-inline-error">{formError}</div> : null}
                 <div className="form-group sales-form-field">
                   <label htmlFor="leadName">Lead Name</label>
                   <input
@@ -249,8 +321,8 @@ export default function LeadsPage() {
                 <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>
                   Cancel
                 </button>
-                <button className="lw-btn" onClick={handleAddLead}>
-                  Save Lead
+                <button className="lw-btn" onClick={handleAddLead} disabled={isSavingLead}>
+                  {isSavingLead ? "Saving..." : "Save Lead"}
                 </button>
               </div>
             </div>

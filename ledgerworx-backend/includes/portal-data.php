@@ -134,17 +134,46 @@ function lw_build_profile_payload( $user = null ) {
 		return array();
 	}
 
+	$roles          = (array) $user->roles;
+	$primary_role   = (string) ( $roles[0] ?? '' );
+	$role_labels    = array(
+		'lw_client'     => 'Client',
+		'lw_salesperson'=> 'Sales Executive',
+		'lw_accountant' => 'Accountant',
+		'lw_manager'    => 'Manager',
+		'administrator' => 'Administrator',
+	);
+	$location_parts = array_filter(
+		array(
+			get_user_meta( $user->ID, 'billing_city', true ),
+			get_user_meta( $user->ID, 'billing_state', true ),
+			get_user_meta( $user->ID, 'billing_country', true ),
+		)
+	);
+	$location_label = implode( ', ', $location_parts );
+
+	if ( ! $location_label ) {
+		$location_label = (string) get_user_meta( $user->ID, 'location', true );
+	}
+
 	return array(
-		'id'          => (int) $user->ID,
-		'name'        => lw_get_user_display_name( $user ),
-		'email'       => $user->user_email,
-		'phone'       => lw_get_user_phone( $user->ID ),
-		'companyName' => lw_get_user_company_name( $user->ID ),
-		'avatarUrl'   => get_avatar_url( $user->ID, array( 'size' => 96 ) ),
-		'status'      => 'Active',
-		'clientType'  => lw_get_user_type_label( $user ),
-		'userType'    => lw_get_user_type_label( $user ),
-		'clientSince' => lw_get_client_since_label( $user ),
+		'id'                  => (int) $user->ID,
+		'name'                => lw_get_user_display_name( $user ),
+		'username'            => (string) $user->user_login,
+		'email'               => $user->user_email,
+		'phone'               => lw_get_user_phone( $user->ID ),
+		'companyName'         => lw_get_user_company_name( $user->ID ),
+		'avatarUrl'           => get_avatar_url( $user->ID, array( 'size' => 96 ) ),
+		'status'              => 'Active',
+		'clientType'          => lw_get_user_type_label( $user ),
+		'userType'            => lw_get_user_type_label( $user ),
+		'role'                => (string) ( $role_labels[ $primary_role ] ?? ucfirst( str_replace( array( 'lw_', '_' ), array( '', ' ' ), $primary_role ) ) ),
+		'location'            => $location_label,
+		'department'          => (string) get_user_meta( $user->ID, 'department', true ),
+		'designation'         => (string) get_user_meta( $user->ID, 'designation', true ),
+		'employeeId'          => (string) get_user_meta( $user->ID, 'employee_id', true ),
+		'joinDate'            => mysql2date( 'F j, Y', $user->user_registered ),
+		'clientSince'         => lw_get_client_since_label( $user ),
 		'requiresCompanyName' => ! (bool) lw_get_user_company_name( $user->ID ),
 	);
 }

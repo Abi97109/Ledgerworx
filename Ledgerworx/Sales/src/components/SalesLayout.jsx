@@ -14,10 +14,11 @@ import {
 } from "../modules/sales/utils/routePaths";
 import {
   applySalesTheme,
-  getSalesProfileState,
+  buildSalesProfileFromSession,
   getSalesSettingsState,
   resolveThemeFromPreference
 } from "../modules/sales/utils/salesAccountState";
+import { usePortalSession } from "../session/PortalSessionProvider";
 
 const linkClassName = ({ isActive }) => (isActive ? "active" : "");
 
@@ -119,10 +120,14 @@ function ProfileIcon() {
 }
 
 export default function SalesLayout({ pageClass, children }) {
+  const session = usePortalSession();
   const userProfileRef = useRef(null);
   const dropdownRef = useRef(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [profile] = useState(() => getSalesProfileState());
+  const profile = useMemo(
+    () => buildSalesProfileFromSession(session.data?.profile),
+    [session.data?.profile]
+  );
   const [settingsState, setSettingsState] = useState(() => getSalesSettingsState());
   const theme = useMemo(
     () => resolveThemeFromPreference(settingsState.preferences?.theme_preference),
@@ -233,7 +238,7 @@ export default function SalesLayout({ pageClass, children }) {
           <div className="sales-dropdown-divider" />
           <a href="mailto:support@ledgerworx.me" className="sales-dropdown-item">Help & Support</a>
           <div className="sales-dropdown-divider" />
-          <Link to={SALES_SIGNOUT_ROUTE} className="sales-dropdown-item sales-dropdown-item--danger">Logout</Link>
+          <a href={session.data?.config?.logoutUrl || SALES_SIGNOUT_ROUTE} className="sales-dropdown-item sales-dropdown-item--danger">Logout</a>
         </div>
       </div>
 

@@ -5,11 +5,12 @@ import {
   adminUsersRolesAddFormDefaults,
   adminUsersRolesEditDepartmentOptions,
   adminUsersRolesRoleOptions,
-  adminUsersRolesStatusOptions,
-  adminUsersRolesUsers
+  adminUsersRolesStatusOptions
 } from "../data/adminUsersRolesData";
+import { fetchAdminUsers } from "../api/adminPortalApi";
 import { useAdminPageStyles } from "../utils/useAdminPageStyles";
 import adminUsersRolesCss from "../styles/admin_usersandroles.css?raw";
+import EmployeePortalLoader from "../../../../../shared/employee-ui/EmployeePortalLoader";
 
 const compactInputStyle = {
   width: "120px"
@@ -18,12 +19,6 @@ const compactInputStyle = {
 const emailInputStyle = {
   width: "150px"
 };
-
-function buildInitialUsers() {
-  return adminUsersRolesUsers.map((user) => ({
-    ...user
-  }));
-}
 
 function roleClassFor(role) {
   return role === "Admin" ? "admin-role" : role.toLowerCase().replace(/\s+/g, "");
@@ -43,10 +38,29 @@ function createEditValues(user) {
 
 export default function AdminUsersRolesPage() {
   useAdminPageStyles({ pageKey: "users-roles", pageCssText: adminUsersRolesCss });
-  const [users, setUsers] = useState(buildInitialUsers);
+  const [users, setUsers] = useState([]);
   const [editingRows, setEditingRows] = useState({});
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [addForm, setAddForm] = useState(adminUsersRolesAddFormDefaults);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function loadUsers() {
+      setIsLoading(true);
+      setError("");
+      try {
+        const payload = await fetchAdminUsers();
+        setUsers(Array.isArray(payload?.users) ? payload.users : []);
+      } catch (loadError) {
+        setError(loadError?.message || "Unable to load admin users.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadUsers();
+  }, []);
 
   useEffect(() => {
     function handleKeyDown(event) {
@@ -149,7 +163,6 @@ export default function AdminUsersRolesPage() {
   }
 
   function cancelEdit() {
-    setUsers(buildInitialUsers());
     setEditingRows({});
     setIsAddModalOpen(false);
     resetAddForm();
@@ -260,6 +273,10 @@ export default function AdminUsersRolesPage() {
             + Add User
           </button>
         </div>
+
+        {error ? (
+          <div style={{ color: "#dc2626", marginBottom: "16px" }}>{error}</div>
+        ) : null}
 
         <div
           className={`modal-overlay${isAddModalOpen ? " open" : ""}`}
@@ -454,7 +471,17 @@ export default function AdminUsersRolesPage() {
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => {
+              {isLoading ? (
+                <tr>
+                  <td colSpan="9" style={{ textAlign: "center", padding: "24px" }}>
+                    <EmployeePortalLoader
+                      compact
+                      title="Loading employees"
+                      message="Fetching the latest WordPress user directory for the admin workspace."
+                    />
+                  </td>
+                </tr>
+              ) : users.map((user) => {
                 const isEditing = Boolean(editingRows[user.id]);
                 const editValues = editingRows[user.id];
                 const actionState = user.status === "Inactive" ? "activate" : "deactivate";

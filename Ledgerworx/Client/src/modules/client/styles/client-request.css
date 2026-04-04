@@ -848,7 +848,7 @@ body.client-requests-page .progress-step.completed .progress-step-line {
 
         body.client-requests-page .labels {
             display: grid;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
+            grid-template-columns: repeat(7, minmax(0, 1fr));
             gap: 8px;
             font-size: 11px;
             color: #64748b;
@@ -858,6 +858,7 @@ body.client-requests-page .progress-step.completed .progress-step-line {
 
         body.client-requests-page .labels span {
             line-height: 1.35;
+            white-space: nowrap;
         }
 
         body.client-requests-page .progress-steps {

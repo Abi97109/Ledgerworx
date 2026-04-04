@@ -1,12 +1,8 @@
 import React, { useEffect, useMemo } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { clientReceiptPdfStaticData } from '../data/receiptPdfData';
-import {
-    CLIENT_DASHBOARD_ROUTE,
-    CLIENT_PAYMENTS_ROUTE
-} from '../utils/routePaths';
 import '../styles/client-receiptpdf.css';
-import '../styles/client-breadcrumb.css';
+import receiptLogo from '../../../assets/logo.png';
 
 function pad2(value) {
     return String(value).padStart(2, '0');
@@ -54,22 +50,10 @@ export default function ClientReceiptPdfPage() {
 
     return (
         <div className="receipt-pdf-page">
-            <div className="toolbar">
-                <button type="button" onClick={() => window.print()}>
-                    {clientReceiptPdfStaticData.downloadButtonLabel}
-                </button>
-            </div>
-
             <main className="sheet">
-                <nav className="breadcrumb portal-breadcrumb" aria-label="Breadcrumb">
-                    <Link to={CLIENT_DASHBOARD_ROUTE}>Dashboard</Link>
-                    <span className="crumb-sep">/</span>
-                    <Link to={CLIENT_PAYMENTS_ROUTE}>Payments</Link>
-                    <span className="crumb-sep">/</span>
-                    <span className="current">Receipt PDF</span>
-                </nav>
                 <div className="top">
-                    <div>
+                    <div className="receipt-brand-block">
+                        <img src={receiptLogo} alt="LedgerWorx" className="receipt-logo" />
                         <h1 className="title">{clientReceiptPdfStaticData.heading}</h1>
                         <p className="paid-badge">{clientReceiptPdfStaticData.statusLabel}</p>
                     </div>
@@ -101,6 +85,12 @@ export default function ClientReceiptPdfPage() {
                 </div>
 
                 <p className="foot">{clientReceiptPdfStaticData.footerNote}</p>
+
+                <div className="toolbar toolbar-bottom">
+                    <button type="button" onClick={() => window.print()}>
+                        {clientReceiptPdfStaticData.downloadButtonLabel}
+                    </button>
+                </div>
             </main>
         </div>
     );

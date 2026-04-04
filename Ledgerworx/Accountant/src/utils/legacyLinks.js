@@ -19,6 +19,8 @@ export function buildLegacyUrl(relativePath = "") {
     return trimmedPath;
   }
 
+  const bootstrap = typeof window !== "undefined" ? window.__LW_PORTAL_BOOTSTRAP__ : null;
+
   let normalizedPath = trimmedPath.replace(/\\/g, "/");
 
   while (normalizedPath.startsWith("../")) {
@@ -32,6 +34,9 @@ export function buildLegacyUrl(relativePath = "") {
   } else if (normalizedPath.startsWith("accountant-n/uploads/")) {
     normalizedPath = normalizedPath.slice("accountant-n/".length);
   } else if (normalizedPath === "accountant-n/php/logout.php") {
+    if (bootstrap?.config?.logoutUrl) {
+      return bootstrap.config.logoutUrl;
+    }
     normalizedPath = "accountant/signout";
   }
 

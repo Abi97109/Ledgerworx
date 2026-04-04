@@ -33,13 +33,22 @@ function buildPaymentRows(requests) {
     return requests
         .filter((request) => {
             const stage = normalizeStage(request.workflowStage || request.status);
-            return stage.includes('payment') || stage.includes('completed');
+            return (
+                stage.includes('payment') ||
+                stage.includes('processing') ||
+                stage.includes('confirmation') ||
+                stage.includes('completed')
+            );
         })
         .map((request) => {
             const stage = normalizeStage(request.workflowStage || request.status);
             const amountValue = parseAedAmount(request.amount);
 
-            if (stage.includes('payment pending') || stage.includes('payment required')) {
+            if (
+                stage.includes('payment pending') ||
+                stage.includes('payment required') ||
+                stage === 'payment'
+            ) {
                 return {
                     id: request.requestId,
                     title: request.title,
@@ -56,6 +65,22 @@ function buildPaymentRows(requests) {
             }
 
             if (stage.includes('awaiting payment confirmation')) {
+                return {
+                    id: request.requestId,
+                    title: request.title,
+                    requestId: request.requestId,
+                    amount: request.amount || 'Amount submitted',
+                    amountValue,
+                    statusKey: 'upcoming',
+                    statusLabel: 'Awaiting Confirmation',
+                    actionLabel: 'Awaiting Confirmation',
+                    iconTone: 'blue',
+                    iconClass: 'fas fa-hourglass-half',
+                    request
+                };
+            }
+
+            if (stage.includes('processing') || stage.includes('confirmation')) {
                 return {
                     id: request.requestId,
                     title: request.title,
@@ -210,15 +235,15 @@ export default function ClientPaymentsPage() {
         await updateRequestMutation.mutateAsync({
             requestId: request.requestId,
             requestData: {
-                status: 'Completed',
-                workflowStage: 'Completed',
-                progress: buildClientProgressFromStatus('completed'),
-                actionBtn: 'View Receipt',
-                dueDate: 'Payment handoff completed',
+                status: 'Awaiting Payment Confirmation',
+                workflowStage: 'Awaiting Payment Confirmation',
+                progress: buildClientProgressFromStatus('awaiting payment confirmation'),
+                actionBtn: 'Awaiting Confirmation',
+                dueDate: 'Awaiting payment confirmation',
                 instructions: [
                     'You have been redirected to our WhatsApp payment contact.',
-                    'This request has been marked as paid after the WhatsApp payment handoff.',
-                    'You can now review the receipt from the Payments page.'
+                    'Your payment handoff has been submitted for staff confirmation.',
+                    'The request will move forward once our team verifies the payment.'
                 ]
             }
         });
@@ -240,7 +265,7 @@ export default function ClientPaymentsPage() {
                 window.open(targetUrl, '_blank', 'noopener,noreferrer');
                 try {
                     await markRequestPaid(request);
-                    showPayNowNotification('WhatsApp opened. The request has been marked as paid.');
+                    showPayNowNotification('WhatsApp opened. The request is now awaiting payment confirmation.');
                 } catch (error) {
                     showPayNowNotification(error?.message || 'WhatsApp opened, but we could not update the request status right away.');
                 }

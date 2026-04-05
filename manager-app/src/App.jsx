@@ -1,35 +1,51 @@
-import React, { useMemo, useState } from 'react';
+import React from 'react';
+import { BrowserRouter, NavLink, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
-import AppRouter from './routes/AppRouter.jsx';
 
-const initialProfile = {
-  fullName: 'Manager',
-  role: 'Manager',
-  email: 'manager@ledgerworx.com',
-  office: 'UAE Operations',
-  employeeId: 'LW-MA-204',
-  status: 'Active',
-};
-
-function getInitials(name) {
-  const parts = name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2);
-
-  if (parts.length === 0) {
-    return 'NA';
-  }
-
-  return parts.map((part) => part[0]?.toUpperCase() ?? '').join('');
-}
+import Dashboard from './pages/Dashboard.jsx';
+import Sales from './pages/Sales.jsx';
+import Accounts from './pages/Accounts.jsx';
+import Clients from './pages/Clients.jsx';
+import Reports from './pages/Reports.jsx';
+import Settings from './pages/Settings.jsx';
 
 function App() {
-  const [profile, setProfile] = useState(initialProfile);
-  const initials = useMemo(() => getInitials(profile.fullName), [profile.fullName]);
+  return (
+    <BrowserRouter>
+      <div className="app">
 
-  return <AppRouter profile={profile} setProfile={setProfile} initials={initials} />;
+        {/* 🔷 TOP NAVBAR */}
+        <header className="navbar">
+          <div className="logo">LEDGER WORX</div>
+
+          <nav className="nav-links">
+            <NavLink to="/dashboard">Home</NavLink>
+            <NavLink to="/sales">Sales</NavLink>
+            <NavLink to="/accounts">Accounts</NavLink>
+            <NavLink to="/clients">Clients</NavLink>
+            <NavLink to="/reports">Reports</NavLink>
+            <NavLink to="/settings">Settings</NavLink>
+          </nav>
+
+          <div className="user">Manager</div>
+        </header>
+
+        {/* 🔷 MAIN CONTENT */}
+        <main className="container">
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/sales" element={<Sales />} />
+            <Route path="/accounts" element={<Accounts />} />
+            <Route path="/clients" element={<Clients />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </main>
+
+      </div>
+    </BrowserRouter>
+  );
 }
 
 export default App;

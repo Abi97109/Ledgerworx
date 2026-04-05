@@ -1,9 +1,0 @@
-export const MANAGER_BASE_ROUTE = '/manager';
-export const MANAGER_DASHBOARD_ROUTE = `${MANAGER_BASE_ROUTE}/dashboard`;
-export const MANAGER_SALES_ROUTE = `${MANAGER_BASE_ROUTE}/sales`;
-export const MANAGER_ACCOUNTS_ROUTE = `${MANAGER_BASE_ROUTE}/accounts`;
-export const MANAGER_CLIENTS_ROUTE = `${MANAGER_BASE_ROUTE}/clients`;
-export const MANAGER_REPORTS_ROUTE = `${MANAGER_BASE_ROUTE}/reports`;
-export const MANAGER_ADMIN_ROUTE = `${MANAGER_BASE_ROUTE}/admin`;
-export const MANAGER_SETTINGS_ROUTE = `${MANAGER_BASE_ROUTE}/settings`;
-export const MANAGER_PROFILE_ROUTE = `${MANAGER_BASE_ROUTE}/profile`;

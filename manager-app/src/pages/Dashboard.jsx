@@ -1,330 +1,282 @@
-import React, { useMemo, useState } from 'react';
-
-const overallData = {
-  week: {
-    label: 'This week',
-    revenue: 'AED 231,590',
-    growth: '40.0',
-    refund: '2.5',
-    online: '23.4',
-    note:
-      'Performance is strong this week with a 40.0 growth rate. Online selling is driving 23.4 of total volume, while refunds remain low at 2.5.',
-  },
-  month: {
-    label: 'This month',
-    revenue: 'AED 928,420',
-    growth: '28.0',
-    refund: '3.1',
-    online: '18.7',
-    note:
-      'Monthly revenue remains healthy with balanced channel performance. Online demand is stable, while refund levels are still tightly controlled.',
-  },
-  year: {
-    label: 'This year',
-    revenue: 'AED 5,842,300',
-    growth: '62.0',
-    refund: '4.3',
-    online: '31.8',
-    note:
-      'Annual performance shows strong expansion across UAE operations. Digital sales continue to lift overall revenue while refund exposure stays manageable.',
-  },
-};
-
-const salesSeries = [
-  { day: 'Mon', year: 52, month: 80, week: 112 },
-  { day: 'Tue', year: 72, month: 58, week: 130 },
-  { day: 'Wed', year: 45, month: 104, week: 90 },
-  { day: 'Thu', year: 98, month: 68, week: 118 },
-  { day: 'Fri', year: 58, month: 88, week: 104 },
-  { day: 'Sat', year: 32, month: 52, week: 76 },
-  { day: 'Sun', year: 72, month: 124, week: 134 },
-];
-
-const accountData = {
-  week: { receivables: 85.0, cash: 15.0 },
-  month: { receivables: 72.0, cash: 28.0 },
-  year: { receivables: 64.0, cash: 36.0 },
-};
-
-const clientData = {
-  week: { leads: 48.0, customers: 30.0 },
-  month: { leads: 63.0, customers: 46.0 },
-  year: { leads: 79.0, customers: 61.0 },
-};
-
-const salesToggleConfig = [
-  { key: 'year', label: 'Year', color: 'is-gray', barClass: 'sales-bar-gray' },
-  { key: 'month', label: 'Month', color: 'is-blue', barClass: 'sales-bar-blue' },
-  { key: 'week', label: 'Week', color: 'is-green', barClass: 'sales-bar-green' },
-];
-
-const timeframeConfig = [
-  { key: 'year', label: 'Year' },
-  { key: 'month', label: 'Month' },
-  { key: 'week', label: 'Week' },
-];
-
-function ToggleRow({ label, color, active, onClick }) {
-  const classes = ['toggle-pill', color, active ? 'is-active' : '']
-    .filter(Boolean)
-    .join(' ');
-
-  return (
-    <button
-      type="button"
-      className={`toggle-line ${active ? 'toggle-line-active' : ''}`}
-      onClick={onClick}
-      aria-pressed={active}
-    >
-      <span className={classes}></span>
-      <span>{label}</span>
-    </button>
-  );
-}
-
-function formatValue(value) {
-  return Number(value).toFixed(1);
-}
+import React, { useState } from "react";
 
 function Dashboard() {
-  const [overallTimeframe, setOverallTimeframe] = useState('week');
-  const [salesToggles, setSalesToggles] = useState({
-    year: true,
-    month: true,
-    week: true,
-  });
-  const [accountsTimeframe, setAccountsTimeframe] = useState('week');
-  const [clientsTimeframe, setClientsTimeframe] = useState('week');
-  const [hoveredAccount, setHoveredAccount] = useState(null);
+  const [timeframe, setTimeframe] = useState("week");
+  const [accountsTimeframe, setAccountsTimeframe] = useState("week");
+  const [clientsTimeframe, setClientsTimeframe] = useState("week");
+  const [overallTimeframe, setOverallTimeframe] = useState("week");
 
-  const overall = overallData[overallTimeframe];
-  const account = accountData[accountsTimeframe];
-  const clients = clientData[clientsTimeframe];
+  const [hoveredSlice, setHoveredSlice] = useState(null);
+  const [hoveredBar, setHoveredBar] = useState(null); // ✅ FIXED
 
-  const visibleSalesKeys = useMemo(
-    () => salesToggleConfig.filter((item) => salesToggles[item.key]),
-    [salesToggles]
-  );
-
-  const handleSalesToggle = (key) => {
-    const enabledCount = Object.values(salesToggles).filter(Boolean).length;
-    if (salesToggles[key] && enabledCount === 1) {
-      return;
-    }
-
-    setSalesToggles((current) => ({
-      ...current,
-      [key]: !current[key],
-    }));
+  const dataMap = {
+    week: [40, 60, 55, 65, 70, 50, 75],
+    month: [60, 80, 70, 90, 85, 75, 95],
+    year: [80, 100, 90, 110, 105, 95, 120],
   };
 
+  const pieData = {
+    week: { receivables: 85, cash: 15 },
+    month: { receivables: 70, cash: 30 },
+    year: { receivables: 60, cash: 40 },
+  };
+
+  const clientData = {
+    week: { leads: 48, customers: 30 },
+    month: { leads: 120, customers: 75 },
+    year: { leads: 540, customers: 320 },
+  };
+
+  const overallData = {
+    week: {
+      revenue: "AED 231,590",
+      growth: "+40%",
+      refund: "2.5%",
+      online: "+23.4%",
+      text: "Performance is strong this week with a 40% growth rate.",
+    },
+    month: {
+      revenue: "AED 890,000",
+      growth: "+28%",
+      refund: "3.1%",
+      online: "+18.2%",
+      text: "Monthly performance is stable with consistent growth.",
+    },
+    year: {
+      revenue: "AED 5,200,000",
+      growth: "+65%",
+      refund: "4.0%",
+      online: "+35.8%",
+      text: "Yearly performance shows strong long-term growth.",
+    },
+  };
+
+  const currentClient = clientData[clientsTimeframe];
+  const currentPie = pieData[accountsTimeframe];
+  const currentOverall = overallData[overallTimeframe];
+
   return (
-    <div className="container dashboard-page">
+    <div className="container">
+
+      {/* HEADER */}
       <h1 className="dashboard-title">MANAGER DASHBOARD</h1>
       <p className="dashboard-sub">
         Welcome back, U. Detailed performance insights for UAE Operations.
       </p>
 
-      <section className="dashboard-grid">
-        <article className="dashboard-card dashboard-card-main">
-          <div className="dashboard-card-head">
-            <h2 className="section-title">Overall</h2>
-            <select
-              className="dashboard-select"
-              value={overall.label}
-              onChange={(event) => {
-                const selected = Object.entries(overallData).find(
-                  ([, value]) => value.label === event.target.value
-                );
-                if (selected) {
-                  setOverallTimeframe(selected[0]);
-                }
-              }}
-            >
-              {Object.values(overallData).map((option) => (
-                <option key={option.label}>{option.label}</option>
-              ))}
-            </select>
-          </div>
+      <div className="dashboard-top">
 
-          <p className="revenue-figure">{overall.revenue}</p>
-          <p className="revenue-label">Total revenue</p>
+        {/* OVERALL */}
+        <div className="card hover-card">
+          <div className="card-header">
+            <h3>Overall</h3>
 
-          <div className="dashboard-note">{overall.note}</div>
-
-          <div className="summary-stats">
-            <div className="summary-stat">
-              <strong>{overall.growth}</strong>
-              <span>Growth</span>
-            </div>
-            <div className="summary-stat">
-              <strong>{overall.refund}</strong>
-              <span>Refund</span>
-            </div>
-            <div className="summary-stat">
-              <strong>{overall.online}</strong>
-              <span>Online</span>
-            </div>
-          </div>
-        </article>
-
-        <article className="dashboard-card dashboard-card-wide">
-          <div className="dashboard-card-head">
-            <div>
-              <h2 className="section-title">Sales Performance</h2>
-              <p className="section-subtitle">Comparison across timeframes</p>
-            </div>
-
-            <div className="toggle-stack">
-              {salesToggleConfig.map((toggle) => (
-                <ToggleRow
-                  key={toggle.key}
-                  label={toggle.label}
-                  color={toggle.color}
-                  active={salesToggles[toggle.key]}
-                  onClick={() => handleSalesToggle(toggle.key)}
-                />
+            {/* SIMPLE TOGGLE DROPDOWN */}
+            <div className="toggle-buttons">
+              {["week", "month", "year"].map(t => (
+                <button
+                  key={t}
+                  className={overallTimeframe === t ? "active" : ""}
+                  onClick={() => setOverallTimeframe(t)}
+                >
+                  {t}
+                </button>
               ))}
             </div>
           </div>
 
-          <div className="sales-chart" aria-label="Sales performance chart">
-            {salesSeries.map((item) => (
-              <div className="sales-day" key={item.day}>
-                <div className="sales-bars">
-                  {visibleSalesKeys.map((series) => (
+          <h1 className="big-number">{currentOverall.revenue}</h1>
+          <p className="muted">Total revenue</p>
+
+          <div className="info-box">
+            {currentOverall.text}
+          </div>
+
+          <div className="mini-stats">
+            <div>{currentOverall.growth} <span>Growth</span></div>
+            <div>{currentOverall.refund} <span>Refund</span></div>
+            <div>{currentOverall.online} <span>Online</span></div>
+          </div>
+        </div>
+
+        {/* SALES */}
+        <div className="card hover-card">
+          <div className="card-header">
+            <h3>Sales Performance</h3>
+
+            <div className="toggle-buttons">
+              {["year","month","week"].map(t => (
+                <button
+                  key={t}
+                  className={timeframe===t ? "active" : ""}
+                  onClick={()=>setTimeframe(t)}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="chart">
+            {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d,i)=>(
+              <div key={i} className="chart-group">
+                <div className="bars">
+
+                  {timeframe === "year" && (
                     <div
-                      key={series.key}
-                      className={`sales-bar ${series.barClass}`}
-                      style={{ height: `${item[series.key]}px` }}
+                      className="bar grey"
+                      style={{ height: `${dataMap.year[i]}px` }}
+                      onMouseEnter={() => setHoveredBar({ type: "year", index: i })}
+                      onMouseLeave={() => setHoveredBar(null)}
                     >
-                      <span className="graph-tooltip">
-                        {series.label}: {formatValue(item[series.key])}
-                      </span>
+                      {hoveredBar?.type === "year" && hoveredBar.index === i && (
+                        <div className="bar-tooltip">{dataMap.year[i]}</div>
+                      )}
                     </div>
-                  ))}
+                  )}
+
+                  {timeframe === "month" && (
+                    <div
+                      className="bar blue"
+                      style={{ height: `${dataMap.month[i]}px` }}
+                      onMouseEnter={() => setHoveredBar({ type: "month", index: i })}
+                      onMouseLeave={() => setHoveredBar(null)}
+                    >
+                      {hoveredBar?.type === "month" && hoveredBar.index === i && (
+                        <div className="bar-tooltip">{dataMap.month[i]}</div>
+                      )}
+                    </div>
+                  )}
+
+                  {timeframe === "week" && (
+                    <div
+                      className="bar green"
+                      style={{ height: `${dataMap.week[i]}px` }}
+                      onMouseEnter={() => setHoveredBar({ type: "week", index: i })}
+                      onMouseLeave={() => setHoveredBar(null)}
+                    >
+                      {hoveredBar?.type === "week" && hoveredBar.index === i && (
+                        <div className="bar-tooltip">{dataMap.week[i]}</div>
+                      )}
+                    </div>
+                  )}
+
                 </div>
-                <span className="sales-label">{item.day}</span>
+                <span>{d}</span>
               </div>
             ))}
           </div>
+        </div>
 
-          <p className="chart-meta">
-            Showing {visibleSalesKeys.map((item) => item.label).join(', ')} data
-          </p>
-        </article>
+        {/* ACCOUNTS */}
+        <div className="card hover-card">
+          <div className="card-header">
+            <h3>Accounts distribution</h3>
 
-        <article className="dashboard-card dashboard-card-side">
-          <div className="dashboard-card-head">
-            <div>
-              <h2 className="section-title">Accounts distribution</h2>
-              <p className="accounts-copy">Receivables vs Cash</p>
-            </div>
-
-            <div className="toggle-stack">
-              {timeframeConfig.map((toggle) => (
-                <ToggleRow
-                  key={toggle.key}
-                  label={toggle.label}
-                  color={toggle.key === accountsTimeframe ? 'is-green' : ''}
-                  active={toggle.key === accountsTimeframe}
-                  onClick={() => setAccountsTimeframe(toggle.key)}
-                />
+            <div className="toggle-buttons">
+              {["year","month","week"].map(t => (
+                <button
+                  key={t}
+                  className={accountsTimeframe===t ? "active" : ""}
+                  onClick={()=>setAccountsTimeframe(t)}
+                >
+                  {t}
+                </button>
               ))}
             </div>
           </div>
 
           <div
-            className="accounts-pie"
-            aria-label="Accounts distribution pie chart"
-            style={{
-              background: `conic-gradient(#4a958d 0 ${account.receivables}%, #3f81ec ${account.receivables}% 100%)`,
-            }}
-            onMouseMove={(event) => {
-              const rect = event.currentTarget.getBoundingClientRect();
-              const x = event.clientX - rect.left;
-              const y = event.clientY - rect.top;
+            className="pie"
+            onMouseMove={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const y = e.clientY - rect.top;
+
               const centerX = rect.width / 2;
               const centerY = rect.height / 2;
+
               const angle =
-                ((Math.atan2(y - centerY, x - centerX) * 180) / Math.PI + 360) % 360;
-              const splitAngle = (account.receivables / 100) * 360;
+                (Math.atan2(y - centerY, x - centerX) * 180) / Math.PI + 180;
 
-              setHoveredAccount(angle <= splitAngle ? 'receivables' : 'cash');
+              if (angle < currentPie.receivables * 3.6) {
+                setHoveredSlice("receivables");
+              } else {
+                setHoveredSlice("cash");
+              }
             }}
-            onMouseLeave={() => setHoveredAccount(null)}
+            onMouseLeave={() => setHoveredSlice(null)}
+            style={{
+              background: `conic-gradient(
+                #3f8f83 ${currentPie.receivables}%,
+                #3b82f6 ${currentPie.receivables}% 100%
+              )`,
+            }}
           >
-            {hoveredAccount ? (
-              <span className="graph-tooltip graph-tooltip-pie">
-                {hoveredAccount === 'receivables'
-                  ? `Receivables: ${formatValue(account.receivables)}`
-                  : `Cash on Hand: ${formatValue(account.cash)}`}
-              </span>
-            ) : null}
+            {hoveredSlice && (
+              <div className="pie-tooltip">
+                {hoveredSlice === "receivables"
+                  ? `Receivables: ${currentPie.receivables}%`
+                  : `Cash: ${currentPie.cash}%`}
+              </div>
+            )}
           </div>
 
-          <div className="accounts-legend">
-            <div className="legend-row">
-              <span className="legend-dot legend-dot-green"></span>
-              <span>Receivables: {formatValue(account.receivables)}</span>
-            </div>
-            <div className="legend-row">
-              <span className="legend-dot legend-dot-blue"></span>
-              <span>Cash on Hand: {formatValue(account.cash)}</span>
-            </div>
+          <div className="legend">
+            <div><span className="dot green"></span> Receivables: {currentPie.receivables}%</div>
+            <div><span className="dot blue"></span> Cash: {currentPie.cash}%</div>
           </div>
-        </article>
-      </section>
+        </div>
 
-      <section className="dashboard-card dashboard-card-bottom">
-        <div className="clients-head">
-          <h2 className="section-title">Clients</h2>
+      </div>
 
-          <div className="toggle-stack toggle-stack-inline" aria-label="Client timeframe toggles">
-            {timeframeConfig.map((toggle) => (
-              <ToggleRow
-                key={toggle.key}
-                label={toggle.label}
-                color={toggle.key === clientsTimeframe ? 'is-green' : ''}
-                active={toggle.key === clientsTimeframe}
-                onClick={() => setClientsTimeframe(toggle.key)}
-              />
+      {/* CLIENTS */}
+      <div className="card hover-card clients-card">
+        <div className="card-header">
+          <h3>Clients</h3>
+
+          <div className="toggle-buttons">
+            {["year","month","week"].map(t => (
+              <button
+                key={t}
+                className={clientsTimeframe===t ? "active" : ""}
+                onClick={()=>setClientsTimeframe(t)}
+              >
+                {t}
+              </button>
             ))}
           </div>
         </div>
 
-        <div className="progress-shell">
-          <div className="progress-block">
-            <p className="progress-label">Leads</p>
-            <div className="progress-track">
-              <div
-                className="progress-fill progress-fill-blue progress-fill-hover"
-                style={{ width: `${clients.leads}%` }}
-              >
-                <span className="graph-tooltip">
-                  Leads: {formatValue(clients.leads)}
-                </span>
-              </div>
-            </div>
-            <p className="progress-value">{formatValue(clients.leads)}</p>
+        <div className="progress-group">
+          <div className="progress-header">
+            <p>Leads</p>
+            <span>{currentClient.leads}</span>
           </div>
 
-          <div className="progress-block">
-            <p className="progress-label">Customers</p>
-            <div className="progress-track">
-              <div
-                className="progress-fill progress-fill-green progress-fill-hover"
-                style={{ width: `${clients.customers}%` }}
-              >
-                <span className="graph-tooltip">
-                  Customers: {formatValue(clients.customers)}
-                </span>
-              </div>
-            </div>
-            <p className="progress-value">{formatValue(clients.customers)}</p>
+          <div className="progress">
+            <div
+              className="progress-fill"
+              style={{ width: `${(currentClient.leads / 600) * 100}%` }}
+            />
           </div>
         </div>
-      </section>
+
+        <div className="progress-group">
+          <div className="progress-header">
+            <p>Customers</p>
+            <span>{currentClient.customers}</span>
+          </div>
+
+          <div className="progress">
+            <div
+              className="progress-fill green"
+              style={{ width: `${(currentClient.customers / 600) * 100}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }

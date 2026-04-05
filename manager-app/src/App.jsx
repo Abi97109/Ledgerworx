@@ -29,7 +29,20 @@ function App() {
   const [profile, setProfile] = useState(initialProfile);
   const initials = useMemo(() => getInitials(profile.fullName), [profile.fullName]);
 
-  return <AppRouter profile={profile} setProfile={setProfile} initials={initials} />;
+  const handleLogout = () => {
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+    setProfile(initialProfile);
+  };
+
+  return (
+    <AppRouter
+      profile={profile}
+      setProfile={setProfile}
+      initials={initials}
+      onLogout={handleLogout}
+    />
+  );
 }
 
 export default App;

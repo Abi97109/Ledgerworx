@@ -7,3 +7,4 @@ export const MANAGER_REPORTS_ROUTE = `${MANAGER_BASE_ROUTE}/reports`;
 export const MANAGER_ADMIN_ROUTE = `${MANAGER_BASE_ROUTE}/admin`;
 export const MANAGER_SETTINGS_ROUTE = `${MANAGER_BASE_ROUTE}/settings`;
 export const MANAGER_PROFILE_ROUTE = `${MANAGER_BASE_ROUTE}/profile`;
+export const MANAGER_LOGGED_OUT_ROUTE = `${MANAGER_BASE_ROUTE}/logged-out`;

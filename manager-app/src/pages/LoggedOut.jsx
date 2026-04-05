@@ -1,6 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { MANAGER_DASHBOARD_ROUTE } from '../routes/routePaths.js';
 
 function LoggedOut() {
   return (
@@ -9,12 +7,12 @@ function LoggedOut() {
         <span className="logged-out-badge">Session Ended</span>
         <h1>You have been logged out</h1>
         <p>
-          Your manager session has been closed successfully. You can return to the dashboard
-          whenever you are ready.
+          Your manager session has been closed successfully. Continue to the login page to
+          sign in again.
         </p>
-        <Link to={MANAGER_DASHBOARD_ROUTE} className="logged-out-action">
-          Go to Dashboard
-        </Link>
+        <a href="https://ledgerworx.me/login/" className="logged-out-action">
+          Go to Login Page
+        </a>
       </div>
     </div>
   );

@@ -15,6 +15,9 @@ import {
   MANAGER_SETTINGS_ROUTE,
 } from './routePaths.js';
 
+const routerBaseName =
+  import.meta.env.VITE_ROUTER_BASENAME || (import.meta.env.DEV ? '/' : '/portal');
+
 function renderRoute(route) {
   return <Route key={route.path} path={route.path} element={route.element} />;
 }
@@ -23,7 +26,7 @@ function AppRouter({ profile, setProfile, initials }) {
   const managerRoutes = getManagerRoutes(profile, setProfile, initials);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={routerBaseName}>
       <div className="app-shell">
         <Navbar profile={profile} initials={initials} />
 
